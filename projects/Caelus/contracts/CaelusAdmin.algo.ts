@@ -1,57 +1,26 @@
 import { Contract } from '@algorandfoundation/tealscript';
 
+/**
+ * CaelusAdmin is the main contract handling the Caelus protocol.
+ * Core Features:
+ * - handling minting and burning of bsALGO;
+ * - keep the peg ratio bsALGO:ALGO;
+ * - auction for distribution on mint and clawback on burn;
+ * - force redistribution of stake;
+ * - deploy Validator Pool Contracts;
+ */
 export class CaelusAdmin extends Contract {
-  /**
-   * Calculates the sum of two numbers
-   *
-   * @param a
-   * @param b
-   * @returns The sum of a and b
-   */
-  private getSum(a: uint64, b: uint64): uint64 {
-    return a + b;
-  }
+  programVersion = 11;
 
-  /**
-   * Calculates the difference between two numbers
-   *
-   * @param a
-   * @param b
-   * @returns The difference between a and b.
-   */
-  private getDifference(a: uint64, b: uint64): uint64 {
-    return a >= b ? a - b : b - a;
-  }
+  pegRatio = GlobalStateKey<ufixed<64, 2>>({ key: 'peg' });
 
-  /**
-   * A method that takes two numbers and does either addition or subtraction
-   *
-   * @param a The first uint64
-   * @param b The second uint64
-   * @param operation The operation to perform. Can be either 'sum' or 'difference'
-   *
-   * @returns The result of the operation
-   */
-  doMath(a: uint64, b: uint64, operation: string): uint64 {
-    let result: uint64;
+  epochLen = GlobalStateKey<uint64>({ key: 'epochlen' });
 
-    if (operation === 'sum') {
-      result = this.getSum(a, b);
-    } else if (operation === 'difference') {
-      result = this.getDifference(a, b);
-    } else throw Error('Invalid operation');
+  initializedPoolContract = GlobalStateKey<boolean>({ key: 'initPoolContract' });
 
-    return result;
-  }
+  validatorPoolContractVersion = GlobalStateKey<uint64>({ key: 'validatorPoolVersion' });
 
-  /**
-   * A demonstration method used in the AlgoKit fullstack template.
-   * Greets the user by name.
-   *
-   * @param name The name of the user to greet.
-   * @returns A greeting message to the user.
-   */
-  hello(name: string): string {
-    return 'Hello, ' + name;
-  }
+  totalAlgoStaked = GlobalStateKey<uint64>({ key: 'totalstake' });
+
+  init_bsALGO = GlobalStateKey<boolean>({ key: 'init_bsALGO' });
 }
