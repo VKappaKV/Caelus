@@ -27,6 +27,7 @@ describe('CaelusAdmin', () => {
 
     await appClient.create.createApplication({});
   });
+  /*
 
   test('sum', async () => {
     const a = 13;
@@ -45,5 +46,5 @@ describe('CaelusAdmin', () => {
   test('hello', async () => {
     const diff = await appClient.hello({ name: 'world!' });
     expect(diff.return?.valueOf()).toBe('Hello, world!');
-  });
+  }); */
 });

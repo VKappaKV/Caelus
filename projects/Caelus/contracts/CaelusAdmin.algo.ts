@@ -23,4 +23,12 @@ export class CaelusAdmin extends Contract {
   totalAlgoStaked = GlobalStateKey<uint64>({ key: 'totalstake' });
 
   init_bsALGO = GlobalStateKey<boolean>({ key: 'init_bsALGO' });
+
+  createApplication(): void {
+    this.totalAlgoStaked.value = 0;
+    this.init_bsALGO.value = false;
+    this.initializedPoolContract.value = false;
+    this.validatorPoolContractVersion.value = 0;
+    this.pegRatio.value = 1.0;
+  }
 }
