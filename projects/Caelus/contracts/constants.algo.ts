@@ -12,3 +12,4 @@ export const APPROX_AVG_ROUNDS_PER_DAY = 30857; // approx 'daily' rounds for APR
 
 export const MIN_ALGO_STAKE_FOR_REWARDS = 30_000_000_000;
 export const MAX_ALGO_STAKE_PER_ACCOUNT = 30_000_000_000_000;
+export const PERFORMANCE_STAKE_INCREASE = 10_000_000_000;

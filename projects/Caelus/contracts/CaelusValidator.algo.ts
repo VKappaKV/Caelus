@@ -1,5 +1,5 @@
 import { Contract } from '@algorandfoundation/tealscript';
-import { MAX_ALGO_STAKE_PER_ACCOUNT, MIN_ALGO_STAKE_FOR_REWARDS } from './constants.algo';
+import { MAX_ALGO_STAKE_PER_ACCOUNT, MIN_ALGO_STAKE_FOR_REWARDS, PERFORMANCE_STAKE_INCREASE } from './constants.algo';
 
 /**
  * Caelus Validator Pool Contract.
@@ -27,6 +27,8 @@ export class CaelusValidatorPool extends Contract {
 
   max_delegatable_stake = GlobalStateKey<uint64>({ key: 'max_dStake' });
 
+  performance_counter = GlobalStateKey<uint64>({ key: 'performance' });
+
   saturation_BUFFER = GlobalStateKey<uint64>({ key: 'saturationBuffer' });
 
   /**
@@ -48,8 +50,9 @@ export class CaelusValidatorPool extends Contract {
     this.max_delegatable_stake.value = 0;
     this.operator_Commit.value = 0;
 
-    // init buffer
+    // init buffer & counter
     this.saturation_BUFFER.value = 0;
+    this.performance_counter.value = 0;
   }
 
   /**
@@ -90,6 +93,9 @@ export class CaelusValidatorPool extends Contract {
     });
     this.updateDelegationFactors();
   }
+
+  // Todo
+  performanceCheck(): void {}
 
   /**
    * Used to set the Contract account online for consensus. Always check that account is online and incentivesEligible before having delegatable stake
@@ -191,6 +197,8 @@ export class CaelusValidatorPool extends Contract {
   private updateDelegationFactors(): void {
     this.max_delegatable_stake.value =
       this.operator_Commit.value > MIN_ALGO_STAKE_FOR_REWARDS ? this.operator_Commit.value : 0;
+
+    this.max_delegatable_stake.value += PERFORMANCE_STAKE_INCREASE * (this.performance_counter.value % 5);
 
     this.saturation_BUFFER.value =
       this.max_delegatable_stake.value > 0 ? this.delegated_stake.value / this.max_delegatable_stake.value : 1;
