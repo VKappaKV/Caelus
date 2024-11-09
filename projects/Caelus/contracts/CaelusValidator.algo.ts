@@ -6,9 +6,9 @@ import { MAX_ALGO_STAKE_PER_ACCOUNT, MIN_ALGO_STAKE_FOR_REWARDS, PERFORMANCE_STA
  */
 
 export class CaelusValidatorPool extends Contract {
-  /**
-   * Contract State Key
-   */
+  /** *******************
+   * Contract State Key *
+   ******************** */
   programVersion = 11;
 
   creatorContract_AppID = GlobalStateKey<AppID>({ key: 'creator' });
@@ -31,9 +31,9 @@ export class CaelusValidatorPool extends Contract {
 
   saturation_BUFFER = GlobalStateKey<uint64>({ key: 'saturationBuffer' });
 
-  /**
-   * Public Methods
-   */
+  /** ******************
+   * Public Methods    *
+   ******************* */
 
   /**
    * createApplication method called at creation, initializes some globalKey values
@@ -179,9 +179,9 @@ export class CaelusValidatorPool extends Contract {
     }
   }
 
-  /**
-   * Private Methods
-   */
+  /** ******************
+   * Private Methods   *
+   ******************* */
 
   private getGoOnlineFeeAmount(): uint64 {
     if (!this.getEligibilityFlag) {
@@ -195,6 +195,7 @@ export class CaelusValidatorPool extends Contract {
   }
 
   private updateDelegationFactors(): void {
+    // add the check to limit max delegatable stake so that it doesn't sum up to more than 30M : MAX_ALGO_STAKE_PER_ACCOUNT
     this.max_delegatable_stake.value =
       this.operator_Commit.value > MIN_ALGO_STAKE_FOR_REWARDS ? this.operator_Commit.value : 0;
 
