@@ -6,10 +6,12 @@ import { MAX_ALGO_STAKE_PER_ACCOUNT, MIN_ALGO_STAKE_FOR_REWARDS, PERFORMANCE_STA
  */
 
 export class CaelusValidatorPool extends Contract {
-  /** *******************
-   * Contract State Key *
-   ******************** */
+  /** ***************
+   * Contract State *
+   **************** */
   programVersion = 11;
+
+  // Contract checks params
 
   creatorContract_AppID = GlobalStateKey<AppID>({ key: 'creator' });
 
@@ -17,19 +19,33 @@ export class CaelusValidatorPool extends Contract {
 
   validatorPoolContract_version = GlobalStateKey<uint64>({ key: 'contractVersion' });
 
+  // Operator specific params
+
   operator_Address = GlobalStateKey<Address>({ key: 'operator' });
 
   operator_Commit = GlobalStateKey<uint64>({ key: 'operatorCommit' });
 
   min_Commit = GlobalStateKey<uint64>({ key: 'minStake' });
 
+  // Delegated Stake params
+
   delegated_stake = GlobalStateKey<uint64>({ key: 'delegatedStake' });
 
   max_delegatable_stake = GlobalStateKey<uint64>({ key: 'max_dStake' });
 
+  // Node performance params
+
   performance_counter = GlobalStateKey<uint64>({ key: 'performance' });
 
-  saturation_BUFFER = GlobalStateKey<uint64>({ key: 'saturationBuffer' });
+  saturation_BUFFER = GlobalStateKey<uint64>({ key: 'saturationBuffer' }); // value goes from 0 to 1000
+
+  last_reward_report = GlobalStateKey<uint64>({ key: 'rewardReport' });
+
+  isDelinquent = GlobalStateKey<boolean>({ key: 'isDelinquent' });
+
+  last_delinquency_report = GlobalStateKey<uint64>({ key: 'delinquencyReport' });
+
+  //----------------------------------------------------------------------------------------------------------
 
   /** ******************
    * Public Methods    *
@@ -39,29 +55,32 @@ export class CaelusValidatorPool extends Contract {
    * createApplication method called at creation, initializes some globalKey values
    * @param {AppID} creatingContract - ApplicationID for the creator contract (CaelusAdminContract)
    * @param {Address} operatorAddress - Address of the node operator used to sign online/offline txns and participate in auctions
+   * @param {uint64} contractVersion - Approval Program version for the node contract, stored in the CaelusAdminContract
    */
-  createApplication(creatingContract: AppID, operatorAddress: Address): void {
+  createApplication(creatingContract: AppID, operatorAddress: Address, contractVersion: uint64): void {
     this.min_Commit.value = MIN_ALGO_STAKE_FOR_REWARDS;
     this.creatorContract_AppID.value = creatingContract;
     this.operator_Address.value = operatorAddress;
+    this.validatorPoolContract_version.value = contractVersion;
 
     // stake counters
+    this.operator_Commit.value = 0;
     this.delegated_stake.value = 0;
     this.max_delegatable_stake.value = 0;
-    this.operator_Commit.value = 0;
 
-    // init buffer & counter
+    // init buffer, flags & counters
     this.saturation_BUFFER.value = 0;
     this.performance_counter.value = 0;
+    this.isDelinquent.value = false;
   }
 
   /**
-   *  Used by the node operator to update his stake amount for the node
+   *  Used by the node operator to add to his stake amount for the node
    *
    * @param {PayTxn} commit - node operator stake commitment
-   * @throws Error if the sender isn't the node operator, the receiver isn't the app address or if the total balance is above 30M Algo
+   * @throws {Error} if the sender isn't the node operator, the receiver isn't the app address or if the total balance is above 30M Algo
    */
-  updateAddToOperatorCommit(commit: PayTxn): void {
+  addToOperatorCommit(commit: PayTxn): void {
     const totalBalanceUpdated = this.operator_Commit.value + commit.amount;
     assert(totalBalanceUpdated < MAX_ALGO_STAKE_PER_ACCOUNT, 'Contract max balance cannot be over 30M Algo');
 
@@ -75,11 +94,11 @@ export class CaelusValidatorPool extends Contract {
   }
 
   /**
-   *
+   *  Used by the node operator to remove from his stake amount for the node
    * @param {uint64} claimRequest - amount claimed by the node operator to be removed from the contract balance and subtracted from the operator_commit counter
-   * @throws Error if the sender isn't the node operator or if the total commit by the node operator goes below the min threshold for rewards eligibility
+   * @throws {Error} if the sender isn't the node operator or if the total commit by the node operator goes below the min threshold for rewards eligibility
    */
-  updateRemoveFromOperatorCommit(claimRequest: uint64): void {
+  removeFromOperatorCommit(claimRequest: uint64): void {
     assert(this.txn.sender === this.operator_Address.value, 'Only the Node Operator can claim his stake');
     assert(
       this.operator_Commit.value - claimRequest > MIN_ALGO_STAKE_FOR_REWARDS,
@@ -97,6 +116,36 @@ export class CaelusValidatorPool extends Contract {
   // Todo
   performanceCheck(): void {}
 
+  getToleratedBlockDelta(): uint64 {
+    return 0;
+  }
+
+  reportRewards(block: uint64): void {
+    // call CaelusAdmin contract
+    // use the block proposer to get performance++
+    // use the proposerPayout to declare the amount
+    const report = blocks[block].proposerPayout;
+    const takeFee = (report * 6) / 100;
+  }
+
+  bid(): void {}
+
+  add_stake(): void {}
+
+  snitch_burn(): void {}
+
+  snitch(): void {}
+
+  get_snitched(): void {}
+
+  clawback_stake(): void {}
+
+  clawback_stake_to_validator(): void {}
+
+  claimLeftAlgo(): void {}
+
+  checkAlgodVersion(): void {}
+
   /**
    * Used to set the Contract account online for consensus. Always check that account is online and incentivesEligible before having delegatable stake
    *
@@ -107,7 +156,7 @@ export class CaelusValidatorPool extends Contract {
    * @param {uint64} voteFirst - Index of first valid block for the participation keys
    * @param {uint64} voteLast - Index of last valid block for for the participation keys
    * @param {uint64} voteKeyDilution - The vote key dilution value
-   * @throws {Error} throws error if the caller isn't the node operator
+   * @throws {Error} if the caller isn't the node operator
    */
   goOnline(
     feePayment: PayTxn,
@@ -174,14 +223,45 @@ export class CaelusValidatorPool extends Contract {
         this.txn.sender === this.creatorContract_AppID.value.address,
         'Only the Caelus main contract can set the contract offline and issue a penalty'
       );
-      // ... handle penalty for node operator
+      this.performance_counter.value = 0;
+      this.max_delegatable_stake.value = 0; // setting the contract to a state where it can get snitched from other contract or directly by a following txn appCall
       sendOfflineKeyRegistration({});
     }
   }
 
-  /** ******************
-   * Private Methods   *
-   ******************* */
+  // private or public?
+  private updateDelegationFactors(): void {
+    // start counting from the operator commit
+    if (this.operator_Commit.value > MIN_ALGO_STAKE_FOR_REWARDS) {
+      this.max_delegatable_stake.value = this.operator_Commit.value;
+    } else {
+      this.max_delegatable_stake.value = 0;
+    }
+
+    // add in the performance counter to increase delegatable amount
+    this.max_delegatable_stake.value += PERFORMANCE_STAKE_INCREASE * (this.performance_counter.value / 5);
+
+    // check against MAX_ALGO_STAKE_PER_ACCOUNT (50M)
+    if (this.app.address.balance > MAX_ALGO_STAKE_PER_ACCOUNT) {
+      this.max_delegatable_stake.value = 0;
+    } else if (this.app.address.balance + this.max_delegatable_stake.value > MAX_ALGO_STAKE_PER_ACCOUNT) {
+      this.max_delegatable_stake.value =
+        this.app.address.balance + this.max_delegatable_stake.value - MAX_ALGO_STAKE_PER_ACCOUNT;
+    }
+
+    // calculate saturation buffer with 3 decimal precision
+    if (this.max_delegatable_stake.value > 0) {
+      this.saturation_BUFFER.value = (this.delegated_stake.value * 1000) / this.max_delegatable_stake.value;
+    } else {
+      this.saturation_BUFFER.value = 1000;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------------------
+
+  /** *****************
+   * Private Methods  *
+   ****************** */
 
   private getGoOnlineFeeAmount(): uint64 {
     if (!this.getEligibilityFlag) {
@@ -192,16 +272,5 @@ export class CaelusValidatorPool extends Contract {
 
   private getEligibilityFlag(): boolean {
     return this.app.address.incentiveEligible;
-  }
-
-  private updateDelegationFactors(): void {
-    // add the check to limit max delegatable stake so that it doesn't sum up to more than 30M : MAX_ALGO_STAKE_PER_ACCOUNT
-    this.max_delegatable_stake.value =
-      this.operator_Commit.value > MIN_ALGO_STAKE_FOR_REWARDS ? this.operator_Commit.value : 0;
-
-    this.max_delegatable_stake.value += PERFORMANCE_STAKE_INCREASE * (this.performance_counter.value % 5);
-
-    this.saturation_BUFFER.value =
-      this.max_delegatable_stake.value > 0 ? this.delegated_stake.value / this.max_delegatable_stake.value : 1;
   }
 }
