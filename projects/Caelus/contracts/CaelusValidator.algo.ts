@@ -13,39 +13,39 @@ export class CaelusValidatorPool extends Contract {
 
   // Contract checks params
 
-  creatorContract_AppID = GlobalStateKey<AppID>({ key: 'creator' });
+  creatorContractAppID = GlobalStateKey<AppID>({ key: 'creator' });
 
-  algod_version = GlobalStateKey<string>({ key: 'algodV' });
+  algodVersion = GlobalStateKey<string>({ key: 'algodV' });
 
-  pool_name = GlobalStateKey<string>({ key: 'name' });
+  poolName = GlobalStateKey<string>({ key: 'name' });
 
-  validatorPoolContract_version = GlobalStateKey<uint64>({ key: 'contractVersion' });
+  validatorPoolContractVersion = GlobalStateKey<uint64>({ key: 'contractVersion' });
 
   // Operator specific params
 
-  operator_Address = GlobalStateKey<Address>({ key: 'operator' });
+  operatorAddress = GlobalStateKey<Address>({ key: 'operator' });
 
-  operator_Commit = GlobalStateKey<uint64>({ key: 'operatorCommit' });
+  operatorCommit = GlobalStateKey<uint64>({ key: 'operatorCommit' });
 
-  min_Commit = GlobalStateKey<uint64>({ key: 'minStake' });
+  minCommit = GlobalStateKey<uint64>({ key: 'minStake' });
 
   // Delegated Stake params
 
-  delegated_stake = GlobalStateKey<uint64>({ key: 'delegatedStake' });
+  delegatedStake = GlobalStateKey<uint64>({ key: 'delegatedStake' });
 
-  max_delegatable_stake = GlobalStateKey<uint64>({ key: 'maxDStake' });
+  maxDelegatableStake = GlobalStateKey<uint64>({ key: 'maxDStake' });
 
   // Node performance params
 
-  performance_counter = GlobalStateKey<uint64>({ key: 'performance' });
+  performanceCounter = GlobalStateKey<uint64>({ key: 'performance' });
 
-  saturation_BUFFER = GlobalStateKey<uint64>({ key: 'saturationBuffer' }); // value goes from 0 to 1000
+  saturationBUFFER = GlobalStateKey<uint64>({ key: 'saturationBuffer' }); // value goes from 0 to 1000
 
-  last_reward_report = GlobalStateKey<uint64>({ key: 'rewardReport' });
+  lastRewardReport = GlobalStateKey<uint64>({ key: 'rewardReport' });
 
   isDelinquent = GlobalStateKey<boolean>({ key: 'isDelinquent' });
 
-  last_delinquency_report = GlobalStateKey<uint64>({ key: 'delinquencyReport' });
+  lastDelinquencyReport = GlobalStateKey<uint64>({ key: 'delinquencyReport' });
 
   //----------------------------------------------------------------------------------------------------------
 
@@ -60,19 +60,19 @@ export class CaelusValidatorPool extends Contract {
    * @param {uint64} contractVersion - Approval Program version for the node contract, stored in the CaelusAdminContract
    */
   createApplication(creatingContract: AppID, operatorAddress: Address, contractVersion: uint64): void {
-    this.min_Commit.value = MIN_ALGO_STAKE_FOR_REWARDS;
-    this.creatorContract_AppID.value = creatingContract;
-    this.operator_Address.value = operatorAddress;
-    this.validatorPoolContract_version.value = contractVersion;
+    this.minCommit.value = MIN_ALGO_STAKE_FOR_REWARDS;
+    this.creatorContractAppID.value = creatingContract;
+    this.operatorAddress.value = operatorAddress;
+    this.validatorPoolContractVersion.value = contractVersion;
 
     // stake counters
-    this.operator_Commit.value = 0;
-    this.delegated_stake.value = 0;
-    this.max_delegatable_stake.value = 0;
+    this.operatorCommit.value = 0;
+    this.delegatedStake.value = 0;
+    this.maxDelegatableStake.value = 0;
 
     // init buffer, flags & counters
-    this.saturation_BUFFER.value = 0;
-    this.performance_counter.value = 0;
+    this.saturationBUFFER.value = 0;
+    this.performanceCounter.value = 0;
     this.isDelinquent.value = false;
   }
 
@@ -83,15 +83,15 @@ export class CaelusValidatorPool extends Contract {
    * @throws {Error} if the sender isn't the node operator, the receiver isn't the app address or if the total balance is above 30M Algo
    */
   addToOperatorCommit(commit: PayTxn): void {
-    const totalBalanceUpdated = this.operator_Commit.value + commit.amount;
+    const totalBalanceUpdated = this.operatorCommit.value + commit.amount;
     assert(totalBalanceUpdated < MAX_ALGO_STAKE_PER_ACCOUNT, 'Contract max balance cannot be over 30M Algo');
 
     verifyPayTxn(commit, {
-      sender: this.operator_Address.value,
+      sender: this.operatorAddress.value,
       receiver: this.app.address,
       amount: commit.amount,
     });
-    this.operator_Commit.value += commit.amount;
+    this.operatorCommit.value += commit.amount;
     this.updateDelegationFactors();
   }
 
@@ -102,16 +102,16 @@ export class CaelusValidatorPool extends Contract {
    */
   removeFromOperatorCommit(claimRequest: uint64): void {
     verifyAppCallTxn(this.txn, {
-      sender: this.operator_Address.value,
+      sender: this.operatorAddress.value,
     });
     // assert(this.txn.sender === this.operator_Address.value, 'Only the Node Operator can claim his stake');
     assert(
-      this.operator_Commit.value - claimRequest > MIN_ALGO_STAKE_FOR_REWARDS,
+      this.operatorCommit.value - claimRequest > MIN_ALGO_STAKE_FOR_REWARDS,
       'Node Operator can take his stake below 30k only if the node contract will be closed'
     );
     sendPayment({
       sender: this.app.address,
-      receiver: this.operator_Address.value,
+      receiver: this.operatorAddress.value,
       amount: claimRequest,
       fee: 0,
     });
@@ -128,12 +128,12 @@ export class CaelusValidatorPool extends Contract {
   }
 
   // report the proposed block and send the rewards to the rewards_reserve_address; keep the operator fee
-  reportRewards(block: uint64): void {
+  reportRewards(/* block: uint64 */): void {
     // call CaelusAdmin contract
     // use the block proposer to get performance++
     // use the proposerPayout to declare the amount
-    const report = blocks[block].proposerPayout;
-    const takeFee = (report * 6) / 100;
+    // const report = blocks[block].proposerPayout;
+    // const takeFee = (report * 6) / 100;
   }
 
   // call the auction contract to report the saturation buffer & delegatable stake
@@ -148,6 +148,7 @@ export class CaelusValidatorPool extends Contract {
   // call to check on performances throught the get_snitched method
   snitch(): void {}
 
+  // TBD if it makes sense to keep this one or not and just move logic to checks methods
   get_snitched(): void {}
 
   // used by CA contract to remove the delegated stake and send it back to the auction
@@ -200,7 +201,7 @@ export class CaelusValidatorPool extends Contract {
 
     // Check that operator commit to the contract balance is at least 30k Algo
     assert(
-      this.operator_Commit.value >= this.min_Commit.value,
+      this.operatorCommit.value >= this.minCommit.value,
       'Operator commit must be higher than minimum balance for rewards eligibility'
     );
 
@@ -246,13 +247,13 @@ export class CaelusValidatorPool extends Contract {
         'Only the Caelus main contract can set the contract offline and issue a penalty'
       ); */
       verifyAppCallTxn(this.txn, {
-        sender: this.creatorContract_AppID.value.address,
+        sender: this.creatorContractAppID.value.address,
       });
       // if it's going to be set offline by the CaelusAdmin Contract might change penalty to just clawback every stake
       // directly and reset all the values to 0; with Delinquency max_delegatable_stake can't be recalculated to start
       // to the init node commit but only on performance for a certain number of blocks depending on the tolerated block delta
-      this.performance_counter.value = 0;
-      this.max_delegatable_stake.value = 0; // setting the contract to a state where it can get snitched from other contract or directly by a following txn appCall
+      this.performanceCounter.value = 0;
+      this.maxDelegatableStake.value = 0; // setting the contract to a state where it can get snitched from other contract or directly by a following txn appCall
       sendOfflineKeyRegistration({});
     }
   }
@@ -260,28 +261,28 @@ export class CaelusValidatorPool extends Contract {
   // private or public?
   private updateDelegationFactors(): void {
     // start counting from the operator commit
-    if (this.operator_Commit.value > MIN_ALGO_STAKE_FOR_REWARDS) {
-      this.max_delegatable_stake.value = this.operator_Commit.value;
+    if (this.operatorCommit.value > MIN_ALGO_STAKE_FOR_REWARDS) {
+      this.maxDelegatableStake.value = this.operatorCommit.value;
     } else {
-      this.max_delegatable_stake.value = 0;
+      this.maxDelegatableStake.value = 0;
     }
 
     // add in the performance counter to increase delegatable amount
-    this.max_delegatable_stake.value += PERFORMANCE_STAKE_INCREASE * (this.performance_counter.value / 5);
+    this.maxDelegatableStake.value += PERFORMANCE_STAKE_INCREASE * (this.performanceCounter.value / 5);
 
     // check against MAX_ALGO_STAKE_PER_ACCOUNT (50M)
     if (this.app.address.balance > MAX_ALGO_STAKE_PER_ACCOUNT) {
-      this.max_delegatable_stake.value = 0;
-    } else if (this.app.address.balance + this.max_delegatable_stake.value > MAX_ALGO_STAKE_PER_ACCOUNT) {
-      this.max_delegatable_stake.value =
-        this.app.address.balance + this.max_delegatable_stake.value - MAX_ALGO_STAKE_PER_ACCOUNT;
+      this.maxDelegatableStake.value = 0;
+    } else if (this.app.address.balance + this.maxDelegatableStake.value > MAX_ALGO_STAKE_PER_ACCOUNT) {
+      this.maxDelegatableStake.value =
+        this.app.address.balance + this.maxDelegatableStake.value - MAX_ALGO_STAKE_PER_ACCOUNT;
     }
 
     // calculate saturation buffer with 3 decimal precision
-    if (this.max_delegatable_stake.value > 0) {
-      this.saturation_BUFFER.value = (this.delegated_stake.value * 1000) / this.max_delegatable_stake.value;
+    if (this.maxDelegatableStake.value > 0) {
+      this.saturationBUFFER.value = (this.delegatedStake.value * 1000) / this.maxDelegatableStake.value;
     } else {
-      this.saturation_BUFFER.value = 1000;
+      this.saturationBUFFER.value = 1000;
     }
   }
 
