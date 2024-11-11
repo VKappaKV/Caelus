@@ -140,22 +140,22 @@ export class CaelusValidatorPool extends Contract {
   bid(): void {}
 
   // called by the auction contract to assign stake to the node contract at mint
-  add_stake(): void {}
+  addStake(): void {}
 
   // call the auction contract to report the saturation buffer of itself or another validator contract
-  snitch_burn(): void {}
+  snitchBurn(): void {}
 
   // call to check on performances throught the get_snitched method
   snitch(): void {}
 
   // TBD if it makes sense to keep this one or not and just move logic to checks methods
-  get_snitched(): void {}
+  getSnitched(): void {}
 
   // used by CA contract to remove the delegated stake and send it back to the auction
-  clawback_stake(): void {}
+  clawbackStake(): void {}
 
   // used by other CV contracts to claim stake in case of delinquent stake
-  clawback_stake_to_validator(): void {}
+  clawbackStakeToValidator(): void {}
 
   // used by CA to clean up remaining Algo
   claimLeftAlgo(): void {}
