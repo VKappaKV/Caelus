@@ -13,9 +13,11 @@ export class CaelusValidatorPool extends Contract {
 
   // Contract checks params
 
-  creatorContract_AppReference = GlobalStateKey<AppReference>({ key: 'creator' });
+  creatorContract_AppID = GlobalStateKey<AppID>({ key: 'creator' });
 
   algod_version = GlobalStateKey<string>({ key: 'algodV' });
+
+  pool_name = GlobalStateKey<string>({ key: 'name' });
 
   validatorPoolContract_version = GlobalStateKey<uint64>({ key: 'contractVersion' });
 
@@ -53,13 +55,13 @@ export class CaelusValidatorPool extends Contract {
 
   /**
    * createApplication method called at creation, initializes some globalKey values
-   * @param {AppReference} creatingContract - ApplicationID for the creator contract (CaelusAdminContract)
+   * @param {AppID} creatingContract - ApplicationID for the creator contract (CaelusAdminContract)
    * @param {Address} operatorAddress - Address of the node operator used to sign online/offline txns and participate in auctions
    * @param {uint64} contractVersion - Approval Program version for the node contract, stored in the CaelusAdminContract
    */
-  createApplication(creatingContract: AppReference, operatorAddress: Address, contractVersion: uint64): void {
+  createApplication(creatingContract: AppID, operatorAddress: Address, contractVersion: uint64): void {
     this.min_Commit.value = MIN_ALGO_STAKE_FOR_REWARDS;
-    this.creatorContract_AppReference.value = creatingContract;
+    this.creatorContract_AppID.value = creatingContract;
     this.operator_Address.value = operatorAddress;
     this.validatorPoolContract_version.value = contractVersion;
 
@@ -117,12 +119,15 @@ export class CaelusValidatorPool extends Contract {
   }
 
   // Todo
+  // check where falls the last reported proposed block within the tolerated block delta
   performanceCheck(): void {}
 
+  // calculate tolerated wait time given the online stake for this account vs total online stake
   getToleratedBlockDelta(): uint64 {
     return 0;
   }
 
+  // report the proposed block and send the rewards to the rewards_reserve_address; keep the operator fee
   reportRewards(block: uint64): void {
     // call CaelusAdmin contract
     // use the block proposer to get performance++
@@ -131,22 +136,30 @@ export class CaelusValidatorPool extends Contract {
     const takeFee = (report * 6) / 100;
   }
 
+  // call the auction contract to report the saturation buffer & delegatable stake
   bid(): void {}
 
+  // called by the auction contract to assign stake to the node contract at mint
   add_stake(): void {}
 
+  // call the auction contract to report the saturation buffer of itself or another validator contract
   snitch_burn(): void {}
 
+  // call to check on performances throught the get_snitched method
   snitch(): void {}
 
   get_snitched(): void {}
 
+  // used by CA contract to remove the delegated stake and send it back to the auction
   clawback_stake(): void {}
 
+  // used by other CV contracts to claim stake in case of delinquent stake
   clawback_stake_to_validator(): void {}
 
+  // used by CA to clean up remaining Algo
   claimLeftAlgo(): void {}
 
+  // TODO in the future. Can we trustlessly check the algod version? Or does it need an oracle?
   checkAlgodVersion(): void {}
 
   /**
@@ -175,9 +188,9 @@ export class CaelusValidatorPool extends Contract {
       this.txn.sender === this.operator_Address.value,
       'Only the Node Operator can register online with participation key'
     ); */
-    verifyAppCallTxn(this.txn, {
+    /* verifyAppCallTxn(this.txn, {
       sender: this.operator_Address.value,
-    });
+    }); */
 
     // Check that contract balance is at least 30k Algo
     assert(
@@ -216,12 +229,11 @@ export class CaelusValidatorPool extends Contract {
    */
   goOffline(offlineCase: uint64): void {
     /* assert(
-      this.txn.sender === this.operator_Address.value ||
-        this.txn.sender === this.creatorContract_AppReference.value.address,
+      this.txn.sender === this.operator_Address.value || this.txn.sender === this.creatorContract_AppID.value.address,
       'Only Node Operator or Caelus Admin contract can set the contract offline'
     ); */
     /* verifyAppCallTxn(this.txn, {
-      sender: this.creatorContract_AppReference.value.address || this.operator_Address.value,
+      sender: this.creatorContract_AppID.value.address || this.operator_Address.value,
     }); */
 
     if (offlineCase === 0) {
@@ -230,11 +242,11 @@ export class CaelusValidatorPool extends Contract {
 
     if (offlineCase === 1) {
       /* assert(
-        this.txn.sender === this.creatorContract_AppReference.value.address,
+        this.txn.sender === this.creatorContract_AppID.value.address,
         'Only the Caelus main contract can set the contract offline and issue a penalty'
       ); */
       verifyAppCallTxn(this.txn, {
-        sender: this.creatorContract_AppReference.value.address,
+        sender: this.creatorContract_AppID.value.address,
       });
       // if it's going to be set offline by the CaelusAdmin Contract might change penalty to just clawback every stake
       // directly and reset all the values to 0; with Delinquency max_delegatable_stake can't be recalculated to start

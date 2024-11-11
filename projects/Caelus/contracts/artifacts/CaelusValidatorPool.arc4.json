@@ -8,7 +8,7 @@
       "args": [
         {
           "name": "creatingContract",
-          "type": "application"
+          "type": "uint64"
         },
         {
           "name": "operatorAddress",

@@ -8,7 +8,7 @@
       "args": [
         {
           "name": "creatingContract",
-          "type": "application"
+          "type": "uint64"
         },
         {
           "name": "operatorAddress",
@@ -310,7 +310,7 @@
     "schema": {
       "global": {
         "bytes": 4,
-        "ints": 9
+        "ints": 10
       },
       "local": {
         "bytes": 0,
@@ -319,13 +319,18 @@
     },
     "keys": {
       "global": {
-        "creatorContract_AppReference": {
+        "creatorContract_AppID": {
           "key": "Y3JlYXRvcg==",
           "keyType": "AVMBytes",
-          "valueType": "application"
+          "valueType": "uint64"
         },
         "algod_version": {
           "key": "YWxnb2RW",
+          "keyType": "AVMBytes",
+          "valueType": "string"
+        },
+        "pool_name": {
+          "key": "bmFtZQ==",
           "keyType": "AVMBytes",
           "valueType": "string"
         },
@@ -625,7 +630,7 @@
         },
         {
           "teal": 30,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
             155,
             156,
@@ -634,14 +639,14 @@
         },
         {
           "teal": 31,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
             158
           ]
         },
         {
           "teal": 34,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
             159,
             160,
@@ -650,21 +655,21 @@
         },
         {
           "teal": 35,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
             162
           ]
         },
         {
           "teal": 36,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
             163
           ]
         },
         {
           "teal": 37,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
             164,
             165
@@ -672,14 +677,14 @@
         },
         {
           "teal": 38,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
             166
           ]
         },
         {
           "teal": 41,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "errorMessage": "argument 1 (operatorAddress) for createApplication must be a address",
           "pc": [
             167
@@ -687,7 +692,7 @@
         },
         {
           "teal": 44,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
             168,
             169,
@@ -696,76 +701,76 @@
         },
         {
           "teal": 45,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
             171
           ]
         },
         {
-          "teal": 46,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "teal": 48,
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
             172,
-            173
+            173,
+            174
           ]
         },
         {
           "teal": 49,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
-            174,
-            175,
-            176
+            175
           ]
         },
         {
           "teal": 50,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
-            177
+            176
           ]
         },
         {
-          "teal": 51,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "teal": 63,
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
-            178
+            177,
+            178,
+            179
           ]
         },
         {
-          "teal": 64,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
+          "teal": 67,
+          "source": "contracts\\CaelusValidator.algo.ts:63",
           "pc": [
-            179,
             180,
             181
           ]
         },
         {
           "teal": 68,
-          "source": "contracts\\CaelusValidator.algo.ts:61",
+          "source": "contracts\\CaelusValidator.algo.ts:63",
           "pc": [
-            182,
-            183
+            182
           ]
         },
         {
           "teal": 69,
-          "source": "contracts\\CaelusValidator.algo.ts:61",
+          "source": "contracts\\CaelusValidator.algo.ts:63",
           "pc": [
-            184
+            183
           ]
         },
         {
-          "teal": 70,
-          "source": "contracts\\CaelusValidator.algo.ts:61",
+          "teal": 73,
+          "source": "contracts\\CaelusValidator.algo.ts:64",
           "pc": [
+            184,
             185
           ]
         },
         {
           "teal": 74,
-          "source": "contracts\\CaelusValidator.algo.ts:62",
+          "source": "contracts\\CaelusValidator.algo.ts:64",
           "pc": [
             186,
             187
@@ -773,45 +778,39 @@
         },
         {
           "teal": 75,
-          "source": "contracts\\CaelusValidator.algo.ts:62",
+          "source": "contracts\\CaelusValidator.algo.ts:64",
           "pc": [
-            188,
+            188
+          ]
+        },
+        {
+          "teal": 79,
+          "source": "contracts\\CaelusValidator.algo.ts:65",
+          "pc": [
             189
           ]
         },
         {
-          "teal": 76,
-          "source": "contracts\\CaelusValidator.algo.ts:62",
-          "pc": [
-            190
-          ]
-        },
-        {
           "teal": 80,
-          "source": "contracts\\CaelusValidator.algo.ts:63",
+          "source": "contracts\\CaelusValidator.algo.ts:65",
           "pc": [
+            190,
             191
           ]
         },
         {
           "teal": 81,
-          "source": "contracts\\CaelusValidator.algo.ts:63",
+          "source": "contracts\\CaelusValidator.algo.ts:65",
           "pc": [
-            192,
-            193
+            192
           ]
         },
         {
-          "teal": 82,
-          "source": "contracts\\CaelusValidator.algo.ts:63",
+          "teal": 85,
+          "source": "contracts\\CaelusValidator.algo.ts:66",
           "pc": [
-            194
-          ]
-        },
-        {
-          "teal": 86,
-          "source": "contracts\\CaelusValidator.algo.ts:64",
-          "pc": [
+            193,
+            194,
             195,
             196,
             197,
@@ -826,138 +825,138 @@
             206,
             207,
             208,
-            209,
+            209
+          ]
+        },
+        {
+          "teal": 86,
+          "source": "contracts\\CaelusValidator.algo.ts:66",
+          "pc": [
             210,
             211
           ]
         },
         {
           "teal": 87,
-          "source": "contracts\\CaelusValidator.algo.ts:64",
+          "source": "contracts\\CaelusValidator.algo.ts:66",
           "pc": [
-            212,
+            212
+          ]
+        },
+        {
+          "teal": 91,
+          "source": "contracts\\CaelusValidator.algo.ts:69",
+          "pc": [
             213
           ]
         },
         {
-          "teal": 88,
-          "source": "contracts\\CaelusValidator.algo.ts:64",
+          "teal": 92,
+          "source": "contracts\\CaelusValidator.algo.ts:69",
           "pc": [
             214
           ]
         },
         {
-          "teal": 92,
-          "source": "contracts\\CaelusValidator.algo.ts:67",
+          "teal": 93,
+          "source": "contracts\\CaelusValidator.algo.ts:69",
           "pc": [
             215
           ]
         },
         {
-          "teal": 93,
-          "source": "contracts\\CaelusValidator.algo.ts:67",
+          "teal": 97,
+          "source": "contracts\\CaelusValidator.algo.ts:70",
           "pc": [
-            216
-          ]
-        },
-        {
-          "teal": 94,
-          "source": "contracts\\CaelusValidator.algo.ts:67",
-          "pc": [
+            216,
             217
           ]
         },
         {
           "teal": 98,
-          "source": "contracts\\CaelusValidator.algo.ts:68",
+          "source": "contracts\\CaelusValidator.algo.ts:70",
           "pc": [
-            218,
-            219
+            218
           ]
         },
         {
           "teal": 99,
-          "source": "contracts\\CaelusValidator.algo.ts:68",
+          "source": "contracts\\CaelusValidator.algo.ts:70",
+          "pc": [
+            219
+          ]
+        },
+        {
+          "teal": 103,
+          "source": "contracts\\CaelusValidator.algo.ts:71",
           "pc": [
             220
           ]
         },
         {
-          "teal": 100,
-          "source": "contracts\\CaelusValidator.algo.ts:68",
+          "teal": 104,
+          "source": "contracts\\CaelusValidator.algo.ts:71",
           "pc": [
             221
           ]
         },
         {
-          "teal": 104,
-          "source": "contracts\\CaelusValidator.algo.ts:69",
+          "teal": 105,
+          "source": "contracts\\CaelusValidator.algo.ts:71",
           "pc": [
             222
           ]
         },
         {
-          "teal": 105,
-          "source": "contracts\\CaelusValidator.algo.ts:69",
+          "teal": 109,
+          "source": "contracts\\CaelusValidator.algo.ts:74",
           "pc": [
-            223
-          ]
-        },
-        {
-          "teal": 106,
-          "source": "contracts\\CaelusValidator.algo.ts:69",
-          "pc": [
+            223,
             224
           ]
         },
         {
           "teal": 110,
-          "source": "contracts\\CaelusValidator.algo.ts:72",
+          "source": "contracts\\CaelusValidator.algo.ts:74",
           "pc": [
-            225,
-            226
+            225
           ]
         },
         {
           "teal": 111,
-          "source": "contracts\\CaelusValidator.algo.ts:72",
+          "source": "contracts\\CaelusValidator.algo.ts:74",
           "pc": [
-            227
+            226
           ]
         },
         {
-          "teal": 112,
-          "source": "contracts\\CaelusValidator.algo.ts:72",
+          "teal": 115,
+          "source": "contracts\\CaelusValidator.algo.ts:75",
           "pc": [
+            227,
             228
           ]
         },
         {
           "teal": 116,
-          "source": "contracts\\CaelusValidator.algo.ts:73",
+          "source": "contracts\\CaelusValidator.algo.ts:75",
           "pc": [
-            229,
-            230
+            229
           ]
         },
         {
           "teal": 117,
-          "source": "contracts\\CaelusValidator.algo.ts:73",
+          "source": "contracts\\CaelusValidator.algo.ts:75",
           "pc": [
-            231
+            230
           ]
         },
         {
-          "teal": 118,
-          "source": "contracts\\CaelusValidator.algo.ts:73",
+          "teal": 121,
+          "source": "contracts\\CaelusValidator.algo.ts:76",
           "pc": [
-            232
-          ]
-        },
-        {
-          "teal": 122,
-          "source": "contracts\\CaelusValidator.algo.ts:74",
-          "pc": [
+            231,
+            232,
             233,
             234,
             235,
@@ -969,178 +968,184 @@
             241,
             242,
             243,
-            244,
-            245,
-            246
+            244
+          ]
+        },
+        {
+          "teal": 122,
+          "source": "contracts\\CaelusValidator.algo.ts:76",
+          "pc": [
+            245
           ]
         },
         {
           "teal": 123,
-          "source": "contracts\\CaelusValidator.algo.ts:74",
+          "source": "contracts\\CaelusValidator.algo.ts:76",
           "pc": [
-            247
+            246,
+            247,
+            248
           ]
         },
         {
           "teal": 124,
-          "source": "contracts\\CaelusValidator.algo.ts:74",
+          "source": "contracts\\CaelusValidator.algo.ts:76",
           "pc": [
-            248,
-            249,
-            250
+            249
           ]
         },
         {
           "teal": 125,
-          "source": "contracts\\CaelusValidator.algo.ts:74",
+          "source": "contracts\\CaelusValidator.algo.ts:76",
           "pc": [
+            250,
             251
           ]
         },
         {
           "teal": 126,
-          "source": "contracts\\CaelusValidator.algo.ts:74",
+          "source": "contracts\\CaelusValidator.algo.ts:76",
           "pc": [
-            252,
-            253
+            252
           ]
         },
         {
           "teal": 127,
-          "source": "contracts\\CaelusValidator.algo.ts:74",
+          "source": "contracts\\CaelusValidator.algo.ts:76",
+          "pc": [
+            253
+          ]
+        },
+        {
+          "teal": 128,
+          "source": "contracts\\CaelusValidator.algo.ts:62",
           "pc": [
             254
           ]
         },
         {
-          "teal": 128,
-          "source": "contracts\\CaelusValidator.algo.ts:74",
+          "teal": 133,
+          "source": "contracts\\CaelusValidator.algo.ts:85",
           "pc": [
-            255
-          ]
-        },
-        {
-          "teal": 129,
-          "source": "contracts\\CaelusValidator.algo.ts:60",
-          "pc": [
+            255,
             256
           ]
         },
         {
           "teal": 134,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "source": "contracts\\CaelusValidator.algo.ts:85",
           "pc": [
-            257,
-            258
+            257
           ]
         },
         {
           "teal": 135,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "source": "contracts\\CaelusValidator.algo.ts:85",
+          "pc": [
+            258
+          ]
+        },
+        {
+          "teal": 136,
+          "source": "contracts\\CaelusValidator.algo.ts:85",
           "pc": [
             259
           ]
         },
         {
-          "teal": 136,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
-          "pc": [
-            260
-          ]
-        },
-        {
           "teal": 137,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "source": "contracts\\CaelusValidator.algo.ts:85",
           "pc": [
+            260,
             261
           ]
         },
         {
           "teal": 138,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "source": "contracts\\CaelusValidator.algo.ts:85",
           "pc": [
-            262,
-            263
+            262
           ]
         },
         {
           "teal": 139,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "source": "contracts\\CaelusValidator.algo.ts:85",
+          "pc": [
+            263
+          ]
+        },
+        {
+          "teal": 142,
+          "source": "contracts\\CaelusValidator.algo.ts:85",
+          "errorMessage": "argument 0 (commit) for addToOperatorCommit must be a pay transaction",
           "pc": [
             264
           ]
         },
         {
-          "teal": 140,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "teal": 145,
+          "source": "contracts\\CaelusValidator.algo.ts:85",
           "pc": [
-            265
-          ]
-        },
-        {
-          "teal": 143,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
-          "errorMessage": "argument 0 (commit) for addToOperatorCommit must be a pay transaction",
-          "pc": [
-            266
+            265,
+            266,
+            267
           ]
         },
         {
           "teal": 146,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "source": "contracts\\CaelusValidator.algo.ts:85",
           "pc": [
-            267,
-            268,
-            269
+            268
           ]
         },
         {
           "teal": 147,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "source": "contracts\\CaelusValidator.algo.ts:85",
           "pc": [
-            270
+            269
           ]
         },
         {
-          "teal": 148,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "teal": 156,
+          "source": "contracts\\CaelusValidator.algo.ts:85",
           "pc": [
-            271
+            270,
+            271,
+            272
           ]
         },
         {
-          "teal": 157,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "teal": 159,
+          "source": "contracts\\CaelusValidator.algo.ts:85",
           "pc": [
-            272,
-            273,
+            273
+          ]
+        },
+        {
+          "teal": 163,
+          "source": "contracts\\CaelusValidator.algo.ts:86",
+          "pc": [
             274
           ]
         },
         {
-          "teal": 160,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "teal": 164,
+          "source": "contracts\\CaelusValidator.algo.ts:86",
           "pc": [
             275
           ]
         },
         {
-          "teal": 164,
-          "source": "contracts\\CaelusValidator.algo.ts:84",
-          "pc": [
-            276
-          ]
-        },
-        {
           "teal": 165,
-          "source": "contracts\\CaelusValidator.algo.ts:84",
+          "source": "contracts\\CaelusValidator.algo.ts:86",
           "pc": [
+            276,
             277
           ]
         },
         {
           "teal": 166,
-          "source": "contracts\\CaelusValidator.algo.ts:84",
+          "source": "contracts\\CaelusValidator.algo.ts:86",
           "pc": [
             278,
             279
@@ -1148,22 +1153,22 @@
         },
         {
           "teal": 167,
-          "source": "contracts\\CaelusValidator.algo.ts:84",
+          "source": "contracts\\CaelusValidator.algo.ts:86",
           "pc": [
-            280,
-            281
+            280
           ]
         },
         {
           "teal": 168,
-          "source": "contracts\\CaelusValidator.algo.ts:84",
+          "source": "contracts\\CaelusValidator.algo.ts:86",
           "pc": [
+            281,
             282
           ]
         },
         {
-          "teal": 169,
-          "source": "contracts\\CaelusValidator.algo.ts:84",
+          "teal": 172,
+          "source": "contracts\\CaelusValidator.algo.ts:87",
           "pc": [
             283,
             284
@@ -1171,37 +1176,37 @@
         },
         {
           "teal": 173,
-          "source": "contracts\\CaelusValidator.algo.ts:85",
+          "source": "contracts\\CaelusValidator.algo.ts:87",
           "pc": [
-            285,
-            286
+            285
           ]
         },
         {
           "teal": 174,
-          "source": "contracts\\CaelusValidator.algo.ts:85",
+          "source": "contracts\\CaelusValidator.algo.ts:87",
+          "pc": [
+            286
+          ]
+        },
+        {
+          "teal": 177,
+          "source": "contracts\\CaelusValidator.algo.ts:87",
+          "errorMessage": "Contract max balance cannot be over 30M Algo",
           "pc": [
             287
           ]
         },
         {
-          "teal": 175,
-          "source": "contracts\\CaelusValidator.algo.ts:85",
+          "teal": 186,
+          "source": "contracts\\CaelusValidator.algo.ts:89",
           "pc": [
-            288
-          ]
-        },
-        {
-          "teal": 178,
-          "source": "contracts\\CaelusValidator.algo.ts:85",
-          "errorMessage": "Contract max balance cannot be over 30M Algo",
-          "pc": [
+            288,
             289
           ]
         },
         {
           "teal": 187,
-          "source": "contracts\\CaelusValidator.algo.ts:87",
+          "source": "contracts\\CaelusValidator.algo.ts:90",
           "pc": [
             290,
             291
@@ -1209,44 +1214,44 @@
         },
         {
           "teal": 188,
-          "source": "contracts\\CaelusValidator.algo.ts:88",
+          "source": "contracts\\CaelusValidator.algo.ts:90",
           "pc": [
-            292,
-            293
+            292
           ]
         },
         {
           "teal": 189,
-          "source": "contracts\\CaelusValidator.algo.ts:88",
+          "source": "contracts\\CaelusValidator.algo.ts:90",
+          "pc": [
+            293
+          ]
+        },
+        {
+          "teal": 190,
+          "source": "contracts\\CaelusValidator.algo.ts:90",
           "pc": [
             294
           ]
         },
         {
-          "teal": 190,
-          "source": "contracts\\CaelusValidator.algo.ts:88",
+          "teal": 193,
+          "source": "contracts\\CaelusValidator.algo.ts:90",
+          "errorMessage": "transaction verification failed: {\"txn\":\"commit\",\"field\":\"sender\",\"expected\":\"this.operator_Address.value\"}",
           "pc": [
             295
           ]
         },
         {
-          "teal": 191,
-          "source": "contracts\\CaelusValidator.algo.ts:88",
+          "teal": 196,
+          "source": "contracts\\CaelusValidator.algo.ts:89",
           "pc": [
-            296
-          ]
-        },
-        {
-          "teal": 194,
-          "source": "contracts\\CaelusValidator.algo.ts:88",
-          "errorMessage": "transaction verification failed: {\"txn\":\"commit\",\"field\":\"sender\",\"expected\":\"this.operator_Address.value\"}",
-          "pc": [
+            296,
             297
           ]
         },
         {
           "teal": 197,
-          "source": "contracts\\CaelusValidator.algo.ts:87",
+          "source": "contracts\\CaelusValidator.algo.ts:91",
           "pc": [
             298,
             299
@@ -1254,7 +1259,7 @@
         },
         {
           "teal": 198,
-          "source": "contracts\\CaelusValidator.algo.ts:89",
+          "source": "contracts\\CaelusValidator.algo.ts:91",
           "pc": [
             300,
             301
@@ -1262,30 +1267,30 @@
         },
         {
           "teal": 199,
-          "source": "contracts\\CaelusValidator.algo.ts:89",
+          "source": "contracts\\CaelusValidator.algo.ts:91",
           "pc": [
-            302,
+            302
+          ]
+        },
+        {
+          "teal": 202,
+          "source": "contracts\\CaelusValidator.algo.ts:91",
+          "errorMessage": "transaction verification failed: {\"txn\":\"commit\",\"field\":\"receiver\",\"expected\":\"this.app.address\"}",
+          "pc": [
             303
           ]
         },
         {
-          "teal": 200,
+          "teal": 205,
           "source": "contracts\\CaelusValidator.algo.ts:89",
           "pc": [
-            304
-          ]
-        },
-        {
-          "teal": 203,
-          "source": "contracts\\CaelusValidator.algo.ts:89",
-          "errorMessage": "transaction verification failed: {\"txn\":\"commit\",\"field\":\"receiver\",\"expected\":\"this.app.address\"}",
-          "pc": [
+            304,
             305
           ]
         },
         {
           "teal": 206,
-          "source": "contracts\\CaelusValidator.algo.ts:87",
+          "source": "contracts\\CaelusValidator.algo.ts:92",
           "pc": [
             306,
             307
@@ -1293,7 +1298,7 @@
         },
         {
           "teal": 207,
-          "source": "contracts\\CaelusValidator.algo.ts:90",
+          "source": "contracts\\CaelusValidator.algo.ts:92",
           "pc": [
             308,
             309
@@ -1301,7 +1306,7 @@
         },
         {
           "teal": 208,
-          "source": "contracts\\CaelusValidator.algo.ts:90",
+          "source": "contracts\\CaelusValidator.algo.ts:92",
           "pc": [
             310,
             311
@@ -1309,44 +1314,44 @@
         },
         {
           "teal": 209,
-          "source": "contracts\\CaelusValidator.algo.ts:90",
+          "source": "contracts\\CaelusValidator.algo.ts:92",
           "pc": [
-            312,
+            312
+          ]
+        },
+        {
+          "teal": 212,
+          "source": "contracts\\CaelusValidator.algo.ts:92",
+          "errorMessage": "transaction verification failed: {\"txn\":\"commit\",\"field\":\"amount\",\"expected\":\"commit.amount\"}",
+          "pc": [
             313
           ]
         },
         {
-          "teal": 210,
-          "source": "contracts\\CaelusValidator.algo.ts:90",
+          "teal": 216,
+          "source": "contracts\\CaelusValidator.algo.ts:94",
           "pc": [
             314
           ]
         },
         {
-          "teal": 213,
-          "source": "contracts\\CaelusValidator.algo.ts:90",
-          "errorMessage": "transaction verification failed: {\"txn\":\"commit\",\"field\":\"amount\",\"expected\":\"commit.amount\"}",
+          "teal": 217,
+          "source": "contracts\\CaelusValidator.algo.ts:94",
           "pc": [
             315
           ]
         },
         {
-          "teal": 217,
-          "source": "contracts\\CaelusValidator.algo.ts:92",
-          "pc": [
-            316
-          ]
-        },
-        {
           "teal": 218,
-          "source": "contracts\\CaelusValidator.algo.ts:92",
+          "source": "contracts\\CaelusValidator.algo.ts:94",
           "pc": [
+            316,
             317
           ]
         },
         {
           "teal": 219,
-          "source": "contracts\\CaelusValidator.algo.ts:92",
+          "source": "contracts\\CaelusValidator.algo.ts:94",
           "pc": [
             318,
             319
@@ -1354,209 +1359,209 @@
         },
         {
           "teal": 220,
-          "source": "contracts\\CaelusValidator.algo.ts:92",
+          "source": "contracts\\CaelusValidator.algo.ts:94",
           "pc": [
-            320,
-            321
+            320
           ]
         },
         {
           "teal": 221,
-          "source": "contracts\\CaelusValidator.algo.ts:92",
+          "source": "contracts\\CaelusValidator.algo.ts:94",
+          "pc": [
+            321
+          ]
+        },
+        {
+          "teal": 222,
+          "source": "contracts\\CaelusValidator.algo.ts:94",
           "pc": [
             322
           ]
         },
         {
-          "teal": 222,
-          "source": "contracts\\CaelusValidator.algo.ts:92",
+          "teal": 223,
+          "source": "contracts\\CaelusValidator.algo.ts:94",
           "pc": [
             323
           ]
         },
         {
-          "teal": 223,
-          "source": "contracts\\CaelusValidator.algo.ts:92",
+          "teal": 227,
+          "source": "contracts\\CaelusValidator.algo.ts:95",
           "pc": [
-            324
-          ]
-        },
-        {
-          "teal": 224,
-          "source": "contracts\\CaelusValidator.algo.ts:92",
-          "pc": [
-            325
+            324,
+            325,
+            326
           ]
         },
         {
           "teal": 228,
-          "source": "contracts\\CaelusValidator.algo.ts:93",
+          "source": "contracts\\CaelusValidator.algo.ts:85",
           "pc": [
-            326,
-            327,
-            328
+            327
           ]
         },
         {
-          "teal": 229,
-          "source": "contracts\\CaelusValidator.algo.ts:83",
+          "teal": 233,
+          "source": "contracts\\CaelusValidator.algo.ts:103",
           "pc": [
-            329
+            328,
+            329,
+            330
           ]
         },
         {
           "teal": 234,
-          "source": "contracts\\CaelusValidator.algo.ts:101",
+          "source": "contracts\\CaelusValidator.algo.ts:103",
           "pc": [
-            330,
-            331,
-            332
+            331
           ]
         },
         {
-          "teal": 235,
-          "source": "contracts\\CaelusValidator.algo.ts:101",
+          "teal": 237,
+          "source": "contracts\\CaelusValidator.algo.ts:103",
           "pc": [
-            333
+            332,
+            333,
+            334
           ]
         },
         {
           "teal": 238,
-          "source": "contracts\\CaelusValidator.algo.ts:101",
+          "source": "contracts\\CaelusValidator.algo.ts:103",
           "pc": [
-            334,
-            335,
-            336
+            335
           ]
         },
         {
           "teal": 239,
-          "source": "contracts\\CaelusValidator.algo.ts:101",
+          "source": "contracts\\CaelusValidator.algo.ts:103",
           "pc": [
-            337
+            336
           ]
         },
         {
-          "teal": 240,
-          "source": "contracts\\CaelusValidator.algo.ts:101",
+          "teal": 247,
+          "source": "contracts\\CaelusValidator.algo.ts:103",
           "pc": [
-            338
+            337,
+            338,
+            339
           ]
         },
         {
-          "teal": 248,
-          "source": "contracts\\CaelusValidator.algo.ts:101",
+          "teal": 254,
+          "source": "contracts\\CaelusValidator.algo.ts:105",
           "pc": [
-            339,
             340,
             341
           ]
         },
         {
           "teal": 255,
-          "source": "contracts\\CaelusValidator.algo.ts:103",
+          "source": "contracts\\CaelusValidator.algo.ts:105",
           "pc": [
-            342,
-            343
+            342
           ]
         },
         {
           "teal": 256,
-          "source": "contracts\\CaelusValidator.algo.ts:103",
+          "source": "contracts\\CaelusValidator.algo.ts:105",
+          "pc": [
+            343
+          ]
+        },
+        {
+          "teal": 257,
+          "source": "contracts\\CaelusValidator.algo.ts:105",
           "pc": [
             344
           ]
         },
         {
-          "teal": 257,
-          "source": "contracts\\CaelusValidator.algo.ts:103",
+          "teal": 260,
+          "source": "contracts\\CaelusValidator.algo.ts:105",
+          "errorMessage": "transaction verification failed: {\"txn\":\"this.txn\",\"field\":\"sender\",\"expected\":\"this.operator_Address.value\"}",
           "pc": [
             345
           ]
         },
         {
-          "teal": 258,
-          "source": "contracts\\CaelusValidator.algo.ts:103",
+          "teal": 267,
+          "source": "contracts\\CaelusValidator.algo.ts:109",
           "pc": [
             346
           ]
         },
         {
-          "teal": 261,
-          "source": "contracts\\CaelusValidator.algo.ts:103",
-          "errorMessage": "transaction verification failed: {\"txn\":\"this.txn\",\"field\":\"sender\",\"expected\":\"this.operator_Address.value\"}",
+          "teal": 268,
+          "source": "contracts\\CaelusValidator.algo.ts:109",
           "pc": [
             347
           ]
         },
         {
-          "teal": 268,
-          "source": "contracts\\CaelusValidator.algo.ts:107",
-          "pc": [
-            348
-          ]
-        },
-        {
           "teal": 269,
-          "source": "contracts\\CaelusValidator.algo.ts:107",
+          "source": "contracts\\CaelusValidator.algo.ts:109",
           "pc": [
+            348,
             349
           ]
         },
         {
           "teal": 270,
-          "source": "contracts\\CaelusValidator.algo.ts:107",
+          "source": "contracts\\CaelusValidator.algo.ts:109",
           "pc": [
-            350,
-            351
+            350
           ]
         },
         {
           "teal": 271,
-          "source": "contracts\\CaelusValidator.algo.ts:107",
+          "source": "contracts\\CaelusValidator.algo.ts:109",
+          "pc": [
+            351
+          ]
+        },
+        {
+          "teal": 272,
+          "source": "contracts\\CaelusValidator.algo.ts:109",
           "pc": [
             352
           ]
         },
         {
-          "teal": 272,
-          "source": "contracts\\CaelusValidator.algo.ts:107",
+          "teal": 275,
+          "source": "contracts\\CaelusValidator.algo.ts:108",
+          "errorMessage": "Node Operator can take his stake below 30k only if the node contract will be closed",
           "pc": [
             353
           ]
         },
         {
-          "teal": 273,
-          "source": "contracts\\CaelusValidator.algo.ts:107",
+          "teal": 284,
+          "source": "contracts\\CaelusValidator.algo.ts:112",
           "pc": [
             354
           ]
         },
         {
-          "teal": 276,
-          "source": "contracts\\CaelusValidator.algo.ts:106",
-          "errorMessage": "Node Operator can take his stake below 30k only if the node contract will be closed",
+          "teal": 285,
+          "source": "contracts\\CaelusValidator.algo.ts:112",
           "pc": [
             355
           ]
         },
         {
-          "teal": 285,
-          "source": "contracts\\CaelusValidator.algo.ts:110",
-          "pc": [
-            356
-          ]
-        },
-        {
           "teal": 286,
-          "source": "contracts\\CaelusValidator.algo.ts:110",
+          "source": "contracts\\CaelusValidator.algo.ts:112",
           "pc": [
+            356,
             357
           ]
         },
         {
-          "teal": 287,
-          "source": "contracts\\CaelusValidator.algo.ts:110",
+          "teal": 290,
+          "source": "contracts\\CaelusValidator.algo.ts:113",
           "pc": [
             358,
             359
@@ -1564,37 +1569,37 @@
         },
         {
           "teal": 291,
-          "source": "contracts\\CaelusValidator.algo.ts:111",
+          "source": "contracts\\CaelusValidator.algo.ts:113",
           "pc": [
             360,
             361
           ]
         },
         {
-          "teal": 292,
-          "source": "contracts\\CaelusValidator.algo.ts:111",
+          "teal": 295,
+          "source": "contracts\\CaelusValidator.algo.ts:114",
           "pc": [
-            362,
-            363
+            362
           ]
         },
         {
           "teal": 296,
-          "source": "contracts\\CaelusValidator.algo.ts:112",
+          "source": "contracts\\CaelusValidator.algo.ts:114",
           "pc": [
-            364
+            363
           ]
         },
         {
           "teal": 297,
-          "source": "contracts\\CaelusValidator.algo.ts:112",
+          "source": "contracts\\CaelusValidator.algo.ts:114",
           "pc": [
+            364,
             365
           ]
         },
         {
-          "teal": 298,
-          "source": "contracts\\CaelusValidator.algo.ts:112",
+          "teal": 301,
+          "source": "contracts\\CaelusValidator.algo.ts:115",
           "pc": [
             366,
             367
@@ -1602,241 +1607,241 @@
         },
         {
           "teal": 302,
-          "source": "contracts\\CaelusValidator.algo.ts:113",
+          "source": "contracts\\CaelusValidator.algo.ts:115",
           "pc": [
             368,
             369
           ]
         },
         {
-          "teal": 303,
-          "source": "contracts\\CaelusValidator.algo.ts:113",
+          "teal": 306,
+          "source": "contracts\\CaelusValidator.algo.ts:116",
           "pc": [
-            370,
-            371
+            370
           ]
         },
         {
           "teal": 307,
-          "source": "contracts\\CaelusValidator.algo.ts:114",
+          "source": "contracts\\CaelusValidator.algo.ts:116",
           "pc": [
+            371,
             372
           ]
         },
         {
-          "teal": 308,
-          "source": "contracts\\CaelusValidator.algo.ts:114",
+          "teal": 310,
+          "source": "contracts\\CaelusValidator.algo.ts:112",
           "pc": [
-            373,
-            374
+            373
           ]
         },
         {
-          "teal": 311,
-          "source": "contracts\\CaelusValidator.algo.ts:110",
+          "teal": 314,
+          "source": "contracts\\CaelusValidator.algo.ts:118",
           "pc": [
-            375
+            374,
+            375,
+            376
           ]
         },
         {
           "teal": 315,
-          "source": "contracts\\CaelusValidator.algo.ts:116",
+          "source": "contracts\\CaelusValidator.algo.ts:103",
           "pc": [
-            376,
-            377,
-            378
+            377
           ]
         },
         {
-          "teal": 316,
-          "source": "contracts\\CaelusValidator.algo.ts:101",
+          "teal": 320,
+          "source": "contracts\\CaelusValidator.algo.ts:122",
           "pc": [
-            379
+            378,
+            379,
+            380
           ]
         },
         {
           "teal": 321,
-          "source": "contracts\\CaelusValidator.algo.ts:120",
+          "source": "contracts\\CaelusValidator.algo.ts:122",
           "pc": [
-            380,
-            381,
-            382
+            381
           ]
         },
         {
           "teal": 322,
-          "source": "contracts\\CaelusValidator.algo.ts:120",
+          "source": "contracts\\CaelusValidator.algo.ts:122",
           "pc": [
-            383
+            382
           ]
         },
         {
-          "teal": 323,
-          "source": "contracts\\CaelusValidator.algo.ts:120",
+          "teal": 326,
+          "source": "contracts\\CaelusValidator.algo.ts:122",
           "pc": [
-            384
+            383,
+            384,
+            385
           ]
         },
         {
           "teal": 327,
-          "source": "contracts\\CaelusValidator.algo.ts:120",
-          "pc": [
-            385,
-            386,
-            387
-          ]
-        },
-        {
-          "teal": 328,
-          "source": "contracts\\CaelusValidator.algo.ts:120",
-          "pc": [
-            388
-          ]
-        },
-        {
-          "teal": 333,
           "source": "contracts\\CaelusValidator.algo.ts:122",
           "pc": [
+            386
+          ]
+        },
+        {
+          "teal": 332,
+          "source": "contracts\\CaelusValidator.algo.ts:124",
+          "pc": [
+            387,
+            388,
             389,
             390,
             391,
-            392,
+            392
+          ]
+        },
+        {
+          "teal": 335,
+          "source": "contracts\\CaelusValidator.algo.ts:124",
+          "pc": [
             393,
-            394
+            394,
+            395
           ]
         },
         {
           "teal": 336,
-          "source": "contracts\\CaelusValidator.algo.ts:122",
+          "source": "contracts\\CaelusValidator.algo.ts:124",
           "pc": [
-            395,
-            396,
-            397
+            396
           ]
         },
         {
           "teal": 337,
-          "source": "contracts\\CaelusValidator.algo.ts:122",
+          "source": "contracts\\CaelusValidator.algo.ts:124",
+          "pc": [
+            397
+          ]
+        },
+        {
+          "teal": 338,
+          "source": "contracts\\CaelusValidator.algo.ts:124",
           "pc": [
             398
           ]
         },
         {
-          "teal": 338,
-          "source": "contracts\\CaelusValidator.algo.ts:122",
+          "teal": 339,
+          "source": "contracts\\CaelusValidator.algo.ts:124",
           "pc": [
             399
           ]
         },
         {
-          "teal": 339,
-          "source": "contracts\\CaelusValidator.algo.ts:122",
+          "teal": 340,
+          "source": "contracts\\CaelusValidator.algo.ts:124",
           "pc": [
             400
           ]
         },
         {
-          "teal": 340,
-          "source": "contracts\\CaelusValidator.algo.ts:122",
+          "teal": 344,
+          "source": "contracts\\CaelusValidator.algo.ts:124",
           "pc": [
-            401
+            401,
+            402,
+            403
           ]
         },
         {
-          "teal": 341,
-          "source": "contracts\\CaelusValidator.algo.ts:122",
+          "teal": 348,
+          "source": "contracts\\CaelusValidator.algo.ts:125",
           "pc": [
-            402
-          ]
-        },
-        {
-          "teal": 345,
-          "source": "contracts\\CaelusValidator.algo.ts:122",
-          "pc": [
-            403,
-            404,
-            405
+            404
           ]
         },
         {
           "teal": 349,
-          "source": "contracts\\CaelusValidator.algo.ts:123",
+          "source": "contracts\\CaelusValidator.algo.ts:124",
           "pc": [
-            406
+            405
           ]
         },
         {
-          "teal": 350,
-          "source": "contracts\\CaelusValidator.algo.ts:122",
+          "teal": 354,
+          "source": "contracts\\CaelusValidator.algo.ts:128",
           "pc": [
-            407
+            406,
+            407,
+            408
           ]
         },
         {
           "teal": 355,
-          "source": "contracts\\CaelusValidator.algo.ts:126",
+          "source": "contracts\\CaelusValidator.algo.ts:128",
           "pc": [
-            408,
-            409,
-            410
+            409
           ]
         },
         {
-          "teal": 356,
-          "source": "contracts\\CaelusValidator.algo.ts:126",
+          "teal": 358,
+          "source": "contracts\\CaelusValidator.algo.ts:128",
           "pc": [
-            411
+            410,
+            411,
+            412
           ]
         },
         {
           "teal": 359,
-          "source": "contracts\\CaelusValidator.algo.ts:126",
+          "source": "contracts\\CaelusValidator.algo.ts:128",
           "pc": [
-            412,
-            413,
-            414
+            413
           ]
         },
         {
           "teal": 360,
-          "source": "contracts\\CaelusValidator.algo.ts:126",
+          "source": "contracts\\CaelusValidator.algo.ts:128",
           "pc": [
-            415
+            414
           ]
         },
         {
-          "teal": 361,
-          "source": "contracts\\CaelusValidator.algo.ts:126",
+          "teal": 364,
+          "source": "contracts\\CaelusValidator.algo.ts:128",
           "pc": [
-            416
+            415,
+            416,
+            417
           ]
         },
         {
-          "teal": 365,
-          "source": "contracts\\CaelusValidator.algo.ts:126",
+          "teal": 367,
+          "source": "contracts\\CaelusValidator.algo.ts:128",
           "pc": [
-            417,
-            418,
-            419
+            418
           ]
         },
         {
           "teal": 368,
-          "source": "contracts\\CaelusValidator.algo.ts:126",
+          "source": "contracts\\CaelusValidator.algo.ts:128",
           "pc": [
-            420
+            419
           ]
         },
         {
-          "teal": 369,
-          "source": "contracts\\CaelusValidator.algo.ts:126",
+          "teal": 372,
+          "source": "contracts\\CaelusValidator.algo.ts:132",
           "pc": [
+            420,
             421
           ]
         },
         {
           "teal": 373,
-          "source": "contracts\\CaelusValidator.algo.ts:130",
+          "source": "contracts\\CaelusValidator.algo.ts:132",
           "pc": [
             422,
             423
@@ -1844,15 +1849,15 @@
         },
         {
           "teal": 374,
-          "source": "contracts\\CaelusValidator.algo.ts:130",
+          "source": "contracts\\CaelusValidator.algo.ts:132",
           "pc": [
             424,
             425
           ]
         },
         {
-          "teal": 375,
-          "source": "contracts\\CaelusValidator.algo.ts:130",
+          "teal": 378,
+          "source": "contracts\\CaelusValidator.algo.ts:133",
           "pc": [
             426,
             427
@@ -1860,7 +1865,7 @@
         },
         {
           "teal": 379,
-          "source": "contracts\\CaelusValidator.algo.ts:131",
+          "source": "contracts\\CaelusValidator.algo.ts:133",
           "pc": [
             428,
             429
@@ -1868,603 +1873,603 @@
         },
         {
           "teal": 380,
-          "source": "contracts\\CaelusValidator.algo.ts:131",
+          "source": "contracts\\CaelusValidator.algo.ts:133",
           "pc": [
-            430,
-            431
+            430
           ]
         },
         {
           "teal": 381,
-          "source": "contracts\\CaelusValidator.algo.ts:131",
+          "source": "contracts\\CaelusValidator.algo.ts:133",
           "pc": [
+            431,
             432
           ]
         },
         {
           "teal": 382,
-          "source": "contracts\\CaelusValidator.algo.ts:131",
+          "source": "contracts\\CaelusValidator.algo.ts:133",
           "pc": [
-            433,
-            434
+            433
           ]
         },
         {
           "teal": 383,
-          "source": "contracts\\CaelusValidator.algo.ts:131",
+          "source": "contracts\\CaelusValidator.algo.ts:133",
           "pc": [
+            434,
             435
           ]
         },
         {
           "teal": 384,
-          "source": "contracts\\CaelusValidator.algo.ts:131",
+          "source": "contracts\\CaelusValidator.algo.ts:128",
           "pc": [
-            436,
-            437
+            436
           ]
         },
         {
-          "teal": 385,
-          "source": "contracts\\CaelusValidator.algo.ts:126",
+          "teal": 389,
+          "source": "contracts\\CaelusValidator.algo.ts:136",
           "pc": [
-            438
+            437,
+            438,
+            439
           ]
         },
         {
           "teal": 390,
-          "source": "contracts\\CaelusValidator.algo.ts:134",
+          "source": "contracts\\CaelusValidator.algo.ts:136",
           "pc": [
-            439,
-            440,
-            441
+            440
           ]
         },
         {
           "teal": 391,
-          "source": "contracts\\CaelusValidator.algo.ts:134",
+          "source": "contracts\\CaelusValidator.algo.ts:136",
           "pc": [
-            442
+            441
           ]
         },
         {
-          "teal": 392,
-          "source": "contracts\\CaelusValidator.algo.ts:134",
+          "teal": 395,
+          "source": "contracts\\CaelusValidator.algo.ts:136",
           "pc": [
-            443
+            442,
+            443,
+            444
           ]
         },
         {
           "teal": 396,
-          "source": "contracts\\CaelusValidator.algo.ts:134",
+          "source": "contracts\\CaelusValidator.algo.ts:136",
           "pc": [
-            444,
-            445,
-            446
+            445
           ]
         },
         {
-          "teal": 397,
-          "source": "contracts\\CaelusValidator.algo.ts:134",
+          "teal": 401,
+          "source": "contracts\\CaelusValidator.algo.ts:138",
           "pc": [
-            447
+            446,
+            447,
+            448
           ]
         },
         {
           "teal": 402,
-          "source": "contracts\\CaelusValidator.algo.ts:136",
+          "source": "contracts\\CaelusValidator.algo.ts:138",
           "pc": [
-            448,
-            449,
-            450
+            449
           ]
         },
         {
           "teal": 403,
-          "source": "contracts\\CaelusValidator.algo.ts:136",
+          "source": "contracts\\CaelusValidator.algo.ts:138",
           "pc": [
-            451
+            450
           ]
         },
         {
-          "teal": 404,
-          "source": "contracts\\CaelusValidator.algo.ts:136",
+          "teal": 407,
+          "source": "contracts\\CaelusValidator.algo.ts:138",
           "pc": [
-            452
+            451,
+            452,
+            453
           ]
         },
         {
           "teal": 408,
-          "source": "contracts\\CaelusValidator.algo.ts:136",
+          "source": "contracts\\CaelusValidator.algo.ts:138",
           "pc": [
-            453,
-            454,
-            455
+            454
           ]
         },
         {
-          "teal": 409,
-          "source": "contracts\\CaelusValidator.algo.ts:136",
+          "teal": 413,
+          "source": "contracts\\CaelusValidator.algo.ts:140",
           "pc": [
-            456
+            455,
+            456,
+            457
           ]
         },
         {
           "teal": 414,
-          "source": "contracts\\CaelusValidator.algo.ts:138",
+          "source": "contracts\\CaelusValidator.algo.ts:140",
           "pc": [
-            457,
-            458,
-            459
+            458
           ]
         },
         {
           "teal": 415,
-          "source": "contracts\\CaelusValidator.algo.ts:138",
+          "source": "contracts\\CaelusValidator.algo.ts:140",
           "pc": [
-            460
+            459
           ]
         },
         {
-          "teal": 416,
-          "source": "contracts\\CaelusValidator.algo.ts:138",
+          "teal": 419,
+          "source": "contracts\\CaelusValidator.algo.ts:140",
           "pc": [
-            461
+            460,
+            461,
+            462
           ]
         },
         {
           "teal": 420,
-          "source": "contracts\\CaelusValidator.algo.ts:138",
+          "source": "contracts\\CaelusValidator.algo.ts:140",
           "pc": [
-            462,
-            463,
-            464
+            463
           ]
         },
         {
-          "teal": 421,
-          "source": "contracts\\CaelusValidator.algo.ts:138",
+          "teal": 425,
+          "source": "contracts\\CaelusValidator.algo.ts:142",
           "pc": [
-            465
+            464,
+            465,
+            466
           ]
         },
         {
           "teal": 426,
-          "source": "contracts\\CaelusValidator.algo.ts:140",
+          "source": "contracts\\CaelusValidator.algo.ts:142",
           "pc": [
-            466,
-            467,
-            468
+            467
           ]
         },
         {
           "teal": 427,
-          "source": "contracts\\CaelusValidator.algo.ts:140",
+          "source": "contracts\\CaelusValidator.algo.ts:142",
           "pc": [
-            469
+            468
           ]
         },
         {
-          "teal": 428,
-          "source": "contracts\\CaelusValidator.algo.ts:140",
+          "teal": 431,
+          "source": "contracts\\CaelusValidator.algo.ts:142",
           "pc": [
-            470
+            469,
+            470,
+            471
           ]
         },
         {
           "teal": 432,
-          "source": "contracts\\CaelusValidator.algo.ts:140",
+          "source": "contracts\\CaelusValidator.algo.ts:142",
           "pc": [
-            471,
-            472,
-            473
+            472
           ]
         },
         {
-          "teal": 433,
-          "source": "contracts\\CaelusValidator.algo.ts:140",
+          "teal": 437,
+          "source": "contracts\\CaelusValidator.algo.ts:144",
           "pc": [
-            474
+            473,
+            474,
+            475
           ]
         },
         {
           "teal": 438,
-          "source": "contracts\\CaelusValidator.algo.ts:142",
+          "source": "contracts\\CaelusValidator.algo.ts:144",
           "pc": [
-            475,
-            476,
-            477
+            476
           ]
         },
         {
           "teal": 439,
-          "source": "contracts\\CaelusValidator.algo.ts:142",
+          "source": "contracts\\CaelusValidator.algo.ts:144",
           "pc": [
-            478
+            477
           ]
         },
         {
-          "teal": 440,
-          "source": "contracts\\CaelusValidator.algo.ts:142",
+          "teal": 443,
+          "source": "contracts\\CaelusValidator.algo.ts:144",
           "pc": [
-            479
+            478,
+            479,
+            480
           ]
         },
         {
           "teal": 444,
-          "source": "contracts\\CaelusValidator.algo.ts:142",
+          "source": "contracts\\CaelusValidator.algo.ts:144",
           "pc": [
-            480,
-            481,
-            482
+            481
           ]
         },
         {
-          "teal": 445,
-          "source": "contracts\\CaelusValidator.algo.ts:142",
+          "teal": 449,
+          "source": "contracts\\CaelusValidator.algo.ts:146",
           "pc": [
-            483
+            482,
+            483,
+            484
           ]
         },
         {
           "teal": 450,
-          "source": "contracts\\CaelusValidator.algo.ts:144",
+          "source": "contracts\\CaelusValidator.algo.ts:146",
           "pc": [
-            484,
-            485,
-            486
+            485
           ]
         },
         {
           "teal": 451,
-          "source": "contracts\\CaelusValidator.algo.ts:144",
+          "source": "contracts\\CaelusValidator.algo.ts:146",
           "pc": [
-            487
+            486
           ]
         },
         {
-          "teal": 452,
-          "source": "contracts\\CaelusValidator.algo.ts:144",
+          "teal": 455,
+          "source": "contracts\\CaelusValidator.algo.ts:146",
           "pc": [
-            488
+            487,
+            488,
+            489
           ]
         },
         {
           "teal": 456,
-          "source": "contracts\\CaelusValidator.algo.ts:144",
+          "source": "contracts\\CaelusValidator.algo.ts:146",
           "pc": [
-            489,
-            490,
-            491
+            490
           ]
         },
         {
-          "teal": 457,
-          "source": "contracts\\CaelusValidator.algo.ts:144",
+          "teal": 461,
+          "source": "contracts\\CaelusValidator.algo.ts:148",
           "pc": [
-            492
+            491,
+            492,
+            493
           ]
         },
         {
           "teal": 462,
-          "source": "contracts\\CaelusValidator.algo.ts:146",
+          "source": "contracts\\CaelusValidator.algo.ts:148",
           "pc": [
-            493,
-            494,
-            495
+            494
           ]
         },
         {
           "teal": 463,
-          "source": "contracts\\CaelusValidator.algo.ts:146",
+          "source": "contracts\\CaelusValidator.algo.ts:148",
           "pc": [
-            496
+            495
           ]
         },
         {
-          "teal": 464,
-          "source": "contracts\\CaelusValidator.algo.ts:146",
+          "teal": 467,
+          "source": "contracts\\CaelusValidator.algo.ts:148",
           "pc": [
-            497
+            496,
+            497,
+            498
           ]
         },
         {
           "teal": 468,
-          "source": "contracts\\CaelusValidator.algo.ts:146",
+          "source": "contracts\\CaelusValidator.algo.ts:148",
           "pc": [
-            498,
-            499,
-            500
+            499
           ]
         },
         {
-          "teal": 469,
-          "source": "contracts\\CaelusValidator.algo.ts:146",
+          "teal": 473,
+          "source": "contracts\\CaelusValidator.algo.ts:150",
           "pc": [
-            501
+            500,
+            501,
+            502
           ]
         },
         {
           "teal": 474,
-          "source": "contracts\\CaelusValidator.algo.ts:148",
+          "source": "contracts\\CaelusValidator.algo.ts:150",
           "pc": [
-            502,
-            503,
-            504
+            503
           ]
         },
         {
           "teal": 475,
-          "source": "contracts\\CaelusValidator.algo.ts:148",
+          "source": "contracts\\CaelusValidator.algo.ts:150",
           "pc": [
-            505
+            504
           ]
         },
         {
-          "teal": 476,
-          "source": "contracts\\CaelusValidator.algo.ts:148",
+          "teal": 479,
+          "source": "contracts\\CaelusValidator.algo.ts:150",
           "pc": [
-            506
+            505,
+            506,
+            507
           ]
         },
         {
           "teal": 480,
-          "source": "contracts\\CaelusValidator.algo.ts:148",
+          "source": "contracts\\CaelusValidator.algo.ts:150",
           "pc": [
-            507,
-            508,
-            509
+            508
           ]
         },
         {
-          "teal": 481,
-          "source": "contracts\\CaelusValidator.algo.ts:148",
+          "teal": 485,
+          "source": "contracts\\CaelusValidator.algo.ts:152",
           "pc": [
-            510
+            509,
+            510,
+            511
           ]
         },
         {
           "teal": 486,
-          "source": "contracts\\CaelusValidator.algo.ts:150",
+          "source": "contracts\\CaelusValidator.algo.ts:152",
           "pc": [
-            511,
-            512,
-            513
+            512
           ]
         },
         {
           "teal": 487,
-          "source": "contracts\\CaelusValidator.algo.ts:150",
+          "source": "contracts\\CaelusValidator.algo.ts:152",
           "pc": [
-            514
+            513
           ]
         },
         {
-          "teal": 488,
-          "source": "contracts\\CaelusValidator.algo.ts:150",
+          "teal": 491,
+          "source": "contracts\\CaelusValidator.algo.ts:152",
           "pc": [
-            515
+            514,
+            515,
+            516
           ]
         },
         {
           "teal": 492,
-          "source": "contracts\\CaelusValidator.algo.ts:150",
+          "source": "contracts\\CaelusValidator.algo.ts:152",
           "pc": [
-            516,
-            517,
-            518
+            517
           ]
         },
         {
-          "teal": 493,
-          "source": "contracts\\CaelusValidator.algo.ts:150",
+          "teal": 497,
+          "source": "contracts\\CaelusValidator.algo.ts:173",
           "pc": [
-            519
+            518,
+            519,
+            520
           ]
         },
         {
           "teal": 498,
-          "source": "contracts\\CaelusValidator.algo.ts:171",
+          "source": "contracts\\CaelusValidator.algo.ts:173",
           "pc": [
-            520,
-            521,
-            522
+            521
           ]
         },
         {
-          "teal": 499,
-          "source": "contracts\\CaelusValidator.algo.ts:171",
+          "teal": 501,
+          "source": "contracts\\CaelusValidator.algo.ts:172",
           "pc": [
-            523
+            522,
+            523,
+            524
           ]
         },
         {
           "teal": 502,
-          "source": "contracts\\CaelusValidator.algo.ts:170",
+          "source": "contracts\\CaelusValidator.algo.ts:172",
           "pc": [
-            524,
-            525,
-            526
+            525
           ]
         },
         {
-          "teal": 503,
-          "source": "contracts\\CaelusValidator.algo.ts:170",
+          "teal": 505,
+          "source": "contracts\\CaelusValidator.algo.ts:171",
           "pc": [
-            527
+            526,
+            527,
+            528
           ]
         },
         {
           "teal": 506,
-          "source": "contracts\\CaelusValidator.algo.ts:169",
+          "source": "contracts\\CaelusValidator.algo.ts:171",
           "pc": [
-            528,
-            529,
-            530
+            529
           ]
         },
         {
-          "teal": 507,
-          "source": "contracts\\CaelusValidator.algo.ts:169",
+          "teal": 509,
+          "source": "contracts\\CaelusValidator.algo.ts:170",
           "pc": [
-            531
+            530,
+            531,
+            532
           ]
         },
         {
           "teal": 510,
-          "source": "contracts\\CaelusValidator.algo.ts:168",
+          "source": "contracts\\CaelusValidator.algo.ts:170",
           "pc": [
-            532,
             533,
-            534
+            534,
+            535
           ]
         },
         {
-          "teal": 511,
-          "source": "contracts\\CaelusValidator.algo.ts:168",
+          "teal": 513,
+          "source": "contracts\\CaelusValidator.algo.ts:169",
           "pc": [
-            535,
             536,
-            537
+            537,
+            538
           ]
         },
         {
           "teal": 514,
-          "source": "contracts\\CaelusValidator.algo.ts:167",
+          "source": "contracts\\CaelusValidator.algo.ts:169",
           "pc": [
-            538,
             539,
-            540
+            540,
+            541
           ]
         },
         {
-          "teal": 515,
-          "source": "contracts\\CaelusValidator.algo.ts:167",
+          "teal": 517,
+          "source": "contracts\\CaelusValidator.algo.ts:168",
           "pc": [
-            541,
             542,
-            543
+            543,
+            544
           ]
         },
         {
           "teal": 518,
-          "source": "contracts\\CaelusValidator.algo.ts:166",
+          "source": "contracts\\CaelusValidator.algo.ts:168",
           "pc": [
-            544,
             545,
-            546
+            546,
+            547
           ]
         },
         {
-          "teal": 519,
-          "source": "contracts\\CaelusValidator.algo.ts:166",
+          "teal": 521,
+          "source": "contracts\\CaelusValidator.algo.ts:167",
           "pc": [
-            547,
             548,
             549
           ]
         },
         {
           "teal": 522,
-          "source": "contracts\\CaelusValidator.algo.ts:165",
+          "source": "contracts\\CaelusValidator.algo.ts:167",
           "pc": [
-            550,
-            551
+            550
           ]
         },
         {
           "teal": 523,
-          "source": "contracts\\CaelusValidator.algo.ts:165",
+          "source": "contracts\\CaelusValidator.algo.ts:167",
+          "pc": [
+            551
+          ]
+        },
+        {
+          "teal": 524,
+          "source": "contracts\\CaelusValidator.algo.ts:167",
           "pc": [
             552
           ]
         },
         {
-          "teal": 524,
-          "source": "contracts\\CaelusValidator.algo.ts:165",
-          "pc": [
-            553
-          ]
-        },
-        {
           "teal": 525,
-          "source": "contracts\\CaelusValidator.algo.ts:165",
+          "source": "contracts\\CaelusValidator.algo.ts:167",
           "pc": [
+            553,
             554
           ]
         },
         {
           "teal": 526,
-          "source": "contracts\\CaelusValidator.algo.ts:165",
+          "source": "contracts\\CaelusValidator.algo.ts:167",
           "pc": [
-            555,
-            556
+            555
           ]
         },
         {
           "teal": 527,
-          "source": "contracts\\CaelusValidator.algo.ts:165",
+          "source": "contracts\\CaelusValidator.algo.ts:167",
+          "pc": [
+            556
+          ]
+        },
+        {
+          "teal": 530,
+          "source": "contracts\\CaelusValidator.algo.ts:167",
+          "errorMessage": "argument 6 (feePayment) for goOnline must be a pay transaction",
           "pc": [
             557
           ]
         },
         {
-          "teal": 528,
-          "source": "contracts\\CaelusValidator.algo.ts:165",
+          "teal": 533,
+          "source": "contracts\\CaelusValidator.algo.ts:166",
           "pc": [
-            558
-          ]
-        },
-        {
-          "teal": 531,
-          "source": "contracts\\CaelusValidator.algo.ts:165",
-          "errorMessage": "argument 6 (feePayment) for goOnline must be a pay transaction",
-          "pc": [
-            559
+            558,
+            559,
+            560
           ]
         },
         {
           "teal": 534,
-          "source": "contracts\\CaelusValidator.algo.ts:164",
+          "source": "contracts\\CaelusValidator.algo.ts:166",
           "pc": [
-            560,
-            561,
-            562
+            561
           ]
         },
         {
           "teal": 535,
-          "source": "contracts\\CaelusValidator.algo.ts:164",
+          "source": "contracts\\CaelusValidator.algo.ts:166",
           "pc": [
-            563
+            562
           ]
         },
         {
-          "teal": 536,
-          "source": "contracts\\CaelusValidator.algo.ts:164",
+          "teal": 550,
+          "source": "contracts\\CaelusValidator.algo.ts:166",
           "pc": [
-            564
+            563,
+            564,
+            565
           ]
         },
         {
-          "teal": 551,
-          "source": "contracts\\CaelusValidator.algo.ts:164",
+          "teal": 553,
+          "source": "contracts\\CaelusValidator.algo.ts:166",
           "pc": [
-            565,
-            566,
-            567
+            566
           ]
         },
         {
-          "teal": 554,
-          "source": "contracts\\CaelusValidator.algo.ts:164",
+          "teal": 560,
+          "source": "contracts\\CaelusValidator.algo.ts:186",
           "pc": [
+            567,
             568
           ]
         },
         {
           "teal": 561,
-          "source": "contracts\\CaelusValidator.algo.ts:179",
+          "source": "contracts\\CaelusValidator.algo.ts:186",
           "pc": [
             569,
             570
@@ -2472,95 +2477,89 @@
         },
         {
           "teal": 562,
-          "source": "contracts\\CaelusValidator.algo.ts:179",
+          "source": "contracts\\CaelusValidator.algo.ts:186",
           "pc": [
             571
           ]
         },
         {
           "teal": 563,
-          "source": "contracts\\CaelusValidator.algo.ts:179",
+          "source": "contracts\\CaelusValidator.algo.ts:186",
           "pc": [
             572
           ]
         },
         {
           "teal": 564,
-          "source": "contracts\\CaelusValidator.algo.ts:179",
+          "source": "contracts\\CaelusValidator.algo.ts:186",
           "pc": [
             573
           ]
         },
         {
           "teal": 567,
-          "source": "contracts\\CaelusValidator.algo.ts:179",
-          "errorMessage": "transaction verification failed: {\"txn\":\"this.txn\",\"field\":\"sender\",\"expected\":\"this.operator_Address.value\"}",
+          "source": "contracts\\CaelusValidator.algo.ts:185",
+          "errorMessage": "Contract needs 30k Algo as minimum balance for rewards eligibility",
           "pc": [
             574
           ]
         },
         {
           "teal": 574,
-          "source": "contracts\\CaelusValidator.algo.ts:184",
+          "source": "contracts\\CaelusValidator.algo.ts:192",
           "pc": [
-            575,
-            576
+            575
           ]
         },
         {
           "teal": 575,
-          "source": "contracts\\CaelusValidator.algo.ts:184",
+          "source": "contracts\\CaelusValidator.algo.ts:192",
+          "pc": [
+            576
+          ]
+        },
+        {
+          "teal": 576,
+          "source": "contracts\\CaelusValidator.algo.ts:192",
           "pc": [
             577,
             578
           ]
         },
         {
-          "teal": 576,
-          "source": "contracts\\CaelusValidator.algo.ts:184",
+          "teal": 577,
+          "source": "contracts\\CaelusValidator.algo.ts:192",
           "pc": [
             579
           ]
         },
         {
-          "teal": 577,
-          "source": "contracts\\CaelusValidator.algo.ts:184",
+          "teal": 578,
+          "source": "contracts\\CaelusValidator.algo.ts:192",
           "pc": [
             580
           ]
         },
         {
-          "teal": 578,
-          "source": "contracts\\CaelusValidator.algo.ts:184",
+          "teal": 581,
+          "source": "contracts\\CaelusValidator.algo.ts:191",
+          "errorMessage": "Operator commit must be higher than minimum balance for rewards eligibility",
           "pc": [
             581
           ]
         },
         {
-          "teal": 581,
-          "source": "contracts\\CaelusValidator.algo.ts:183",
-          "errorMessage": "Contract needs 30k Algo as minimum balance for rewards eligibility",
+          "teal": 585,
+          "source": "contracts\\CaelusValidator.algo.ts:196",
           "pc": [
-            582
-          ]
-        },
-        {
-          "teal": 588,
-          "source": "contracts\\CaelusValidator.algo.ts:190",
-          "pc": [
-            583
-          ]
-        },
-        {
-          "teal": 589,
-          "source": "contracts\\CaelusValidator.algo.ts:190",
-          "pc": [
+            582,
+            583,
             584
           ]
         },
         {
-          "teal": 590,
-          "source": "contracts\\CaelusValidator.algo.ts:190",
+          "teal": 586,
+          "source": "contracts\\CaelusValidator.algo.ts:196",
           "pc": [
             585,
             586
@@ -2568,359 +2567,358 @@
         },
         {
           "teal": 591,
-          "source": "contracts\\CaelusValidator.algo.ts:190",
+          "source": "contracts\\CaelusValidator.algo.ts:198",
           "pc": [
-            587
-          ]
-        },
-        {
-          "teal": 592,
-          "source": "contracts\\CaelusValidator.algo.ts:190",
-          "pc": [
+            587,
             588
           ]
         },
         {
-          "teal": 595,
-          "source": "contracts\\CaelusValidator.algo.ts:189",
-          "errorMessage": "Operator commit must be higher than minimum balance for rewards eligibility",
+          "teal": 592,
+          "source": "contracts\\CaelusValidator.algo.ts:198",
           "pc": [
-            589
+            589,
+            590
           ]
         },
         {
-          "teal": 599,
-          "source": "contracts\\CaelusValidator.algo.ts:194",
+          "teal": 593,
+          "source": "contracts\\CaelusValidator.algo.ts:198",
           "pc": [
-            590,
             591,
             592
           ]
         },
         {
-          "teal": 600,
-          "source": "contracts\\CaelusValidator.algo.ts:194",
+          "teal": 594,
+          "source": "contracts\\CaelusValidator.algo.ts:198",
           "pc": [
-            593,
+            593
+          ]
+        },
+        {
+          "teal": 597,
+          "source": "contracts\\CaelusValidator.algo.ts:198",
+          "errorMessage": "transaction verification failed: {\"txn\":\"feePayment\",\"field\":\"receiver\",\"expected\":\"this.app.address\"}",
+          "pc": [
             594
           ]
         },
         {
-          "teal": 605,
-          "source": "contracts\\CaelusValidator.algo.ts:196",
+          "teal": 600,
+          "source": "contracts\\CaelusValidator.algo.ts:198",
           "pc": [
             595,
             596
           ]
         },
         {
-          "teal": 606,
-          "source": "contracts\\CaelusValidator.algo.ts:196",
+          "teal": 601,
+          "source": "contracts\\CaelusValidator.algo.ts:198",
           "pc": [
             597,
             598
           ]
         },
         {
-          "teal": 607,
-          "source": "contracts\\CaelusValidator.algo.ts:196",
+          "teal": 602,
+          "source": "contracts\\CaelusValidator.algo.ts:198",
           "pc": [
             599,
             600
           ]
         },
         {
-          "teal": 608,
-          "source": "contracts\\CaelusValidator.algo.ts:196",
+          "teal": 603,
+          "source": "contracts\\CaelusValidator.algo.ts:198",
           "pc": [
             601
           ]
         },
         {
-          "teal": 611,
-          "source": "contracts\\CaelusValidator.algo.ts:196",
-          "errorMessage": "transaction verification failed: {\"txn\":\"feePayment\",\"field\":\"receiver\",\"expected\":\"this.app.address\"}",
+          "teal": 606,
+          "source": "contracts\\CaelusValidator.algo.ts:198",
+          "errorMessage": "transaction verification failed: {\"txn\":\"feePayment\",\"field\":\"amount\",\"expected\":\"extraFee\"}",
           "pc": [
             602
           ]
         },
         {
-          "teal": 614,
-          "source": "contracts\\CaelusValidator.algo.ts:196",
+          "teal": 618,
+          "source": "contracts\\CaelusValidator.algo.ts:200",
           "pc": [
-            603,
-            604
+            603
           ]
         },
         {
-          "teal": 615,
-          "source": "contracts\\CaelusValidator.algo.ts:196",
+          "teal": 619,
+          "source": "contracts\\CaelusValidator.algo.ts:200",
           "pc": [
-            605,
-            606
-          ]
-        },
-        {
-          "teal": 616,
-          "source": "contracts\\CaelusValidator.algo.ts:196",
-          "pc": [
-            607,
-            608
-          ]
-        },
-        {
-          "teal": 617,
-          "source": "contracts\\CaelusValidator.algo.ts:196",
-          "pc": [
-            609
+            604,
+            605
           ]
         },
         {
           "teal": 620,
-          "source": "contracts\\CaelusValidator.algo.ts:196",
-          "errorMessage": "transaction verification failed: {\"txn\":\"feePayment\",\"field\":\"amount\",\"expected\":\"extraFee\"}",
+          "source": "contracts\\CaelusValidator.algo.ts:200",
           "pc": [
-            610
+            606,
+            607
           ]
         },
         {
-          "teal": 632,
-          "source": "contracts\\CaelusValidator.algo.ts:198",
+          "teal": 624,
+          "source": "contracts\\CaelusValidator.algo.ts:201",
           "pc": [
+            608,
+            609
+          ]
+        },
+        {
+          "teal": 625,
+          "source": "contracts\\CaelusValidator.algo.ts:201",
+          "pc": [
+            610,
             611
           ]
         },
         {
-          "teal": 633,
-          "source": "contracts\\CaelusValidator.algo.ts:198",
+          "teal": 629,
+          "source": "contracts\\CaelusValidator.algo.ts:202",
           "pc": [
             612,
             613
           ]
         },
         {
-          "teal": 634,
-          "source": "contracts\\CaelusValidator.algo.ts:198",
+          "teal": 630,
+          "source": "contracts\\CaelusValidator.algo.ts:202",
           "pc": [
             614,
             615
           ]
         },
         {
-          "teal": 638,
-          "source": "contracts\\CaelusValidator.algo.ts:199",
+          "teal": 634,
+          "source": "contracts\\CaelusValidator.algo.ts:203",
           "pc": [
             616,
             617
           ]
         },
         {
-          "teal": 639,
-          "source": "contracts\\CaelusValidator.algo.ts:199",
+          "teal": 635,
+          "source": "contracts\\CaelusValidator.algo.ts:203",
           "pc": [
             618,
             619
           ]
         },
         {
-          "teal": 643,
-          "source": "contracts\\CaelusValidator.algo.ts:200",
+          "teal": 639,
+          "source": "contracts\\CaelusValidator.algo.ts:204",
           "pc": [
             620,
             621
           ]
         },
         {
-          "teal": 644,
-          "source": "contracts\\CaelusValidator.algo.ts:200",
+          "teal": 640,
+          "source": "contracts\\CaelusValidator.algo.ts:204",
           "pc": [
             622,
             623
           ]
         },
         {
-          "teal": 648,
-          "source": "contracts\\CaelusValidator.algo.ts:201",
+          "teal": 644,
+          "source": "contracts\\CaelusValidator.algo.ts:205",
           "pc": [
             624,
             625
           ]
         },
         {
-          "teal": 649,
-          "source": "contracts\\CaelusValidator.algo.ts:201",
+          "teal": 645,
+          "source": "contracts\\CaelusValidator.algo.ts:205",
           "pc": [
             626,
             627
           ]
         },
         {
-          "teal": 653,
-          "source": "contracts\\CaelusValidator.algo.ts:202",
+          "teal": 649,
+          "source": "contracts\\CaelusValidator.algo.ts:206",
           "pc": [
             628,
             629
           ]
         },
         {
-          "teal": 654,
-          "source": "contracts\\CaelusValidator.algo.ts:202",
+          "teal": 650,
+          "source": "contracts\\CaelusValidator.algo.ts:206",
           "pc": [
             630,
             631
           ]
         },
         {
-          "teal": 658,
-          "source": "contracts\\CaelusValidator.algo.ts:203",
+          "teal": 654,
+          "source": "contracts\\CaelusValidator.algo.ts:207",
           "pc": [
             632,
             633
           ]
         },
         {
-          "teal": 659,
-          "source": "contracts\\CaelusValidator.algo.ts:203",
+          "teal": 655,
+          "source": "contracts\\CaelusValidator.algo.ts:207",
           "pc": [
             634,
             635
           ]
         },
         {
-          "teal": 663,
-          "source": "contracts\\CaelusValidator.algo.ts:204",
+          "teal": 658,
+          "source": "contracts\\CaelusValidator.algo.ts:200",
           "pc": [
-            636,
+            636
+          ]
+        },
+        {
+          "teal": 659,
+          "source": "contracts\\CaelusValidator.algo.ts:166",
+          "pc": [
             637
           ]
         },
         {
           "teal": 664,
-          "source": "contracts\\CaelusValidator.algo.ts:204",
+          "source": "contracts\\CaelusValidator.algo.ts:219",
           "pc": [
             638,
-            639
+            639,
+            640
           ]
         },
         {
-          "teal": 668,
-          "source": "contracts\\CaelusValidator.algo.ts:205",
+          "teal": 665,
+          "source": "contracts\\CaelusValidator.algo.ts:219",
           "pc": [
-            640,
             641
           ]
         },
         {
-          "teal": 669,
-          "source": "contracts\\CaelusValidator.algo.ts:205",
+          "teal": 668,
+          "source": "contracts\\CaelusValidator.algo.ts:219",
           "pc": [
             642,
-            643
-          ]
-        },
-        {
-          "teal": 672,
-          "source": "contracts\\CaelusValidator.algo.ts:198",
-          "pc": [
+            643,
             644
           ]
         },
         {
-          "teal": 673,
-          "source": "contracts\\CaelusValidator.algo.ts:164",
+          "teal": 669,
+          "source": "contracts\\CaelusValidator.algo.ts:219",
           "pc": [
             645
           ]
         },
         {
-          "teal": 678,
-          "source": "contracts\\CaelusValidator.algo.ts:217",
+          "teal": 670,
+          "source": "contracts\\CaelusValidator.algo.ts:219",
           "pc": [
-            646,
-            647,
-            648
+            646
           ]
         },
         {
-          "teal": 679,
-          "source": "contracts\\CaelusValidator.algo.ts:217",
+          "teal": 681,
+          "source": "contracts\\CaelusValidator.algo.ts:219",
           "pc": [
+            647,
+            648,
             649
           ]
         },
         {
-          "teal": 682,
-          "source": "contracts\\CaelusValidator.algo.ts:217",
+          "teal": 686,
+          "source": "contracts\\CaelusValidator.algo.ts:228",
           "pc": [
             650,
-            651,
+            651
+          ]
+        },
+        {
+          "teal": 687,
+          "source": "contracts\\CaelusValidator.algo.ts:228",
+          "pc": [
             652
           ]
         },
         {
-          "teal": 683,
-          "source": "contracts\\CaelusValidator.algo.ts:217",
+          "teal": 688,
+          "source": "contracts\\CaelusValidator.algo.ts:228",
           "pc": [
             653
           ]
         },
         {
-          "teal": 684,
-          "source": "contracts\\CaelusValidator.algo.ts:217",
+          "teal": 689,
+          "source": "contracts\\CaelusValidator.algo.ts:228",
           "pc": [
-            654
+            654,
+            655,
+            656
           ]
         },
         {
-          "teal": 695,
-          "source": "contracts\\CaelusValidator.algo.ts:217",
+          "teal": 694,
+          "source": "contracts\\CaelusValidator.algo.ts:229",
           "pc": [
-            655,
-            656,
             657
           ]
         },
         {
-          "teal": 700,
-          "source": "contracts\\CaelusValidator.algo.ts:227",
+          "teal": 695,
+          "source": "contracts\\CaelusValidator.algo.ts:229",
           "pc": [
             658,
             659
           ]
         },
         {
-          "teal": 701,
-          "source": "contracts\\CaelusValidator.algo.ts:227",
+          "teal": 696,
+          "source": "contracts\\CaelusValidator.algo.ts:229",
           "pc": [
-            660
-          ]
-        },
-        {
-          "teal": 702,
-          "source": "contracts\\CaelusValidator.algo.ts:227",
-          "pc": [
+            660,
             661
           ]
         },
         {
-          "teal": 703,
-          "source": "contracts\\CaelusValidator.algo.ts:227",
+          "teal": 699,
+          "source": "contracts\\CaelusValidator.algo.ts:229",
           "pc": [
-            662,
+            662
+          ]
+        },
+        {
+          "teal": 700,
+          "source": "contracts\\CaelusValidator.algo.ts:229",
+          "pc": [
             663,
             664
           ]
         },
         {
-          "teal": 708,
-          "source": "contracts\\CaelusValidator.algo.ts:228",
+          "teal": 703,
+          "source": "contracts\\CaelusValidator.algo.ts:229",
           "pc": [
             665
           ]
         },
         {
           "teal": 709,
-          "source": "contracts\\CaelusValidator.algo.ts:228",
+          "source": "contracts\\CaelusValidator.algo.ts:232",
           "pc": [
             666,
             667
@@ -2928,793 +2926,793 @@
         },
         {
           "teal": 710,
-          "source": "contracts\\CaelusValidator.algo.ts:228",
+          "source": "contracts\\CaelusValidator.algo.ts:232",
           "pc": [
-            668,
+            668
+          ]
+        },
+        {
+          "teal": 711,
+          "source": "contracts\\CaelusValidator.algo.ts:232",
+          "pc": [
             669
           ]
         },
         {
-          "teal": 713,
-          "source": "contracts\\CaelusValidator.algo.ts:228",
+          "teal": 712,
+          "source": "contracts\\CaelusValidator.algo.ts:232",
           "pc": [
-            670
-          ]
-        },
-        {
-          "teal": 714,
-          "source": "contracts\\CaelusValidator.algo.ts:228",
-          "pc": [
+            670,
             671,
             672
           ]
         },
         {
-          "teal": 717,
-          "source": "contracts\\CaelusValidator.algo.ts:228",
+          "teal": 720,
+          "source": "contracts\\CaelusValidator.algo.ts:238",
           "pc": [
-            673
+            673,
+            674
           ]
         },
         {
-          "teal": 723,
-          "source": "contracts\\CaelusValidator.algo.ts:231",
+          "teal": 721,
+          "source": "contracts\\CaelusValidator.algo.ts:238",
           "pc": [
-            674,
-            675
-          ]
-        },
-        {
-          "teal": 724,
-          "source": "contracts\\CaelusValidator.algo.ts:231",
-          "pc": [
+            675,
             676
           ]
         },
         {
-          "teal": 725,
-          "source": "contracts\\CaelusValidator.algo.ts:231",
+          "teal": 722,
+          "source": "contracts\\CaelusValidator.algo.ts:238",
           "pc": [
             677
           ]
         },
         {
-          "teal": 726,
-          "source": "contracts\\CaelusValidator.algo.ts:231",
+          "teal": 723,
+          "source": "contracts\\CaelusValidator.algo.ts:238",
           "pc": [
             678,
-            679,
+            679
+          ]
+        },
+        {
+          "teal": 724,
+          "source": "contracts\\CaelusValidator.algo.ts:238",
+          "pc": [
             680
           ]
         },
         {
-          "teal": 734,
-          "source": "contracts\\CaelusValidator.algo.ts:237",
+          "teal": 725,
+          "source": "contracts\\CaelusValidator.algo.ts:238",
           "pc": [
-            681,
+            681
+          ]
+        },
+        {
+          "teal": 728,
+          "source": "contracts\\CaelusValidator.algo.ts:238",
+          "errorMessage": "transaction verification failed: {\"txn\":\"this.txn\",\"field\":\"sender\",\"expected\":\"this.creatorContract_AppID.value.address\"}",
+          "pc": [
             682
           ]
         },
         {
-          "teal": 735,
-          "source": "contracts\\CaelusValidator.algo.ts:237",
+          "teal": 732,
+          "source": "contracts\\CaelusValidator.algo.ts:243",
           "pc": [
             683,
             684
           ]
         },
         {
-          "teal": 736,
-          "source": "contracts\\CaelusValidator.algo.ts:237",
+          "teal": 733,
+          "source": "contracts\\CaelusValidator.algo.ts:243",
           "pc": [
             685
           ]
         },
         {
-          "teal": 737,
-          "source": "contracts\\CaelusValidator.algo.ts:237",
+          "teal": 734,
+          "source": "contracts\\CaelusValidator.algo.ts:243",
           "pc": [
-            686,
-            687
+            686
           ]
         },
         {
           "teal": 738,
-          "source": "contracts\\CaelusValidator.algo.ts:237",
+          "source": "contracts\\CaelusValidator.algo.ts:244",
+          "pc": [
+            687
+          ]
+        },
+        {
+          "teal": 739,
+          "source": "contracts\\CaelusValidator.algo.ts:244",
           "pc": [
             688
           ]
         },
         {
-          "teal": 739,
-          "source": "contracts\\CaelusValidator.algo.ts:237",
+          "teal": 740,
+          "source": "contracts\\CaelusValidator.algo.ts:244",
           "pc": [
             689
           ]
         },
         {
-          "teal": 742,
-          "source": "contracts\\CaelusValidator.algo.ts:237",
-          "errorMessage": "transaction verification failed: {\"txn\":\"this.txn\",\"field\":\"sender\",\"expected\":\"this.creatorContract_AppReference.value.address\"}",
+          "teal": 744,
+          "source": "contracts\\CaelusValidator.algo.ts:245",
           "pc": [
             690
           ]
         },
         {
-          "teal": 746,
-          "source": "contracts\\CaelusValidator.algo.ts:242",
+          "teal": 745,
+          "source": "contracts\\CaelusValidator.algo.ts:245",
           "pc": [
             691,
             692
           ]
         },
         {
-          "teal": 747,
-          "source": "contracts\\CaelusValidator.algo.ts:242",
+          "teal": 746,
+          "source": "contracts\\CaelusValidator.algo.ts:245",
           "pc": [
-            693
-          ]
-        },
-        {
-          "teal": 748,
-          "source": "contracts\\CaelusValidator.algo.ts:242",
-          "pc": [
+            693,
             694
           ]
         },
         {
-          "teal": 752,
-          "source": "contracts\\CaelusValidator.algo.ts:243",
+          "teal": 749,
+          "source": "contracts\\CaelusValidator.algo.ts:245",
           "pc": [
             695
           ]
         },
         {
-          "teal": 753,
-          "source": "contracts\\CaelusValidator.algo.ts:243",
+          "teal": 750,
+          "source": "contracts\\CaelusValidator.algo.ts:245",
           "pc": [
-            696
-          ]
-        },
-        {
-          "teal": 754,
-          "source": "contracts\\CaelusValidator.algo.ts:243",
-          "pc": [
+            696,
             697
           ]
         },
         {
-          "teal": 758,
-          "source": "contracts\\CaelusValidator.algo.ts:244",
+          "teal": 753,
+          "source": "contracts\\CaelusValidator.algo.ts:245",
           "pc": [
             698
           ]
         },
         {
-          "teal": 759,
-          "source": "contracts\\CaelusValidator.algo.ts:244",
+          "teal": 756,
+          "source": "contracts\\CaelusValidator.algo.ts:219",
           "pc": [
-            699,
-            700
+            699
           ]
         },
         {
           "teal": 760,
-          "source": "contracts\\CaelusValidator.algo.ts:244",
+          "source": "contracts\\CaelusValidator.algo.ts:250",
           "pc": [
+            700,
             701,
             702
           ]
         },
         {
-          "teal": 763,
-          "source": "contracts\\CaelusValidator.algo.ts:244",
+          "teal": 765,
+          "source": "contracts\\CaelusValidator.algo.ts:252",
           "pc": [
             703
           ]
         },
         {
-          "teal": 764,
-          "source": "contracts\\CaelusValidator.algo.ts:244",
+          "teal": 766,
+          "source": "contracts\\CaelusValidator.algo.ts:252",
           "pc": [
-            704,
-            705
+            704
           ]
         },
         {
           "teal": 767,
-          "source": "contracts\\CaelusValidator.algo.ts:244",
+          "source": "contracts\\CaelusValidator.algo.ts:252",
+          "pc": [
+            705
+          ]
+        },
+        {
+          "teal": 768,
+          "source": "contracts\\CaelusValidator.algo.ts:252",
           "pc": [
             706
           ]
         },
         {
-          "teal": 770,
-          "source": "contracts\\CaelusValidator.algo.ts:217",
+          "teal": 769,
+          "source": "contracts\\CaelusValidator.algo.ts:252",
           "pc": [
-            707
+            707,
+            708,
+            709
           ]
         },
         {
           "teal": 774,
-          "source": "contracts\\CaelusValidator.algo.ts:249",
+          "source": "contracts\\CaelusValidator.algo.ts:253",
           "pc": [
-            708,
-            709,
             710
           ]
         },
         {
-          "teal": 779,
-          "source": "contracts\\CaelusValidator.algo.ts:251",
+          "teal": 775,
+          "source": "contracts\\CaelusValidator.algo.ts:253",
           "pc": [
             711
           ]
         },
         {
-          "teal": 780,
-          "source": "contracts\\CaelusValidator.algo.ts:251",
+          "teal": 776,
+          "source": "contracts\\CaelusValidator.algo.ts:253",
           "pc": [
             712
           ]
         },
         {
-          "teal": 781,
-          "source": "contracts\\CaelusValidator.algo.ts:251",
+          "teal": 777,
+          "source": "contracts\\CaelusValidator.algo.ts:253",
           "pc": [
             713
           ]
         },
         {
-          "teal": 782,
-          "source": "contracts\\CaelusValidator.algo.ts:251",
+          "teal": 778,
+          "source": "contracts\\CaelusValidator.algo.ts:252",
           "pc": [
-            714
+            714,
+            715,
+            716
           ]
         },
         {
           "teal": 783,
-          "source": "contracts\\CaelusValidator.algo.ts:251",
+          "source": "contracts\\CaelusValidator.algo.ts:255",
           "pc": [
-            715,
-            716,
             717
           ]
         },
         {
-          "teal": 788,
-          "source": "contracts\\CaelusValidator.algo.ts:252",
+          "teal": 784,
+          "source": "contracts\\CaelusValidator.algo.ts:255",
           "pc": [
             718
           ]
         },
         {
-          "teal": 789,
-          "source": "contracts\\CaelusValidator.algo.ts:252",
+          "teal": 785,
+          "source": "contracts\\CaelusValidator.algo.ts:255",
           "pc": [
             719
           ]
         },
         {
           "teal": 790,
-          "source": "contracts\\CaelusValidator.algo.ts:252",
+          "source": "contracts\\CaelusValidator.algo.ts:259",
           "pc": [
             720
           ]
         },
         {
           "teal": 791,
-          "source": "contracts\\CaelusValidator.algo.ts:252",
+          "source": "contracts\\CaelusValidator.algo.ts:259",
           "pc": [
             721
           ]
         },
         {
           "teal": 792,
-          "source": "contracts\\CaelusValidator.algo.ts:251",
+          "source": "contracts\\CaelusValidator.algo.ts:259",
           "pc": [
             722,
             723,
-            724
-          ]
-        },
-        {
-          "teal": 797,
-          "source": "contracts\\CaelusValidator.algo.ts:254",
-          "pc": [
-            725
-          ]
-        },
-        {
-          "teal": 798,
-          "source": "contracts\\CaelusValidator.algo.ts:254",
-          "pc": [
-            726
-          ]
-        },
-        {
-          "teal": 799,
-          "source": "contracts\\CaelusValidator.algo.ts:254",
-          "pc": [
+            724,
+            725,
+            726,
             727
           ]
         },
         {
-          "teal": 804,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
+          "teal": 793,
+          "source": "contracts\\CaelusValidator.algo.ts:259",
           "pc": [
-            728
-          ]
-        },
-        {
-          "teal": 805,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
-          "pc": [
+            728,
             729
           ]
         },
         {
-          "teal": 806,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
+          "teal": 794,
+          "source": "contracts\\CaelusValidator.algo.ts:259",
           "pc": [
-            730,
+            730
+          ]
+        },
+        {
+          "teal": 795,
+          "source": "contracts\\CaelusValidator.algo.ts:259",
+          "pc": [
             731,
-            732,
-            733,
-            734,
+            732
+          ]
+        },
+        {
+          "teal": 796,
+          "source": "contracts\\CaelusValidator.algo.ts:259",
+          "pc": [
+            733
+          ]
+        },
+        {
+          "teal": 797,
+          "source": "contracts\\CaelusValidator.algo.ts:259",
+          "pc": [
+            734
+          ]
+        },
+        {
+          "teal": 798,
+          "source": "contracts\\CaelusValidator.algo.ts:259",
+          "pc": [
             735
           ]
         },
         {
-          "teal": 807,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
+          "teal": 799,
+          "source": "contracts\\CaelusValidator.algo.ts:259",
           "pc": [
-            736,
+            736
+          ]
+        },
+        {
+          "teal": 800,
+          "source": "contracts\\CaelusValidator.algo.ts:259",
+          "pc": [
             737
           ]
         },
         {
-          "teal": 808,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
+          "teal": 801,
+          "source": "contracts\\CaelusValidator.algo.ts:259",
           "pc": [
             738
           ]
         },
         {
-          "teal": 809,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
+          "teal": 806,
+          "source": "contracts\\CaelusValidator.algo.ts:262",
           "pc": [
             739,
             740
           ]
         },
         {
-          "teal": 810,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
+          "teal": 807,
+          "source": "contracts\\CaelusValidator.algo.ts:262",
           "pc": [
-            741
-          ]
-        },
-        {
-          "teal": 811,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
-          "pc": [
+            741,
             742
           ]
         },
         {
-          "teal": 812,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
+          "teal": 808,
+          "source": "contracts\\CaelusValidator.algo.ts:262",
           "pc": [
             743
           ]
         },
         {
-          "teal": 813,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
+          "teal": 809,
+          "source": "contracts\\CaelusValidator.algo.ts:262",
           "pc": [
             744
           ]
         },
         {
-          "teal": 814,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
+          "teal": 810,
+          "source": "contracts\\CaelusValidator.algo.ts:262",
           "pc": [
             745
           ]
         },
         {
-          "teal": 815,
-          "source": "contracts\\CaelusValidator.algo.ts:258",
+          "teal": 811,
+          "source": "contracts\\CaelusValidator.algo.ts:262",
           "pc": [
-            746
-          ]
-        },
-        {
-          "teal": 820,
-          "source": "contracts\\CaelusValidator.algo.ts:261",
-          "pc": [
+            746,
             747,
             748
           ]
         },
         {
-          "teal": 821,
-          "source": "contracts\\CaelusValidator.algo.ts:261",
+          "teal": 816,
+          "source": "contracts\\CaelusValidator.algo.ts:263",
           "pc": [
-            749,
+            749
+          ]
+        },
+        {
+          "teal": 817,
+          "source": "contracts\\CaelusValidator.algo.ts:263",
+          "pc": [
             750
           ]
         },
         {
-          "teal": 822,
-          "source": "contracts\\CaelusValidator.algo.ts:261",
+          "teal": 818,
+          "source": "contracts\\CaelusValidator.algo.ts:263",
           "pc": [
             751
           ]
         },
         {
-          "teal": 823,
-          "source": "contracts\\CaelusValidator.algo.ts:261",
+          "teal": 819,
+          "source": "contracts\\CaelusValidator.algo.ts:262",
           "pc": [
-            752
+            752,
+            753,
+            754
           ]
         },
         {
           "teal": 824,
-          "source": "contracts\\CaelusValidator.algo.ts:261",
+          "source": "contracts\\CaelusValidator.algo.ts:264",
           "pc": [
-            753
-          ]
-        },
-        {
-          "teal": 825,
-          "source": "contracts\\CaelusValidator.algo.ts:261",
-          "pc": [
-            754,
             755,
             756
           ]
         },
         {
-          "teal": 830,
-          "source": "contracts\\CaelusValidator.algo.ts:262",
+          "teal": 825,
+          "source": "contracts\\CaelusValidator.algo.ts:264",
           "pc": [
-            757
-          ]
-        },
-        {
-          "teal": 831,
-          "source": "contracts\\CaelusValidator.algo.ts:262",
-          "pc": [
+            757,
             758
           ]
         },
         {
-          "teal": 832,
-          "source": "contracts\\CaelusValidator.algo.ts:262",
+          "teal": 826,
+          "source": "contracts\\CaelusValidator.algo.ts:264",
           "pc": [
             759
           ]
         },
         {
-          "teal": 833,
-          "source": "contracts\\CaelusValidator.algo.ts:261",
+          "teal": 827,
+          "source": "contracts\\CaelusValidator.algo.ts:264",
           "pc": [
-            760,
-            761,
+            760
+          ]
+        },
+        {
+          "teal": 828,
+          "source": "contracts\\CaelusValidator.algo.ts:264",
+          "pc": [
+            761
+          ]
+        },
+        {
+          "teal": 829,
+          "source": "contracts\\CaelusValidator.algo.ts:264",
+          "pc": [
             762
           ]
         },
         {
-          "teal": 838,
-          "source": "contracts\\CaelusValidator.algo.ts:263",
+          "teal": 830,
+          "source": "contracts\\CaelusValidator.algo.ts:264",
           "pc": [
-            763,
+            763
+          ]
+        },
+        {
+          "teal": 831,
+          "source": "contracts\\CaelusValidator.algo.ts:264",
+          "pc": [
             764
           ]
         },
         {
-          "teal": 839,
-          "source": "contracts\\CaelusValidator.algo.ts:263",
+          "teal": 832,
+          "source": "contracts\\CaelusValidator.algo.ts:264",
           "pc": [
             765,
-            766
-          ]
-        },
-        {
-          "teal": 840,
-          "source": "contracts\\CaelusValidator.algo.ts:263",
-          "pc": [
+            766,
             767
           ]
         },
         {
-          "teal": 841,
-          "source": "contracts\\CaelusValidator.algo.ts:263",
+          "teal": 838,
+          "source": "contracts\\CaelusValidator.algo.ts:265",
           "pc": [
             768
           ]
         },
         {
-          "teal": 842,
-          "source": "contracts\\CaelusValidator.algo.ts:263",
+          "teal": 839,
+          "source": "contracts\\CaelusValidator.algo.ts:266",
           "pc": [
-            769
-          ]
-        },
-        {
-          "teal": 843,
-          "source": "contracts\\CaelusValidator.algo.ts:263",
-          "pc": [
+            769,
             770
           ]
         },
         {
-          "teal": 844,
-          "source": "contracts\\CaelusValidator.algo.ts:263",
+          "teal": 840,
+          "source": "contracts\\CaelusValidator.algo.ts:266",
           "pc": [
-            771
-          ]
-        },
-        {
-          "teal": 845,
-          "source": "contracts\\CaelusValidator.algo.ts:263",
-          "pc": [
+            771,
             772
           ]
         },
         {
-          "teal": 846,
-          "source": "contracts\\CaelusValidator.algo.ts:263",
+          "teal": 841,
+          "source": "contracts\\CaelusValidator.algo.ts:266",
           "pc": [
-            773,
-            774,
+            773
+          ]
+        },
+        {
+          "teal": 842,
+          "source": "contracts\\CaelusValidator.algo.ts:266",
+          "pc": [
+            774
+          ]
+        },
+        {
+          "teal": 843,
+          "source": "contracts\\CaelusValidator.algo.ts:266",
+          "pc": [
             775
           ]
         },
         {
-          "teal": 852,
-          "source": "contracts\\CaelusValidator.algo.ts:264",
+          "teal": 844,
+          "source": "contracts\\CaelusValidator.algo.ts:266",
           "pc": [
             776
           ]
         },
         {
-          "teal": 853,
-          "source": "contracts\\CaelusValidator.algo.ts:265",
+          "teal": 845,
+          "source": "contracts\\CaelusValidator.algo.ts:266",
           "pc": [
-            777,
+            777
+          ]
+        },
+        {
+          "teal": 846,
+          "source": "contracts\\CaelusValidator.algo.ts:266",
+          "pc": [
             778
           ]
         },
         {
-          "teal": 854,
+          "teal": 847,
           "source": "contracts\\CaelusValidator.algo.ts:265",
           "pc": [
-            779,
+            779
+          ]
+        },
+        {
+          "teal": 853,
+          "source": "contracts\\CaelusValidator.algo.ts:270",
+          "pc": [
             780
           ]
         },
         {
-          "teal": 855,
-          "source": "contracts\\CaelusValidator.algo.ts:265",
+          "teal": 854,
+          "source": "contracts\\CaelusValidator.algo.ts:270",
           "pc": [
             781
           ]
         },
         {
-          "teal": 856,
-          "source": "contracts\\CaelusValidator.algo.ts:265",
+          "teal": 855,
+          "source": "contracts\\CaelusValidator.algo.ts:270",
           "pc": [
             782
           ]
         },
         {
-          "teal": 857,
-          "source": "contracts\\CaelusValidator.algo.ts:265",
+          "teal": 856,
+          "source": "contracts\\CaelusValidator.algo.ts:270",
           "pc": [
             783
           ]
         },
         {
-          "teal": 858,
-          "source": "contracts\\CaelusValidator.algo.ts:265",
+          "teal": 857,
+          "source": "contracts\\CaelusValidator.algo.ts:270",
           "pc": [
-            784
-          ]
-        },
-        {
-          "teal": 859,
-          "source": "contracts\\CaelusValidator.algo.ts:265",
-          "pc": [
-            785
-          ]
-        },
-        {
-          "teal": 860,
-          "source": "contracts\\CaelusValidator.algo.ts:265",
-          "pc": [
+            784,
+            785,
             786
           ]
         },
         {
-          "teal": 861,
-          "source": "contracts\\CaelusValidator.algo.ts:264",
+          "teal": 862,
+          "source": "contracts\\CaelusValidator.algo.ts:271",
           "pc": [
-            787
-          ]
-        },
-        {
-          "teal": 867,
-          "source": "contracts\\CaelusValidator.algo.ts:269",
-          "pc": [
+            787,
             788
           ]
         },
         {
-          "teal": 868,
-          "source": "contracts\\CaelusValidator.algo.ts:269",
+          "teal": 863,
+          "source": "contracts\\CaelusValidator.algo.ts:271",
           "pc": [
-            789
-          ]
-        },
-        {
-          "teal": 869,
-          "source": "contracts\\CaelusValidator.algo.ts:269",
-          "pc": [
+            789,
             790
           ]
         },
         {
-          "teal": 870,
-          "source": "contracts\\CaelusValidator.algo.ts:269",
+          "teal": 864,
+          "source": "contracts\\CaelusValidator.algo.ts:271",
           "pc": [
             791
           ]
         },
         {
-          "teal": 871,
-          "source": "contracts\\CaelusValidator.algo.ts:269",
+          "teal": 865,
+          "source": "contracts\\CaelusValidator.algo.ts:271",
           "pc": [
             792,
-            793,
+            793
+          ]
+        },
+        {
+          "teal": 866,
+          "source": "contracts\\CaelusValidator.algo.ts:271",
+          "pc": [
             794
           ]
         },
         {
-          "teal": 876,
-          "source": "contracts\\CaelusValidator.algo.ts:270",
+          "teal": 867,
+          "source": "contracts\\CaelusValidator.algo.ts:271",
           "pc": [
-            795,
+            795
+          ]
+        },
+        {
+          "teal": 868,
+          "source": "contracts\\CaelusValidator.algo.ts:271",
+          "pc": [
             796
           ]
         },
         {
-          "teal": 877,
-          "source": "contracts\\CaelusValidator.algo.ts:270",
+          "teal": 869,
+          "source": "contracts\\CaelusValidator.algo.ts:271",
           "pc": [
-            797,
+            797
+          ]
+        },
+        {
+          "teal": 870,
+          "source": "contracts\\CaelusValidator.algo.ts:271",
+          "pc": [
             798
           ]
         },
         {
-          "teal": 878,
+          "teal": 871,
           "source": "contracts\\CaelusValidator.algo.ts:270",
           "pc": [
-            799
-          ]
-        },
-        {
-          "teal": 879,
-          "source": "contracts\\CaelusValidator.algo.ts:270",
-          "pc": [
+            799,
             800,
             801
           ]
         },
         {
-          "teal": 880,
-          "source": "contracts\\CaelusValidator.algo.ts:270",
+          "teal": 876,
+          "source": "contracts\\CaelusValidator.algo.ts:273",
           "pc": [
-            802
-          ]
-        },
-        {
-          "teal": 881,
-          "source": "contracts\\CaelusValidator.algo.ts:270",
-          "pc": [
+            802,
             803
           ]
         },
         {
-          "teal": 882,
-          "source": "contracts\\CaelusValidator.algo.ts:270",
+          "teal": 877,
+          "source": "contracts\\CaelusValidator.algo.ts:273",
           "pc": [
-            804
-          ]
-        },
-        {
-          "teal": 883,
-          "source": "contracts\\CaelusValidator.algo.ts:270",
-          "pc": [
+            804,
             805
           ]
         },
         {
-          "teal": 884,
-          "source": "contracts\\CaelusValidator.algo.ts:270",
+          "teal": 878,
+          "source": "contracts\\CaelusValidator.algo.ts:273",
           "pc": [
             806
           ]
         },
         {
-          "teal": 885,
-          "source": "contracts\\CaelusValidator.algo.ts:269",
+          "teal": 881,
+          "source": "contracts\\CaelusValidator.algo.ts:250",
           "pc": [
-            807,
+            807
+          ]
+        },
+        {
+          "teal": 889,
+          "source": "contracts\\CaelusValidator.algo.ts:282",
+          "pc": [
             808,
-            809
+            809,
+            810
           ]
         },
         {
-          "teal": 890,
-          "source": "contracts\\CaelusValidator.algo.ts:272",
+          "teal": 894,
+          "source": "contracts\\CaelusValidator.algo.ts:283",
           "pc": [
-            810,
-            811
-          ]
-        },
-        {
-          "teal": 891,
-          "source": "contracts\\CaelusValidator.algo.ts:272",
-          "pc": [
+            811,
             812,
             813
           ]
         },
         {
-          "teal": 892,
-          "source": "contracts\\CaelusValidator.algo.ts:272",
+          "teal": 895,
+          "source": "contracts\\CaelusValidator.algo.ts:283",
           "pc": [
             814
           ]
         },
         {
-          "teal": 895,
-          "source": "contracts\\CaelusValidator.algo.ts:249",
+          "teal": 896,
+          "source": "contracts\\CaelusValidator.algo.ts:283",
           "pc": [
-            815
+            815,
+            816,
+            817
           ]
         },
         {
-          "teal": 903,
-          "source": "contracts\\CaelusValidator.algo.ts:281",
+          "teal": 901,
+          "source": "contracts\\CaelusValidator.algo.ts:284",
           "pc": [
-            816,
-            817,
-            818
+            818,
+            819
+          ]
+        },
+        {
+          "teal": 902,
+          "source": "contracts\\CaelusValidator.algo.ts:284",
+          "pc": [
+            820
+          ]
+        },
+        {
+          "teal": 907,
+          "source": "contracts\\CaelusValidator.algo.ts:286",
+          "pc": [
+            821
           ]
         },
         {
           "teal": 908,
           "source": "contracts\\CaelusValidator.algo.ts:282",
           "pc": [
-            819,
-            820,
-            821
-          ]
-        },
-        {
-          "teal": 909,
-          "source": "contracts\\CaelusValidator.algo.ts:282",
-          "pc": [
             822
           ]
         },
         {
-          "teal": 910,
-          "source": "contracts\\CaelusValidator.algo.ts:282",
+          "teal": 912,
+          "source": "contracts\\CaelusValidator.algo.ts:289",
           "pc": [
             823,
             824,
@@ -3722,317 +3720,287 @@
           ]
         },
         {
-          "teal": 915,
-          "source": "contracts\\CaelusValidator.algo.ts:283",
+          "teal": 916,
+          "source": "contracts\\CaelusValidator.algo.ts:290",
           "pc": [
             826,
             827
           ]
         },
         {
-          "teal": 916,
-          "source": "contracts\\CaelusValidator.algo.ts:283",
+          "teal": 917,
+          "source": "contracts\\CaelusValidator.algo.ts:290",
           "pc": [
-            828
-          ]
-        },
-        {
-          "teal": 921,
-          "source": "contracts\\CaelusValidator.algo.ts:285",
-          "pc": [
+            828,
             829
           ]
         },
         {
-          "teal": 922,
-          "source": "contracts\\CaelusValidator.algo.ts:281",
+          "teal": 918,
+          "source": "contracts\\CaelusValidator.algo.ts:290",
           "pc": [
             830
           ]
         },
         {
-          "teal": 926,
-          "source": "contracts\\CaelusValidator.algo.ts:288",
+          "teal": 919,
+          "source": "contracts\\CaelusValidator.algo.ts:289",
           "pc": [
-            831,
+            831
+          ]
+        },
+        {
+          "teal": 922,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "pc": [
             832,
-            833
-          ]
-        },
-        {
-          "teal": 930,
-          "source": "contracts\\CaelusValidator.algo.ts:289",
-          "pc": [
+            833,
             834,
-            835
-          ]
-        },
-        {
-          "teal": 931,
-          "source": "contracts\\CaelusValidator.algo.ts:289",
-          "pc": [
+            835,
             836,
             837
           ]
         },
         {
-          "teal": 932,
-          "source": "contracts\\CaelusValidator.algo.ts:289",
+          "teal": 923,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
           "pc": [
-            838
+            838,
+            839,
+            840
+          ]
+        },
+        {
+          "teal": 924,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "pc": [
+            841,
+            842,
+            843,
+            844
+          ]
+        },
+        {
+          "teal": 927,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "errorMessage": "this contract does not implement the given ABI method for create NoOp",
+          "pc": [
+            845
+          ]
+        },
+        {
+          "teal": 930,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "pc": [
+            846,
+            847,
+            848,
+            849,
+            850,
+            851
+          ]
+        },
+        {
+          "teal": 931,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "pc": [
+            852,
+            853,
+            854,
+            855,
+            856,
+            857
+          ]
+        },
+        {
+          "teal": 932,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "pc": [
+            858,
+            859,
+            860,
+            861,
+            862,
+            863
           ]
         },
         {
           "teal": 933,
-          "source": "contracts\\CaelusValidator.algo.ts:288",
+          "source": "contracts\\CaelusValidator.algo.ts:8",
           "pc": [
-            839
+            864,
+            865,
+            866,
+            867,
+            868,
+            869
+          ]
+        },
+        {
+          "teal": 934,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "pc": [
+            870,
+            871,
+            872,
+            873,
+            874,
+            875
+          ]
+        },
+        {
+          "teal": 935,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "pc": [
+            876,
+            877,
+            878,
+            879,
+            880,
+            881
           ]
         },
         {
           "teal": 936,
           "source": "contracts\\CaelusValidator.algo.ts:8",
           "pc": [
-            840,
-            841,
-            842,
-            843,
-            844,
-            845
+            882,
+            883,
+            884,
+            885,
+            886,
+            887
           ]
         },
         {
           "teal": 937,
           "source": "contracts\\CaelusValidator.algo.ts:8",
           "pc": [
-            846,
-            847,
-            848
+            888,
+            889,
+            890,
+            891,
+            892,
+            893
           ]
         },
         {
           "teal": 938,
           "source": "contracts\\CaelusValidator.algo.ts:8",
           "pc": [
-            849,
-            850,
-            851,
-            852
+            894,
+            895,
+            896,
+            897,
+            898,
+            899
+          ]
+        },
+        {
+          "teal": 939,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "pc": [
+            900,
+            901,
+            902,
+            903,
+            904,
+            905
+          ]
+        },
+        {
+          "teal": 940,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "pc": [
+            906,
+            907,
+            908,
+            909,
+            910,
+            911
           ]
         },
         {
           "teal": 941,
           "source": "contracts\\CaelusValidator.algo.ts:8",
-          "errorMessage": "this contract does not implement the given ABI method for create NoOp",
           "pc": [
-            853
+            912,
+            913,
+            914,
+            915,
+            916,
+            917
+          ]
+        },
+        {
+          "teal": 942,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "pc": [
+            918,
+            919,
+            920,
+            921,
+            922,
+            923
+          ]
+        },
+        {
+          "teal": 943,
+          "source": "contracts\\CaelusValidator.algo.ts:8",
+          "pc": [
+            924,
+            925,
+            926,
+            927,
+            928,
+            929
           ]
         },
         {
           "teal": 944,
           "source": "contracts\\CaelusValidator.algo.ts:8",
           "pc": [
-            854,
-            855,
-            856,
-            857,
-            858,
-            859
+            930,
+            931,
+            932,
+            933,
+            934,
+            935
           ]
         },
         {
           "teal": 945,
           "source": "contracts\\CaelusValidator.algo.ts:8",
           "pc": [
-            860,
-            861,
-            862,
-            863,
-            864,
-            865
+            936,
+            937,
+            938,
+            939,
+            940,
+            941
           ]
         },
         {
           "teal": 946,
           "source": "contracts\\CaelusValidator.algo.ts:8",
           "pc": [
-            866,
-            867,
-            868,
-            869,
-            870,
-            871
+            942,
+            943,
+            944
           ]
         },
         {
           "teal": 947,
           "source": "contracts\\CaelusValidator.algo.ts:8",
           "pc": [
-            872,
-            873,
-            874,
-            875,
-            876,
-            877
-          ]
-        },
-        {
-          "teal": 948,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            878,
-            879,
-            880,
-            881,
-            882,
-            883
-          ]
-        },
-        {
-          "teal": 949,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            884,
-            885,
-            886,
-            887,
-            888,
-            889
-          ]
-        },
-        {
-          "teal": 950,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            890,
-            891,
-            892,
-            893,
-            894,
-            895
-          ]
-        },
-        {
-          "teal": 951,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            896,
-            897,
-            898,
-            899,
-            900,
-            901
-          ]
-        },
-        {
-          "teal": 952,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            902,
-            903,
-            904,
-            905,
-            906,
-            907
-          ]
-        },
-        {
-          "teal": 953,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            908,
-            909,
-            910,
-            911,
-            912,
-            913
-          ]
-        },
-        {
-          "teal": 954,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            914,
-            915,
-            916,
-            917,
-            918,
-            919
-          ]
-        },
-        {
-          "teal": 955,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            920,
-            921,
-            922,
-            923,
-            924,
-            925
-          ]
-        },
-        {
-          "teal": 956,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            926,
-            927,
-            928,
-            929,
-            930,
-            931
-          ]
-        },
-        {
-          "teal": 957,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            932,
-            933,
-            934,
-            935,
-            936,
-            937
-          ]
-        },
-        {
-          "teal": 958,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            938,
-            939,
-            940,
-            941,
-            942,
-            943
-          ]
-        },
-        {
-          "teal": 959,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
-            944,
             945,
             946,
             947,
             948,
-            949
-          ]
-        },
-        {
-          "teal": 960,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
+            949,
             950,
             951,
-            952
-          ]
-        },
-        {
-          "teal": 961,
-          "source": "contracts\\CaelusValidator.algo.ts:8",
-          "pc": [
+            952,
             953,
             954,
             955,
@@ -4058,23 +4026,15 @@
             975,
             976,
             977,
-            978,
-            979,
-            980,
-            981,
-            982,
-            983,
-            984,
-            985,
-            986
+            978
           ]
         },
         {
-          "teal": 964,
+          "teal": 950,
           "source": "contracts\\CaelusValidator.algo.ts:8",
           "errorMessage": "this contract does not implement the given ABI method for call NoOp",
           "pc": [
-            987
+            979
           ]
         }
       ],
@@ -4086,11 +4046,11 @@
     }
   },
   "source": {
-    "approval": "I3ByYWdtYSB2ZXJzaW9uIDExCmludGNibG9jayAxIDAgNTAwMDAwMDAwMDAwMDAgMzAwMDAwMDAwMDAgMiAxMDAwIDYKYnl0ZWNibG9jayAweDZkNjE3ODQ0NTM3NDYxNmI2NSAweDZmNzA2NTcyNjE3NDZmNzI0MzZmNmQ2ZDY5NzQgMHg2ZjcwNjU3MjYxNzQ2ZjcyIDB4IDB4NzM2MTc0NzU3MjYxNzQ2OTZmNmU0Mjc1NjY2NjY1NzIgMHg3MDY1NzI2NjZmNzI2ZDYxNmU2MzY1IDB4NjQ2NTZjNjU2NzYxNzQ2NTY0NTM3NDYxNmI2NSAweDZkNjk2ZTUzNzQ2MTZiNjUgMHg2MzcyNjU2MTc0NmY3MgoKLy8gVGhpcyBURUFMIHdhcyBnZW5lcmF0ZWQgYnkgVEVBTFNjcmlwdCB2MC4xMDUuMwovLyBodHRwczovL2dpdGh1Yi5jb20vYWxnb3JhbmRmb3VuZGF0aW9uL1RFQUxTY3JpcHQKCi8vIFRoaXMgY29udHJhY3QgaXMgY29tcGxpYW50IHdpdGggYW5kL29yIGltcGxlbWVudHMgdGhlIGZvbGxvd2luZyBBUkNzOiBbIEFSQzQgXQoKLy8gVGhlIGZvbGxvd2luZyB0ZW4gbGluZXMgb2YgVEVBTCBoYW5kbGUgaW5pdGlhbCBwcm9ncmFtIGZsb3cKLy8gVGhpcyBwYXR0ZXJuIGlzIHVzZWQgdG8gbWFrZSBpdCBlYXN5IGZvciBhbnlvbmUgdG8gcGFyc2UgdGhlIHN0YXJ0IG9mIHRoZSBwcm9ncmFtIGFuZCBkZXRlcm1pbmUgaWYgYSBzcGVjaWZpYyBhY3Rpb24gaXMgYWxsb3dlZAovLyBIZXJlLCBhY3Rpb24gcmVmZXJzIHRvIHRoZSBPbkNvbXBsZXRlIGluIGNvbWJpbmF0aW9uIHdpdGggd2hldGhlciB0aGUgYXBwIGlzIGJlaW5nIGNyZWF0ZWQgb3IgY2FsbGVkCi8vIEV2ZXJ5IHBvc3NpYmxlIGFjdGlvbiBmb3IgdGhpcyBjb250cmFjdCBpcyByZXByZXNlbnRlZCBpbiB0aGUgc3dpdGNoIHN0YXRlbWVudAovLyBJZiB0aGUgYWN0aW9uIGlzIG5vdCBpbXBsZW1lbnRlZCBpbiB0aGUgY29udHJhY3QsIGl0cyByZXNwZWN0aXZlIGJyYW5jaCB3aWxsIGJlICIqTk9UX0lNUExFTUVOVEVEIiB3aGljaCBqdXN0IGNvbnRhaW5zICJlcnIiCnR4biBBcHBsaWNhdGlvbklECiEKaW50YyA2IC8vIDYKKgp0eG4gT25Db21wbGV0aW9uCisKc3dpdGNoICpjYWxsX05vT3AgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpjcmVhdGVfTm9PcCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQKCipOT1RfSU1QTEVNRU5URUQ6CgkvLyBUaGUgcmVxdWVzdGVkIGFjdGlvbiBpcyBub3QgaW1wbGVtZW50ZWQgaW4gdGhpcyBjb250cmFjdC4gQXJlIHlvdSB1c2luZyB0aGUgY29ycmVjdCBPbkNvbXBsZXRlPyBEaWQgeW91IHNldCB5b3VyIGFwcCBJRD8KCWVycgoKLy8gY3JlYXRlQXBwbGljYXRpb24oYXBwbGljYXRpb24sYWRkcmVzcyx1aW50NjQpdm9pZAoqYWJpX3JvdXRlX2NyZWF0ZUFwcGxpY2F0aW9uOgoJLy8gY29udHJhY3RWZXJzaW9uOiB1aW50NjQKCXR4bmEgQXBwbGljYXRpb25BcmdzIDMKCWJ0b2kKCgkvLyBvcGVyYXRvckFkZHJlc3M6IGFkZHJlc3MKCXR4bmEgQXBwbGljYXRpb25BcmdzIDIKCWR1cAoJbGVuCglwdXNoaW50IDMyCgk9PQoKCS8vIGFyZ3VtZW50IDEgKG9wZXJhdG9yQWRkcmVzcykgZm9yIGNyZWF0ZUFwcGxpY2F0aW9uIG11c3QgYmUgYSBhZGRyZXNzCglhc3NlcnQKCgkvLyBjcmVhdGluZ0NvbnRyYWN0OiBhcHBsaWNhdGlvbgoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQoJYnRvaQoJdHhuYXMgQXBwbGljYXRpb25zCgoJLy8gZXhlY3V0ZSBjcmVhdGVBcHBsaWNhdGlvbihhcHBsaWNhdGlvbixhZGRyZXNzLHVpbnQ2NCl2b2lkCgljYWxsc3ViIGNyZWF0ZUFwcGxpY2F0aW9uCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBjcmVhdGVBcHBsaWNhdGlvbihjcmVhdGluZ0NvbnRyYWN0OiBBcHBSZWZlcmVuY2UsIG9wZXJhdG9yQWRkcmVzczogQWRkcmVzcywgY29udHJhY3RWZXJzaW9uOiB1aW50NjQpOiB2b2lkCi8vCi8vICoqKioqKioqKioqKioqKioqKgovLyBQdWJsaWMgTWV0aG9kcyAgICAqCi8vICoqKioqKioqKioqKioqKioqKgovLwovLyBjcmVhdGVBcHBsaWNhdGlvbiBtZXRob2QgY2FsbGVkIGF0IGNyZWF0aW9uLCBpbml0aWFsaXplcyBzb21lIGdsb2JhbEtleSB2YWx1ZXMKLy8gQHBhcmFtIHtBcHBSZWZlcmVuY2V9IGNyZWF0aW5nQ29udHJhY3QgLSBBcHBsaWNhdGlvbklEIGZvciB0aGUgY3JlYXRvciBjb250cmFjdCAoQ2FlbHVzQWRtaW5Db250cmFjdCkKLy8gQHBhcmFtIHtBZGRyZXNzfSBvcGVyYXRvckFkZHJlc3MgLSBBZGRyZXNzIG9mIHRoZSBub2RlIG9wZXJhdG9yIHVzZWQgdG8gc2lnbiBvbmxpbmUvb2ZmbGluZSB0eG5zIGFuZCBwYXJ0aWNpcGF0ZSBpbiBhdWN0aW9ucwovLyBAcGFyYW0ge3VpbnQ2NH0gY29udHJhY3RWZXJzaW9uIC0gQXBwcm92YWwgUHJvZ3JhbSB2ZXJzaW9uIGZvciB0aGUgbm9kZSBjb250cmFjdCwgc3RvcmVkIGluIHRoZSBDYWVsdXNBZG1pbkNvbnRyYWN0CmNyZWF0ZUFwcGxpY2F0aW9uOgoJcHJvdG8gMyAwCgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjYxCgkvLyB0aGlzLm1pbl9Db21taXQudmFsdWUgPSBNSU5fQUxHT19TVEFLRV9GT1JfUkVXQVJEUwoJYnl0ZWMgNyAvLyAgIm1pblN0YWtlIgoJaW50YyAzIC8vIDMwMDAwMDAwMDAwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo2MgoJLy8gdGhpcy5jcmVhdG9yQ29udHJhY3RfQXBwUmVmZXJlbmNlLnZhbHVlID0gY3JlYXRpbmdDb250cmFjdAoJYnl0ZWMgOCAvLyAgImNyZWF0b3IiCglmcmFtZV9kaWcgLTEgLy8gY3JlYXRpbmdDb250cmFjdDogQXBwUmVmZXJlbmNlCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo2MwoJLy8gdGhpcy5vcGVyYXRvcl9BZGRyZXNzLnZhbHVlID0gb3BlcmF0b3JBZGRyZXNzCglieXRlYyAyIC8vICAib3BlcmF0b3IiCglmcmFtZV9kaWcgLTIgLy8gb3BlcmF0b3JBZGRyZXNzOiBBZGRyZXNzCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo2NAoJLy8gdGhpcy52YWxpZGF0b3JQb29sQ29udHJhY3RfdmVyc2lvbi52YWx1ZSA9IGNvbnRyYWN0VmVyc2lvbgoJcHVzaGJ5dGVzIDB4NjM2ZjZlNzQ3MjYxNjM3NDU2NjU3MjczNjk2ZjZlIC8vICJjb250cmFjdFZlcnNpb24iCglmcmFtZV9kaWcgLTMgLy8gY29udHJhY3RWZXJzaW9uOiB1aW50NjQKCWFwcF9nbG9iYWxfcHV0CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjY3CgkvLyB0aGlzLm9wZXJhdG9yX0NvbW1pdC52YWx1ZSA9IDAKCWJ5dGVjIDEgLy8gICJvcGVyYXRvckNvbW1pdCIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo2OAoJLy8gdGhpcy5kZWxlZ2F0ZWRfc3Rha2UudmFsdWUgPSAwCglieXRlYyA2IC8vICAiZGVsZWdhdGVkU3Rha2UiCglpbnRjIDEgLy8gMAoJYXBwX2dsb2JhbF9wdXQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6NjkKCS8vIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlID0gMAoJYnl0ZWMgMCAvLyAgIm1heERTdGFrZSIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo3MgoJLy8gdGhpcy5zYXR1cmF0aW9uX0JVRkZFUi52YWx1ZSA9IDAKCWJ5dGVjIDQgLy8gICJzYXR1cmF0aW9uQnVmZmVyIgoJaW50YyAxIC8vIDAKCWFwcF9nbG9iYWxfcHV0CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjczCgkvLyB0aGlzLnBlcmZvcm1hbmNlX2NvdW50ZXIudmFsdWUgPSAwCglieXRlYyA1IC8vICAicGVyZm9ybWFuY2UiCglpbnRjIDEgLy8gMAoJYXBwX2dsb2JhbF9wdXQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6NzQKCS8vIHRoaXMuaXNEZWxpbnF1ZW50LnZhbHVlID0gZmFsc2UKCXB1c2hieXRlcyAweDY5NzM0NDY1NmM2OTZlNzE3NTY1NmU3NCAvLyAiaXNEZWxpbnF1ZW50IgoJaW50YyAxIC8vIDAKCXB1c2hieXRlcyAweDAwCglpbnRjIDEgLy8gMAoJdW5jb3ZlciAyCglzZXRiaXQKCWFwcF9nbG9iYWxfcHV0CglyZXRzdWIKCi8vIGFkZFRvT3BlcmF0b3JDb21taXQocGF5KXZvaWQKKmFiaV9yb3V0ZV9hZGRUb09wZXJhdG9yQ29tbWl0OgoJLy8gY29tbWl0OiBwYXkKCXR4biBHcm91cEluZGV4CglpbnRjIDAgLy8gMQoJLQoJZHVwCglndHhucyBUeXBlRW51bQoJaW50YyAwIC8vICBwYXkKCT09CgoJLy8gYXJndW1lbnQgMCAoY29tbWl0KSBmb3IgYWRkVG9PcGVyYXRvckNvbW1pdCBtdXN0IGJlIGEgcGF5IHRyYW5zYWN0aW9uCglhc3NlcnQKCgkvLyBleGVjdXRlIGFkZFRvT3BlcmF0b3JDb21taXQocGF5KXZvaWQKCWNhbGxzdWIgYWRkVG9PcGVyYXRvckNvbW1pdAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gYWRkVG9PcGVyYXRvckNvbW1pdChjb21taXQ6IFBheVR4bik6IHZvaWQKLy8KLy8gVXNlZCBieSB0aGUgbm9kZSBvcGVyYXRvciB0byBhZGQgdG8gaGlzIHN0YWtlIGFtb3VudCBmb3IgdGhlIG5vZGUKLy8KLy8gQHBhcmFtIHtQYXlUeG59IGNvbW1pdCAtIG5vZGUgb3BlcmF0b3Igc3Rha2UgY29tbWl0bWVudAovLyBAdGhyb3dzIHtFcnJvcn0gaWYgdGhlIHNlbmRlciBpc24ndCB0aGUgbm9kZSBvcGVyYXRvciwgdGhlIHJlY2VpdmVyIGlzbid0IHRoZSBhcHAgYWRkcmVzcyBvciBpZiB0aGUgdG90YWwgYmFsYW5jZSBpcyBhYm92ZSAzME0gQWxnbwphZGRUb09wZXJhdG9yQ29tbWl0OgoJcHJvdG8gMSAwCgoJLy8gUHVzaCBlbXB0eSBieXRlcyBhZnRlciB0aGUgZnJhbWUgcG9pbnRlciB0byByZXNlcnZlIHNwYWNlIGZvciBsb2NhbCB2YXJpYWJsZXMKCWJ5dGVjIDMgLy8gMHgKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6ODQKCS8vIHRvdGFsQmFsYW5jZVVwZGF0ZWQgPSB0aGlzLm9wZXJhdG9yX0NvbW1pdC52YWx1ZSArIGNvbW1pdC5hbW91bnQKCWJ5dGVjIDEgLy8gICJvcGVyYXRvckNvbW1pdCIKCWFwcF9nbG9iYWxfZ2V0CglmcmFtZV9kaWcgLTEgLy8gY29tbWl0OiBQYXlUeG4KCWd0eG5zIEFtb3VudAoJKwoJZnJhbWVfYnVyeSAwIC8vIHRvdGFsQmFsYW5jZVVwZGF0ZWQ6IHVpbnQ2NAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo4NQoJLy8gYXNzZXJ0KHRvdGFsQmFsYW5jZVVwZGF0ZWQgPCBNQVhfQUxHT19TVEFLRV9QRVJfQUNDT1VOVCwgJ0NvbnRyYWN0IG1heCBiYWxhbmNlIGNhbm5vdCBiZSBvdmVyIDMwTSBBbGdvJykKCWZyYW1lX2RpZyAwIC8vIHRvdGFsQmFsYW5jZVVwZGF0ZWQ6IHVpbnQ2NAoJaW50YyAyIC8vIDUwMDAwMDAwMDAwMDAwCgk8CgoJLy8gQ29udHJhY3QgbWF4IGJhbGFuY2UgY2Fubm90IGJlIG92ZXIgMzBNIEFsZ28KCWFzc2VydAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo4NwoJLy8gdmVyaWZ5UGF5VHhuKGNvbW1pdCwgewoJLy8gICAgICAgc2VuZGVyOiB0aGlzLm9wZXJhdG9yX0FkZHJlc3MudmFsdWUsCgkvLyAgICAgICByZWNlaXZlcjogdGhpcy5hcHAuYWRkcmVzcywKCS8vICAgICAgIGFtb3VudDogY29tbWl0LmFtb3VudCwKCS8vICAgICB9KQoJLy8gdmVyaWZ5IHNlbmRlcgoJZnJhbWVfZGlnIC0xIC8vIGNvbW1pdDogUGF5VHhuCglndHhucyBTZW5kZXIKCWJ5dGVjIDIgLy8gICJvcGVyYXRvciIKCWFwcF9nbG9iYWxfZ2V0Cgk9PQoKCS8vIHRyYW5zYWN0aW9uIHZlcmlmaWNhdGlvbiBmYWlsZWQ6IHsidHhuIjoiY29tbWl0IiwiZmllbGQiOiJzZW5kZXIiLCJleHBlY3RlZCI6InRoaXMub3BlcmF0b3JfQWRkcmVzcy52YWx1ZSJ9Cglhc3NlcnQKCgkvLyB2ZXJpZnkgcmVjZWl2ZXIKCWZyYW1lX2RpZyAtMSAvLyBjb21taXQ6IFBheVR4bgoJZ3R4bnMgUmVjZWl2ZXIKCWdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCgk9PQoKCS8vIHRyYW5zYWN0aW9uIHZlcmlmaWNhdGlvbiBmYWlsZWQ6IHsidHhuIjoiY29tbWl0IiwiZmllbGQiOiJyZWNlaXZlciIsImV4cGVjdGVkIjoidGhpcy5hcHAuYWRkcmVzcyJ9Cglhc3NlcnQKCgkvLyB2ZXJpZnkgYW1vdW50CglmcmFtZV9kaWcgLTEgLy8gY29tbWl0OiBQYXlUeG4KCWd0eG5zIEFtb3VudAoJZnJhbWVfZGlnIC0xIC8vIGNvbW1pdDogUGF5VHhuCglndHhucyBBbW91bnQKCT09CgoJLy8gdHJhbnNhY3Rpb24gdmVyaWZpY2F0aW9uIGZhaWxlZDogeyJ0eG4iOiJjb21taXQiLCJmaWVsZCI6ImFtb3VudCIsImV4cGVjdGVkIjoiY29tbWl0LmFtb3VudCJ9Cglhc3NlcnQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6OTIKCS8vIHRoaXMub3BlcmF0b3JfQ29tbWl0LnZhbHVlICs9IGNvbW1pdC5hbW91bnQKCWJ5dGVjIDEgLy8gICJvcGVyYXRvckNvbW1pdCIKCWFwcF9nbG9iYWxfZ2V0CglmcmFtZV9kaWcgLTEgLy8gY29tbWl0OiBQYXlUeG4KCWd0eG5zIEFtb3VudAoJKwoJYnl0ZWMgMSAvLyAgIm9wZXJhdG9yQ29tbWl0IgoJc3dhcAoJYXBwX2dsb2JhbF9wdXQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6OTMKCS8vIHRoaXMudXBkYXRlRGVsZWdhdGlvbkZhY3RvcnMoKQoJY2FsbHN1YiB1cGRhdGVEZWxlZ2F0aW9uRmFjdG9ycwoJcmV0c3ViCgovLyByZW1vdmVGcm9tT3BlcmF0b3JDb21taXQodWludDY0KXZvaWQKKmFiaV9yb3V0ZV9yZW1vdmVGcm9tT3BlcmF0b3JDb21taXQ6CgkvLyBjbGFpbVJlcXVlc3Q6IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQoJYnRvaQoKCS8vIGV4ZWN1dGUgcmVtb3ZlRnJvbU9wZXJhdG9yQ29tbWl0KHVpbnQ2NCl2b2lkCgljYWxsc3ViIHJlbW92ZUZyb21PcGVyYXRvckNvbW1pdAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gcmVtb3ZlRnJvbU9wZXJhdG9yQ29tbWl0KGNsYWltUmVxdWVzdDogdWludDY0KTogdm9pZAovLwovLyBVc2VkIGJ5IHRoZSBub2RlIG9wZXJhdG9yIHRvIHJlbW92ZSBmcm9tIGhpcyBzdGFrZSBhbW91bnQgZm9yIHRoZSBub2RlCi8vIEBwYXJhbSB7dWludDY0fSBjbGFpbVJlcXVlc3QgLSBhbW91bnQgY2xhaW1lZCBieSB0aGUgbm9kZSBvcGVyYXRvciB0byBiZSByZW1vdmVkIGZyb20gdGhlIGNvbnRyYWN0IGJhbGFuY2UgYW5kIHN1YnRyYWN0ZWQgZnJvbSB0aGUgb3BlcmF0b3JfY29tbWl0IGNvdW50ZXIKLy8gQHRocm93cyB7RXJyb3J9IGlmIHRoZSBzZW5kZXIgaXNuJ3QgdGhlIG5vZGUgb3BlcmF0b3Igb3IgaWYgdGhlIHRvdGFsIGNvbW1pdCBieSB0aGUgbm9kZSBvcGVyYXRvciBnb2VzIGJlbG93IHRoZSBtaW4gdGhyZXNob2xkIGZvciByZXdhcmRzIGVsaWdpYmlsaXR5CnJlbW92ZUZyb21PcGVyYXRvckNvbW1pdDoKCXByb3RvIDEgMAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoxMDIKCS8vIHZlcmlmeUFwcENhbGxUeG4odGhpcy50eG4sIHsKCS8vICAgICAgIHNlbmRlcjogdGhpcy5vcGVyYXRvcl9BZGRyZXNzLnZhbHVlLAoJLy8gICAgIH0pCgkvLyB2ZXJpZnkgc2VuZGVyCgl0eG4gU2VuZGVyCglieXRlYyAyIC8vICAib3BlcmF0b3IiCglhcHBfZ2xvYmFsX2dldAoJPT0KCgkvLyB0cmFuc2FjdGlvbiB2ZXJpZmljYXRpb24gZmFpbGVkOiB7InR4biI6InRoaXMudHhuIiwiZmllbGQiOiJzZW5kZXIiLCJleHBlY3RlZCI6InRoaXMub3BlcmF0b3JfQWRkcmVzcy52YWx1ZSJ9Cglhc3NlcnQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MTA2CgkvLyBhc3NlcnQoCgkvLyAgICAgICB0aGlzLm9wZXJhdG9yX0NvbW1pdC52YWx1ZSAtIGNsYWltUmVxdWVzdCA+IE1JTl9BTEdPX1NUQUtFX0ZPUl9SRVdBUkRTLAoJLy8gICAgICAgJ05vZGUgT3BlcmF0b3IgY2FuIHRha2UgaGlzIHN0YWtlIGJlbG93IDMwayBvbmx5IGlmIHRoZSBub2RlIGNvbnRyYWN0IHdpbGwgYmUgY2xvc2VkJwoJLy8gICAgICkKCWJ5dGVjIDEgLy8gICJvcGVyYXRvckNvbW1pdCIKCWFwcF9nbG9iYWxfZ2V0CglmcmFtZV9kaWcgLTEgLy8gY2xhaW1SZXF1ZXN0OiB1aW50NjQKCS0KCWludGMgMyAvLyAzMDAwMDAwMDAwMAoJPgoKCS8vIE5vZGUgT3BlcmF0b3IgY2FuIHRha2UgaGlzIHN0YWtlIGJlbG93IDMwayBvbmx5IGlmIHRoZSBub2RlIGNvbnRyYWN0IHdpbGwgYmUgY2xvc2VkCglhc3NlcnQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MTEwCgkvLyBzZW5kUGF5bWVudCh7CgkvLyAgICAgICBzZW5kZXI6IHRoaXMuYXBwLmFkZHJlc3MsCgkvLyAgICAgICByZWNlaXZlcjogdGhpcy5vcGVyYXRvcl9BZGRyZXNzLnZhbHVlLAoJLy8gICAgICAgYW1vdW50OiBjbGFpbVJlcXVlc3QsCgkvLyAgICAgICBmZWU6IDAsCgkvLyAgICAgfSkKCWl0eG5fYmVnaW4KCWludGMgMCAvLyAgcGF5CglpdHhuX2ZpZWxkIFR5cGVFbnVtCgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjExMQoJLy8gc2VuZGVyOiB0aGlzLmFwcC5hZGRyZXNzCglnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwoJaXR4bl9maWVsZCBTZW5kZXIKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MTEyCgkvLyByZWNlaXZlcjogdGhpcy5vcGVyYXRvcl9BZGRyZXNzLnZhbHVlCglieXRlYyAyIC8vICAib3BlcmF0b3IiCglhcHBfZ2xvYmFsX2dldAoJaXR4bl9maWVsZCBSZWNlaXZlcgoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoxMTMKCS8vIGFtb3VudDogY2xhaW1SZXF1ZXN0CglmcmFtZV9kaWcgLTEgLy8gY2xhaW1SZXF1ZXN0OiB1aW50NjQKCWl0eG5fZmllbGQgQW1vdW50CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjExNAoJLy8gZmVlOiAwCglpbnRjIDEgLy8gMAoJaXR4bl9maWVsZCBGZWUKCgkvLyBTdWJtaXQgaW5uZXIgdHJhbnNhY3Rpb24KCWl0eG5fc3VibWl0CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjExNgoJLy8gdGhpcy51cGRhdGVEZWxlZ2F0aW9uRmFjdG9ycygpCgljYWxsc3ViIHVwZGF0ZURlbGVnYXRpb25GYWN0b3JzCglyZXRzdWIKCi8vIHBlcmZvcm1hbmNlQ2hlY2soKXZvaWQKKmFiaV9yb3V0ZV9wZXJmb3JtYW5jZUNoZWNrOgoJLy8gZXhlY3V0ZSBwZXJmb3JtYW5jZUNoZWNrKCl2b2lkCgljYWxsc3ViIHBlcmZvcm1hbmNlQ2hlY2sKCWludGMgMCAvLyAxCglyZXR1cm4KCi8vIHBlcmZvcm1hbmNlQ2hlY2soKTogdm9pZApwZXJmb3JtYW5jZUNoZWNrOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGdldFRvbGVyYXRlZEJsb2NrRGVsdGEoKXVpbnQ2NAoqYWJpX3JvdXRlX2dldFRvbGVyYXRlZEJsb2NrRGVsdGE6CgkvLyBUaGUgQUJJIHJldHVybiBwcmVmaXgKCXB1c2hieXRlcyAweDE1MWY3Yzc1CgoJLy8gZXhlY3V0ZSBnZXRUb2xlcmF0ZWRCbG9ja0RlbHRhKCl1aW50NjQKCWNhbGxzdWIgZ2V0VG9sZXJhdGVkQmxvY2tEZWx0YQoJaXRvYgoJY29uY2F0Cglsb2cKCWludGMgMCAvLyAxCglyZXR1cm4KCi8vIGdldFRvbGVyYXRlZEJsb2NrRGVsdGEoKTogdWludDY0CmdldFRvbGVyYXRlZEJsb2NrRGVsdGE6Cglwcm90byAwIDEKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MTIzCgkvLyByZXR1cm4gMDsKCWludGMgMSAvLyAwCglyZXRzdWIKCi8vIHJlcG9ydFJld2FyZHModWludDY0KXZvaWQKKmFiaV9yb3V0ZV9yZXBvcnRSZXdhcmRzOgoJLy8gYmxvY2s6IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQoJYnRvaQoKCS8vIGV4ZWN1dGUgcmVwb3J0UmV3YXJkcyh1aW50NjQpdm9pZAoJY2FsbHN1YiByZXBvcnRSZXdhcmRzCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyByZXBvcnRSZXdhcmRzKGJsb2NrOiB1aW50NjQpOiB2b2lkCnJlcG9ydFJld2FyZHM6Cglwcm90byAxIDAKCgkvLyBQdXNoIGVtcHR5IGJ5dGVzIGFmdGVyIHRoZSBmcmFtZSBwb2ludGVyIHRvIHJlc2VydmUgc3BhY2UgZm9yIGxvY2FsIHZhcmlhYmxlcwoJYnl0ZWMgMyAvLyAweAoJZHVwCgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjEzMAoJLy8gcmVwb3J0ID0gYmxvY2tzW2Jsb2NrXS5wcm9wb3NlclBheW91dAoJZnJhbWVfZGlnIC0xIC8vIGJsb2NrOiB1aW50NjQKCWJsb2NrIEJsa1Byb3Bvc2VyUGF5b3V0CglmcmFtZV9idXJ5IDAgLy8gcmVwb3J0OiB1aW50NjQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MTMxCgkvLyB0YWtlRmVlID0gKHJlcG9ydCAqIDYpIC8gMTAwCglmcmFtZV9kaWcgMCAvLyByZXBvcnQ6IHVpbnQ2NAoJaW50YyA2IC8vIDYKCSoKCXB1c2hpbnQgMTAwCgkvCglmcmFtZV9idXJ5IDEgLy8gdGFrZUZlZTogdWludDY0CglyZXRzdWIKCi8vIGJpZCgpdm9pZAoqYWJpX3JvdXRlX2JpZDoKCS8vIGV4ZWN1dGUgYmlkKCl2b2lkCgljYWxsc3ViIGJpZAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gYmlkKCk6IHZvaWQKYmlkOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGFkZF9zdGFrZSgpdm9pZAoqYWJpX3JvdXRlX2FkZF9zdGFrZToKCS8vIGV4ZWN1dGUgYWRkX3N0YWtlKCl2b2lkCgljYWxsc3ViIGFkZF9zdGFrZQoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gYWRkX3N0YWtlKCk6IHZvaWQKYWRkX3N0YWtlOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIHNuaXRjaF9idXJuKCl2b2lkCiphYmlfcm91dGVfc25pdGNoX2J1cm46CgkvLyBleGVjdXRlIHNuaXRjaF9idXJuKCl2b2lkCgljYWxsc3ViIHNuaXRjaF9idXJuCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBzbml0Y2hfYnVybigpOiB2b2lkCnNuaXRjaF9idXJuOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIHNuaXRjaCgpdm9pZAoqYWJpX3JvdXRlX3NuaXRjaDoKCS8vIGV4ZWN1dGUgc25pdGNoKCl2b2lkCgljYWxsc3ViIHNuaXRjaAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gc25pdGNoKCk6IHZvaWQKc25pdGNoOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGdldF9zbml0Y2hlZCgpdm9pZAoqYWJpX3JvdXRlX2dldF9zbml0Y2hlZDoKCS8vIGV4ZWN1dGUgZ2V0X3NuaXRjaGVkKCl2b2lkCgljYWxsc3ViIGdldF9zbml0Y2hlZAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gZ2V0X3NuaXRjaGVkKCk6IHZvaWQKZ2V0X3NuaXRjaGVkOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGNsYXdiYWNrX3N0YWtlKCl2b2lkCiphYmlfcm91dGVfY2xhd2JhY2tfc3Rha2U6CgkvLyBleGVjdXRlIGNsYXdiYWNrX3N0YWtlKCl2b2lkCgljYWxsc3ViIGNsYXdiYWNrX3N0YWtlCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBjbGF3YmFja19zdGFrZSgpOiB2b2lkCmNsYXdiYWNrX3N0YWtlOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGNsYXdiYWNrX3N0YWtlX3RvX3ZhbGlkYXRvcigpdm9pZAoqYWJpX3JvdXRlX2NsYXdiYWNrX3N0YWtlX3RvX3ZhbGlkYXRvcjoKCS8vIGV4ZWN1dGUgY2xhd2JhY2tfc3Rha2VfdG9fdmFsaWRhdG9yKCl2b2lkCgljYWxsc3ViIGNsYXdiYWNrX3N0YWtlX3RvX3ZhbGlkYXRvcgoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gY2xhd2JhY2tfc3Rha2VfdG9fdmFsaWRhdG9yKCk6IHZvaWQKY2xhd2JhY2tfc3Rha2VfdG9fdmFsaWRhdG9yOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGNsYWltTGVmdEFsZ28oKXZvaWQKKmFiaV9yb3V0ZV9jbGFpbUxlZnRBbGdvOgoJLy8gZXhlY3V0ZSBjbGFpbUxlZnRBbGdvKCl2b2lkCgljYWxsc3ViIGNsYWltTGVmdEFsZ28KCWludGMgMCAvLyAxCglyZXR1cm4KCi8vIGNsYWltTGVmdEFsZ28oKTogdm9pZApjbGFpbUxlZnRBbGdvOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGNoZWNrQWxnb2RWZXJzaW9uKCl2b2lkCiphYmlfcm91dGVfY2hlY2tBbGdvZFZlcnNpb246CgkvLyBleGVjdXRlIGNoZWNrQWxnb2RWZXJzaW9uKCl2b2lkCgljYWxsc3ViIGNoZWNrQWxnb2RWZXJzaW9uCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBjaGVja0FsZ29kVmVyc2lvbigpOiB2b2lkCmNoZWNrQWxnb2RWZXJzaW9uOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGdvT25saW5lKHBheSxzdHJpbmcsc3RyaW5nLHN0cmluZyx1aW50NjQsdWludDY0LHVpbnQ2NCl2b2lkCiphYmlfcm91dGVfZ29PbmxpbmU6CgkvLyB2b3RlS2V5RGlsdXRpb246IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgNgoJYnRvaQoKCS8vIHZvdGVMYXN0OiB1aW50NjQKCXR4bmEgQXBwbGljYXRpb25BcmdzIDUKCWJ0b2kKCgkvLyB2b3RlRmlyc3Q6IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgNAoJYnRvaQoKCS8vIHN0YXRlUHJvb2ZQSzogc3RyaW5nCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAzCglleHRyYWN0IDIgMAoKCS8vIHNlbGVjdGlvblBLOiBzdHJpbmcKCXR4bmEgQXBwbGljYXRpb25BcmdzIDIKCWV4dHJhY3QgMiAwCgoJLy8gdm90ZVBLOiBzdHJpbmcKCXR4bmEgQXBwbGljYXRpb25BcmdzIDEKCWV4dHJhY3QgMiAwCgoJLy8gZmVlUGF5bWVudDogcGF5Cgl0eG4gR3JvdXBJbmRleAoJaW50YyAwIC8vIDEKCS0KCWR1cAoJZ3R4bnMgVHlwZUVudW0KCWludGMgMCAvLyAgcGF5Cgk9PQoKCS8vIGFyZ3VtZW50IDYgKGZlZVBheW1lbnQpIGZvciBnb09ubGluZSBtdXN0IGJlIGEgcGF5IHRyYW5zYWN0aW9uCglhc3NlcnQKCgkvLyBleGVjdXRlIGdvT25saW5lKHBheSxzdHJpbmcsc3RyaW5nLHN0cmluZyx1aW50NjQsdWludDY0LHVpbnQ2NCl2b2lkCgljYWxsc3ViIGdvT25saW5lCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBnb09ubGluZShmZWVQYXltZW50OiBQYXlUeG4sIHZvdGVQSzogc3RyaW5nLCBzZWxlY3Rpb25QSzogc3RyaW5nLCBzdGF0ZVByb29mUEs6IHN0cmluZywgdm90ZUZpcnN0OiB1aW50NjQsIHZvdGVMYXN0OiB1aW50NjQsIHZvdGVLZXlEaWx1dGlvbjogdWludDY0KTogdm9pZAovLwovLyBVc2VkIHRvIHNldCB0aGUgQ29udHJhY3QgYWNjb3VudCBvbmxpbmUgZm9yIGNvbnNlbnN1cy4gQWx3YXlzIGNoZWNrIHRoYXQgYWNjb3VudCBpcyBvbmxpbmUgYW5kIGluY2VudGl2ZXNFbGlnaWJsZSBiZWZvcmUgaGF2aW5nIGRlbGVnYXRhYmxlIHN0YWtlCi8vCi8vIEBwYXJhbSB7UGF5VHhufSBmZWVQYXltZW50IC0gUGF5bWVudCB0cmFuc2FjdGlvbiB0byB0aGUgY29udHJhY3QgdG8gY292ZXIgY29zdHMgZm9yIEVsaWdpYmlsaXR5IGZlZTsgMCBmb3IgcmVuZXdhbC4KLy8gQHBhcmFtIHtzdHJpbmd9IHZvdGVQSyAtIFRoZSB2b3RlIHB1YmxpYyBrZXkKLy8gQHBhcmFtIHtzdHJpbmd9IHNlbGVjdGlvblBLIC0gVGhlIHNlbGVjdGlvbiBwdWJsaWMga2V5Ci8vIEBwYXJhbSB7c3RyaW5nfSBzdGF0ZVByb29mUEsgLSB0aGUgc3RhdGUgcHJvb2YgcHVibGljIGtleQovLyBAcGFyYW0ge3VpbnQ2NH0gdm90ZUZpcnN0IC0gSW5kZXggb2YgZmlyc3QgdmFsaWQgYmxvY2sgZm9yIHRoZSBwYXJ0aWNpcGF0aW9uIGtleXMKLy8gQHBhcmFtIHt1aW50NjR9IHZvdGVMYXN0IC0gSW5kZXggb2YgbGFzdCB2YWxpZCBibG9jayBmb3IgZm9yIHRoZSBwYXJ0aWNpcGF0aW9uIGtleXMKLy8gQHBhcmFtIHt1aW50NjR9IHZvdGVLZXlEaWx1dGlvbiAtIFRoZSB2b3RlIGtleSBkaWx1dGlvbiB2YWx1ZQovLyBAdGhyb3dzIHtFcnJvcn0gaWYgdGhlIGNhbGxlciBpc24ndCB0aGUgbm9kZSBvcGVyYXRvcgpnb09ubGluZToKCXByb3RvIDcgMAoKCS8vIFB1c2ggZW1wdHkgYnl0ZXMgYWZ0ZXIgdGhlIGZyYW1lIHBvaW50ZXIgdG8gcmVzZXJ2ZSBzcGFjZSBmb3IgbG9jYWwgdmFyaWFibGVzCglieXRlYyAzIC8vIDB4CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjE3OAoJLy8gdmVyaWZ5QXBwQ2FsbFR4bih0aGlzLnR4biwgewoJLy8gICAgICAgc2VuZGVyOiB0aGlzLm9wZXJhdG9yX0FkZHJlc3MudmFsdWUsCgkvLyAgICAgfSkKCS8vIHZlcmlmeSBzZW5kZXIKCXR4biBTZW5kZXIKCWJ5dGVjIDIgLy8gICJvcGVyYXRvciIKCWFwcF9nbG9iYWxfZ2V0Cgk9PQoKCS8vIHRyYW5zYWN0aW9uIHZlcmlmaWNhdGlvbiBmYWlsZWQ6IHsidHhuIjoidGhpcy50eG4iLCJmaWVsZCI6InNlbmRlciIsImV4cGVjdGVkIjoidGhpcy5vcGVyYXRvcl9BZGRyZXNzLnZhbHVlIn0KCWFzc2VydAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoxODMKCS8vIGFzc2VydCgKCS8vICAgICAgIHRoaXMuYXBwLmFkZHJlc3MuYmFsYW5jZSA+PSBNSU5fQUxHT19TVEFLRV9GT1JfUkVXQVJEUywKCS8vICAgICAgICdDb250cmFjdCBuZWVkcyAzMGsgQWxnbyBhcyBtaW5pbXVtIGJhbGFuY2UgZm9yIHJld2FyZHMgZWxpZ2liaWxpdHknCgkvLyAgICAgKQoJZ2xvYmFsIEN1cnJlbnRBcHBsaWNhdGlvbkFkZHJlc3MKCWFjY3RfcGFyYW1zX2dldCBBY2N0QmFsYW5jZQoJcG9wCglpbnRjIDMgLy8gMzAwMDAwMDAwMDAKCT49CgoJLy8gQ29udHJhY3QgbmVlZHMgMzBrIEFsZ28gYXMgbWluaW11bSBiYWxhbmNlIGZvciByZXdhcmRzIGVsaWdpYmlsaXR5Cglhc3NlcnQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MTg5CgkvLyBhc3NlcnQoCgkvLyAgICAgICB0aGlzLm9wZXJhdG9yX0NvbW1pdC52YWx1ZSA+PSB0aGlzLm1pbl9Db21taXQudmFsdWUsCgkvLyAgICAgICAnT3BlcmF0b3IgY29tbWl0IG11c3QgYmUgaGlnaGVyIHRoYW4gbWluaW11bSBiYWxhbmNlIGZvciByZXdhcmRzIGVsaWdpYmlsaXR5JwoJLy8gICAgICkKCWJ5dGVjIDEgLy8gICJvcGVyYXRvckNvbW1pdCIKCWFwcF9nbG9iYWxfZ2V0CglieXRlYyA3IC8vICAibWluU3Rha2UiCglhcHBfZ2xvYmFsX2dldAoJPj0KCgkvLyBPcGVyYXRvciBjb21taXQgbXVzdCBiZSBoaWdoZXIgdGhhbiBtaW5pbXVtIGJhbGFuY2UgZm9yIHJld2FyZHMgZWxpZ2liaWxpdHkKCWFzc2VydAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoxOTQKCS8vIGV4dHJhRmVlID0gdGhpcy5nZXRHb09ubGluZUZlZUFtb3VudCgpCgljYWxsc3ViIGdldEdvT25saW5lRmVlQW1vdW50CglmcmFtZV9idXJ5IDAgLy8gZXh0cmFGZWU6IHVpbnQ2NAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoxOTYKCS8vIHZlcmlmeVBheVR4bihmZWVQYXltZW50LCB7IHJlY2VpdmVyOiB0aGlzLmFwcC5hZGRyZXNzLCBhbW91bnQ6IGV4dHJhRmVlIH0pCgkvLyB2ZXJpZnkgcmVjZWl2ZXIKCWZyYW1lX2RpZyAtMSAvLyBmZWVQYXltZW50OiBQYXlUeG4KCWd0eG5zIFJlY2VpdmVyCglnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwoJPT0KCgkvLyB0cmFuc2FjdGlvbiB2ZXJpZmljYXRpb24gZmFpbGVkOiB7InR4biI6ImZlZVBheW1lbnQiLCJmaWVsZCI6InJlY2VpdmVyIiwiZXhwZWN0ZWQiOiJ0aGlzLmFwcC5hZGRyZXNzIn0KCWFzc2VydAoKCS8vIHZlcmlmeSBhbW91bnQKCWZyYW1lX2RpZyAtMSAvLyBmZWVQYXltZW50OiBQYXlUeG4KCWd0eG5zIEFtb3VudAoJZnJhbWVfZGlnIDAgLy8gZXh0cmFGZWU6IHVpbnQ2NAoJPT0KCgkvLyB0cmFuc2FjdGlvbiB2ZXJpZmljYXRpb24gZmFpbGVkOiB7InR4biI6ImZlZVBheW1lbnQiLCJmaWVsZCI6ImFtb3VudCIsImV4cGVjdGVkIjoiZXh0cmFGZWUifQoJYXNzZXJ0CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjE5OAoJLy8gc2VuZE9ubGluZUtleVJlZ2lzdHJhdGlvbih7CgkvLyAgICAgICB2b3RlUEs6IHZvdGVQSywKCS8vICAgICAgIHNlbGVjdGlvblBLOiBzZWxlY3Rpb25QSywKCS8vICAgICAgIHN0YXRlUHJvb2ZQSzogc3RhdGVQcm9vZlBLLAoJLy8gICAgICAgdm90ZUZpcnN0OiB2b3RlRmlyc3QsCgkvLyAgICAgICB2b3RlTGFzdDogdm90ZUxhc3QsCgkvLyAgICAgICB2b3RlS2V5RGlsdXRpb246IHZvdGVLZXlEaWx1dGlvbiwKCS8vICAgICAgIGZlZTogZXh0cmFGZWUsCgkvLyAgICAgfSkKCWl0eG5fYmVnaW4KCWludGMgNCAvLyAga2V5cmVnCglpdHhuX2ZpZWxkIFR5cGVFbnVtCgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjE5OQoJLy8gdm90ZVBLOiB2b3RlUEsKCWZyYW1lX2RpZyAtMiAvLyB2b3RlUEs6IHN0cmluZwoJaXR4bl9maWVsZCBWb3RlUEsKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjAwCgkvLyBzZWxlY3Rpb25QSzogc2VsZWN0aW9uUEsKCWZyYW1lX2RpZyAtMyAvLyBzZWxlY3Rpb25QSzogc3RyaW5nCglpdHhuX2ZpZWxkIFNlbGVjdGlvblBLCgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjIwMQoJLy8gc3RhdGVQcm9vZlBLOiBzdGF0ZVByb29mUEsKCWZyYW1lX2RpZyAtNCAvLyBzdGF0ZVByb29mUEs6IHN0cmluZwoJaXR4bl9maWVsZCBTdGF0ZVByb29mUEsKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjAyCgkvLyB2b3RlRmlyc3Q6IHZvdGVGaXJzdAoJZnJhbWVfZGlnIC01IC8vIHZvdGVGaXJzdDogdWludDY0CglpdHhuX2ZpZWxkIFZvdGVGaXJzdAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyMDMKCS8vIHZvdGVMYXN0OiB2b3RlTGFzdAoJZnJhbWVfZGlnIC02IC8vIHZvdGVMYXN0OiB1aW50NjQKCWl0eG5fZmllbGQgVm90ZUxhc3QKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjA0CgkvLyB2b3RlS2V5RGlsdXRpb246IHZvdGVLZXlEaWx1dGlvbgoJZnJhbWVfZGlnIC03IC8vIHZvdGVLZXlEaWx1dGlvbjogdWludDY0CglpdHhuX2ZpZWxkIFZvdGVLZXlEaWx1dGlvbgoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyMDUKCS8vIGZlZTogZXh0cmFGZWUKCWZyYW1lX2RpZyAwIC8vIGV4dHJhRmVlOiB1aW50NjQKCWl0eG5fZmllbGQgRmVlCgoJLy8gU3VibWl0IGlubmVyIHRyYW5zYWN0aW9uCglpdHhuX3N1Ym1pdAoJcmV0c3ViCgovLyBnb09mZmxpbmUodWludDY0KXZvaWQKKmFiaV9yb3V0ZV9nb09mZmxpbmU6CgkvLyBvZmZsaW5lQ2FzZTogdWludDY0Cgl0eG5hIEFwcGxpY2F0aW9uQXJncyAxCglidG9pCgoJLy8gZXhlY3V0ZSBnb09mZmxpbmUodWludDY0KXZvaWQKCWNhbGxzdWIgZ29PZmZsaW5lCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBnb09mZmxpbmUob2ZmbGluZUNhc2U6IHVpbnQ2NCk6IHZvaWQKLy8KLy8gU2V0IHRoZSBjb250cmFjdCBhY2NvdW50IHRvIG9mZmxpbmUgc28gdGhhdCBpdCBkb2Vzbid0IHBhcnRpY2lwYXRlIGluIGNvbnNlbnN1cyBhbnltb3JlLgovLyBpZiBncmFjZWZ1bCB0aGVuIGl0IG9ubHkgbWVhbnMgdGhhdCB0aGVyZSB3YXMgc29tZSBtaWdyYXRpb24gb3Igb3RoZXIgb3BlcmF0aW9uIFtDQVNFIDFdCi8vIGlmIHVzZWQgdG8gZm9yY2UgdGhlIGFjY291bnQgb2ZmbGluZSBiZWNhdXNlIG9mIGJhZCBiZWhhdmlvciwgdGhlbiBzZXQgdXAgYSBmbGFnIGZvciBwZW5hbHRpZXMgW0NBU0UgMl0KLy8KLy8gQHBhcmFtIHt1aW50NjR9IG9mZmxpbmVDYXNlIC0gezB9OiBncmFjZWZ1bCBvZmZsaW5lIG9mIHRoZSBub2RlIGJ5IHRoZSBub2RlIHJ1bm5lciBvciB0aGUgbWFpbiBDYWVsdXMgY29udHJhY3QKLy8gezF9OiBub2RlIGlzIG1pc2JlaGF2aW5nIGFuZCBuZWVkcyB0byBiZSBzZXQgb2ZmbGluZSBieSB0aGUgbWFpbiBDYWVsdXMgY29udHJhY3QKZ29PZmZsaW5lOgoJcHJvdG8gMSAwCgoJLy8gKmlmMF9jb25kaXRpb24KCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyMjcKCS8vIG9mZmxpbmVDYXNlID09PSAwCglmcmFtZV9kaWcgLTEgLy8gb2ZmbGluZUNhc2U6IHVpbnQ2NAoJaW50YyAxIC8vIDAKCT09CglieiAqaWYwX2VuZAoKCS8vICppZjBfY29uc2VxdWVudAoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjIyOAoJLy8gc2VuZE9mZmxpbmVLZXlSZWdpc3RyYXRpb24oe30pCglpdHhuX2JlZ2luCglpbnRjIDQgLy8gIGtleXJlZwoJaXR4bl9maWVsZCBUeXBlRW51bQoKCS8vIEZlZSBmaWVsZCBub3Qgc2V0LCBkZWZhdWx0aW5nIHRvIDAKCWludGMgMSAvLyAwCglpdHhuX2ZpZWxkIEZlZQoKCS8vIFN1Ym1pdCBpbm5lciB0cmFuc2FjdGlvbgoJaXR4bl9zdWJtaXQKCippZjBfZW5kOgoJLy8gKmlmMV9jb25kaXRpb24KCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyMzEKCS8vIG9mZmxpbmVDYXNlID09PSAxCglmcmFtZV9kaWcgLTEgLy8gb2ZmbGluZUNhc2U6IHVpbnQ2NAoJaW50YyAwIC8vIDEKCT09CglieiAqaWYxX2VuZAoKCS8vICppZjFfY29uc2VxdWVudAoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjIzNgoJLy8gdmVyaWZ5QXBwQ2FsbFR4bih0aGlzLnR4biwgewoJLy8gICAgICAgICBzZW5kZXI6IHRoaXMuY3JlYXRvckNvbnRyYWN0X0FwcFJlZmVyZW5jZS52YWx1ZS5hZGRyZXNzLAoJLy8gICAgICAgfSkKCS8vIHZlcmlmeSBzZW5kZXIKCXR4biBTZW5kZXIKCWJ5dGVjIDggLy8gICJjcmVhdG9yIgoJYXBwX2dsb2JhbF9nZXQKCWFwcF9wYXJhbXNfZ2V0IEFwcEFkZHJlc3MKCXBvcAoJPT0KCgkvLyB0cmFuc2FjdGlvbiB2ZXJpZmljYXRpb24gZmFpbGVkOiB7InR4biI6InRoaXMudHhuIiwiZmllbGQiOiJzZW5kZXIiLCJleHBlY3RlZCI6InRoaXMuY3JlYXRvckNvbnRyYWN0X0FwcFJlZmVyZW5jZS52YWx1ZS5hZGRyZXNzIn0KCWFzc2VydAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNDIKCS8vIHRoaXMucGVyZm9ybWFuY2VfY291bnRlci52YWx1ZSA9IDAKCWJ5dGVjIDUgLy8gICJwZXJmb3JtYW5jZSIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNDMKCS8vIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlID0gMAoJYnl0ZWMgMCAvLyAgIm1heERTdGFrZSIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNDQKCS8vIHNlbmRPZmZsaW5lS2V5UmVnaXN0cmF0aW9uKHt9KQoJaXR4bl9iZWdpbgoJaW50YyA0IC8vICBrZXlyZWcKCWl0eG5fZmllbGQgVHlwZUVudW0KCgkvLyBGZWUgZmllbGQgbm90IHNldCwgZGVmYXVsdGluZyB0byAwCglpbnRjIDEgLy8gMAoJaXR4bl9maWVsZCBGZWUKCgkvLyBTdWJtaXQgaW5uZXIgdHJhbnNhY3Rpb24KCWl0eG5fc3VibWl0CgoqaWYxX2VuZDoKCXJldHN1YgoKLy8gdXBkYXRlRGVsZWdhdGlvbkZhY3RvcnMoKTogdm9pZAp1cGRhdGVEZWxlZ2F0aW9uRmFjdG9yczoKCXByb3RvIDAgMAoKCS8vICppZjJfY29uZGl0aW9uCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjUxCgkvLyB0aGlzLm9wZXJhdG9yX0NvbW1pdC52YWx1ZSA+IE1JTl9BTEdPX1NUQUtFX0ZPUl9SRVdBUkRTCglieXRlYyAxIC8vICAib3BlcmF0b3JDb21taXQiCglhcHBfZ2xvYmFsX2dldAoJaW50YyAzIC8vIDMwMDAwMDAwMDAwCgk+CglieiAqaWYyX2Vsc2UKCgkvLyAqaWYyX2NvbnNlcXVlbnQKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNTIKCS8vIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlID0gdGhpcy5vcGVyYXRvcl9Db21taXQudmFsdWUKCWJ5dGVjIDAgLy8gICJtYXhEU3Rha2UiCglieXRlYyAxIC8vICAib3BlcmF0b3JDb21taXQiCglhcHBfZ2xvYmFsX2dldAoJYXBwX2dsb2JhbF9wdXQKCWIgKmlmMl9lbmQKCippZjJfZWxzZToKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNTQKCS8vIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlID0gMAoJYnl0ZWMgMCAvLyAgIm1heERTdGFrZSIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKKmlmMl9lbmQ6CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjU4CgkvLyB0aGlzLm1heF9kZWxlZ2F0YWJsZV9zdGFrZS52YWx1ZSArPSBQRVJGT1JNQU5DRV9TVEFLRV9JTkNSRUFTRSAqICh0aGlzLnBlcmZvcm1hbmNlX2NvdW50ZXIudmFsdWUgLyA1KQoJYnl0ZWMgMCAvLyAgIm1heERTdGFrZSIKCWFwcF9nbG9iYWxfZ2V0CglwdXNoaW50IDEwMDAwMDAwMDAwCglieXRlYyA1IC8vICAicGVyZm9ybWFuY2UiCglhcHBfZ2xvYmFsX2dldAoJcHVzaGludCA1CgkvCgkqCgkrCglieXRlYyAwIC8vICAibWF4RFN0YWtlIgoJc3dhcAoJYXBwX2dsb2JhbF9wdXQKCgkvLyAqaWYzX2NvbmRpdGlvbgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjI2MQoJLy8gdGhpcy5hcHAuYWRkcmVzcy5iYWxhbmNlID4gTUFYX0FMR09fU1RBS0VfUEVSX0FDQ09VTlQKCWdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCglhY2N0X3BhcmFtc19nZXQgQWNjdEJhbGFuY2UKCXBvcAoJaW50YyAyIC8vIDUwMDAwMDAwMDAwMDAwCgk+CglieiAqaWYzX2Vsc2VpZjFfY29uZGl0aW9uCgoJLy8gKmlmM19jb25zZXF1ZW50CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjYyCgkvLyB0aGlzLm1heF9kZWxlZ2F0YWJsZV9zdGFrZS52YWx1ZSA9IDAKCWJ5dGVjIDAgLy8gICJtYXhEU3Rha2UiCglpbnRjIDEgLy8gMAoJYXBwX2dsb2JhbF9wdXQKCWIgKmlmM19lbmQKCippZjNfZWxzZWlmMV9jb25kaXRpb246CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjYzCgkvLyB0aGlzLmFwcC5hZGRyZXNzLmJhbGFuY2UgKyB0aGlzLm1heF9kZWxlZ2F0YWJsZV9zdGFrZS52YWx1ZSA+IE1BWF9BTEdPX1NUQUtFX1BFUl9BQ0NPVU5UCglnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwoJYWNjdF9wYXJhbXNfZ2V0IEFjY3RCYWxhbmNlCglwb3AKCWJ5dGVjIDAgLy8gICJtYXhEU3Rha2UiCglhcHBfZ2xvYmFsX2dldAoJKwoJaW50YyAyIC8vIDUwMDAwMDAwMDAwMDAwCgk+CglieiAqaWYzX2VuZAoKCS8vICppZjNfZWxzZWlmMV9jb25zZXF1ZW50CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjY0CgkvLyB0aGlzLm1heF9kZWxlZ2F0YWJsZV9zdGFrZS52YWx1ZSA9CgkvLyAgICAgICAgIHRoaXMuYXBwLmFkZHJlc3MuYmFsYW5jZSArIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlIC0gTUFYX0FMR09fU1RBS0VfUEVSX0FDQ09VTlQKCWJ5dGVjIDAgLy8gICJtYXhEU3Rha2UiCglnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwoJYWNjdF9wYXJhbXNfZ2V0IEFjY3RCYWxhbmNlCglwb3AKCWJ5dGVjIDAgLy8gICJtYXhEU3Rha2UiCglhcHBfZ2xvYmFsX2dldAoJKwoJaW50YyAyIC8vIDUwMDAwMDAwMDAwMDAwCgktCglhcHBfZ2xvYmFsX3B1dAoKKmlmM19lbmQ6CgkvLyAqaWY0X2NvbmRpdGlvbgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjI2OQoJLy8gdGhpcy5tYXhfZGVsZWdhdGFibGVfc3Rha2UudmFsdWUgPiAwCglieXRlYyAwIC8vICAibWF4RFN0YWtlIgoJYXBwX2dsb2JhbF9nZXQKCWludGMgMSAvLyAwCgk+CglieiAqaWY0X2Vsc2UKCgkvLyAqaWY0X2NvbnNlcXVlbnQKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNzAKCS8vIHRoaXMuc2F0dXJhdGlvbl9CVUZGRVIudmFsdWUgPSAodGhpcy5kZWxlZ2F0ZWRfc3Rha2UudmFsdWUgKiAxMDAwKSAvIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlCglieXRlYyA0IC8vICAic2F0dXJhdGlvbkJ1ZmZlciIKCWJ5dGVjIDYgLy8gICJkZWxlZ2F0ZWRTdGFrZSIKCWFwcF9nbG9iYWxfZ2V0CglpbnRjIDUgLy8gMTAwMAoJKgoJYnl0ZWMgMCAvLyAgIm1heERTdGFrZSIKCWFwcF9nbG9iYWxfZ2V0CgkvCglhcHBfZ2xvYmFsX3B1dAoJYiAqaWY0X2VuZAoKKmlmNF9lbHNlOgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjI3MgoJLy8gdGhpcy5zYXR1cmF0aW9uX0JVRkZFUi52YWx1ZSA9IDEwMDAKCWJ5dGVjIDQgLy8gICJzYXR1cmF0aW9uQnVmZmVyIgoJaW50YyA1IC8vIDEwMDAKCWFwcF9nbG9iYWxfcHV0CgoqaWY0X2VuZDoKCXJldHN1YgoKLy8gZ2V0R29PbmxpbmVGZWVBbW91bnQoKTogdWludDY0Ci8vCi8vICoqKioqKioqKioqKioqKioqCi8vIFByaXZhdGUgTWV0aG9kcyAgKgovLyAqKioqKioqKioqKioqKioqKgpnZXRHb09ubGluZUZlZUFtb3VudDoKCXByb3RvIDAgMQoKCS8vICppZjVfY29uZGl0aW9uCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjgyCgkvLyAhdGhpcy5nZXRFbGlnaWJpbGl0eUZsYWcoKQoJY2FsbHN1YiBnZXRFbGlnaWJpbGl0eUZsYWcKCSEKCWJ6ICppZjVfZW5kCgoJLy8gKmlmNV9jb25zZXF1ZW50CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjgzCgkvLyByZXR1cm4gZ2xvYmFscy5wYXlvdXRzR29PbmxpbmVGZWU7CglnbG9iYWwgUGF5b3V0c0dvT25saW5lRmVlCglyZXRzdWIKCippZjVfZW5kOgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjI4NQoJLy8gcmV0dXJuIDA7CglpbnRjIDEgLy8gMAoJcmV0c3ViCgovLyBnZXRFbGlnaWJpbGl0eUZsYWcoKTogYm9vbGVhbgpnZXRFbGlnaWJpbGl0eUZsYWc6Cglwcm90byAwIDEKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6Mjg5CgkvLyByZXR1cm4gdGhpcy5hcHAuYWRkcmVzcy5pbmNlbnRpdmVFbGlnaWJsZTsKCWdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCglhY2N0X3BhcmFtc19nZXQgQWNjdEluY2VudGl2ZUVsaWdpYmxlCglwb3AKCXJldHN1YgoKKmNyZWF0ZV9Ob09wOgoJcHVzaGJ5dGVzIDB4ODQzMGJhOGIgLy8gbWV0aG9kICJjcmVhdGVBcHBsaWNhdGlvbihhcHBsaWNhdGlvbixhZGRyZXNzLHVpbnQ2NCl2b2lkIgoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMAoJbWF0Y2ggKmFiaV9yb3V0ZV9jcmVhdGVBcHBsaWNhdGlvbgoKCS8vIHRoaXMgY29udHJhY3QgZG9lcyBub3QgaW1wbGVtZW50IHRoZSBnaXZlbiBBQkkgbWV0aG9kIGZvciBjcmVhdGUgTm9PcAoJZXJyCgoqY2FsbF9Ob09wOgoJcHVzaGJ5dGVzIDB4ZGZhMjA3NjQgLy8gbWV0aG9kICJhZGRUb09wZXJhdG9yQ29tbWl0KHBheSl2b2lkIgoJcHVzaGJ5dGVzIDB4ZjY3ODYwODQgLy8gbWV0aG9kICJyZW1vdmVGcm9tT3BlcmF0b3JDb21taXQodWludDY0KXZvaWQiCglwdXNoYnl0ZXMgMHg3Y2ZmYzc4NyAvLyBtZXRob2QgInBlcmZvcm1hbmNlQ2hlY2soKXZvaWQiCglwdXNoYnl0ZXMgMHg0YmUyODY3NSAvLyBtZXRob2QgImdldFRvbGVyYXRlZEJsb2NrRGVsdGEoKXVpbnQ2NCIKCXB1c2hieXRlcyAweDQ0YTViNTc2IC8vIG1ldGhvZCAicmVwb3J0UmV3YXJkcyh1aW50NjQpdm9pZCIKCXB1c2hieXRlcyAweGUwOGVmMjFlIC8vIG1ldGhvZCAiYmlkKCl2b2lkIgoJcHVzaGJ5dGVzIDB4N2UzMmY3YTggLy8gbWV0aG9kICJhZGRfc3Rha2UoKXZvaWQiCglwdXNoYnl0ZXMgMHg1ZmZkMDU2ZiAvLyBtZXRob2QgInNuaXRjaF9idXJuKCl2b2lkIgoJcHVzaGJ5dGVzIDB4ZmQwNDYxNzMgLy8gbWV0aG9kICJzbml0Y2goKXZvaWQiCglwdXNoYnl0ZXMgMHhmOTQxNzYyMyAvLyBtZXRob2QgImdldF9zbml0Y2hlZCgpdm9pZCIKCXB1c2hieXRlcyAweGRmNDcxZmQ2IC8vIG1ldGhvZCAiY2xhd2JhY2tfc3Rha2UoKXZvaWQiCglwdXNoYnl0ZXMgMHg0ZDY5ZTFjYiAvLyBtZXRob2QgImNsYXdiYWNrX3N0YWtlX3RvX3ZhbGlkYXRvcigpdm9pZCIKCXB1c2hieXRlcyAweGE2OWVhNGE3IC8vIG1ldGhvZCAiY2xhaW1MZWZ0QWxnbygpdm9pZCIKCXB1c2hieXRlcyAweDE5OWUyOThkIC8vIG1ldGhvZCAiY2hlY2tBbGdvZFZlcnNpb24oKXZvaWQiCglwdXNoYnl0ZXMgMHhiNzQxOTgyNyAvLyBtZXRob2QgImdvT25saW5lKHBheSxzdHJpbmcsc3RyaW5nLHN0cmluZyx1aW50NjQsdWludDY0LHVpbnQ2NCl2b2lkIgoJcHVzaGJ5dGVzIDB4YThjNDdlNzggLy8gbWV0aG9kICJnb09mZmxpbmUodWludDY0KXZvaWQiCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAwCgltYXRjaCAqYWJpX3JvdXRlX2FkZFRvT3BlcmF0b3JDb21taXQgKmFiaV9yb3V0ZV9yZW1vdmVGcm9tT3BlcmF0b3JDb21taXQgKmFiaV9yb3V0ZV9wZXJmb3JtYW5jZUNoZWNrICphYmlfcm91dGVfZ2V0VG9sZXJhdGVkQmxvY2tEZWx0YSAqYWJpX3JvdXRlX3JlcG9ydFJld2FyZHMgKmFiaV9yb3V0ZV9iaWQgKmFiaV9yb3V0ZV9hZGRfc3Rha2UgKmFiaV9yb3V0ZV9zbml0Y2hfYnVybiAqYWJpX3JvdXRlX3NuaXRjaCAqYWJpX3JvdXRlX2dldF9zbml0Y2hlZCAqYWJpX3JvdXRlX2NsYXdiYWNrX3N0YWtlICphYmlfcm91dGVfY2xhd2JhY2tfc3Rha2VfdG9fdmFsaWRhdG9yICphYmlfcm91dGVfY2xhaW1MZWZ0QWxnbyAqYWJpX3JvdXRlX2NoZWNrQWxnb2RWZXJzaW9uICphYmlfcm91dGVfZ29PbmxpbmUgKmFiaV9yb3V0ZV9nb09mZmxpbmUKCgkvLyB0aGlzIGNvbnRyYWN0IGRvZXMgbm90IGltcGxlbWVudCB0aGUgZ2l2ZW4gQUJJIG1ldGhvZCBmb3IgY2FsbCBOb09wCgllcnI=",
+    "approval": "I3ByYWdtYSB2ZXJzaW9uIDExCmludGNibG9jayAxIDAgNTAwMDAwMDAwMDAwMDAgMzAwMDAwMDAwMDAgMiAxMDAwIDYKYnl0ZWNibG9jayAweDZkNjE3ODQ0NTM3NDYxNmI2NSAweDZmNzA2NTcyNjE3NDZmNzI0MzZmNmQ2ZDY5NzQgMHg2ZjcwNjU3MjYxNzQ2ZjcyIDB4IDB4NzM2MTc0NzU3MjYxNzQ2OTZmNmU0Mjc1NjY2NjY1NzIgMHg3MDY1NzI2NjZmNzI2ZDYxNmU2MzY1IDB4NjQ2NTZjNjU2NzYxNzQ2NTY0NTM3NDYxNmI2NSAweDZkNjk2ZTUzNzQ2MTZiNjUgMHg2MzcyNjU2MTc0NmY3MgoKLy8gVGhpcyBURUFMIHdhcyBnZW5lcmF0ZWQgYnkgVEVBTFNjcmlwdCB2MC4xMDUuNQovLyBodHRwczovL2dpdGh1Yi5jb20vYWxnb3JhbmRmb3VuZGF0aW9uL1RFQUxTY3JpcHQKCi8vIFRoaXMgY29udHJhY3QgaXMgY29tcGxpYW50IHdpdGggYW5kL29yIGltcGxlbWVudHMgdGhlIGZvbGxvd2luZyBBUkNzOiBbIEFSQzQgXQoKLy8gVGhlIGZvbGxvd2luZyB0ZW4gbGluZXMgb2YgVEVBTCBoYW5kbGUgaW5pdGlhbCBwcm9ncmFtIGZsb3cKLy8gVGhpcyBwYXR0ZXJuIGlzIHVzZWQgdG8gbWFrZSBpdCBlYXN5IGZvciBhbnlvbmUgdG8gcGFyc2UgdGhlIHN0YXJ0IG9mIHRoZSBwcm9ncmFtIGFuZCBkZXRlcm1pbmUgaWYgYSBzcGVjaWZpYyBhY3Rpb24gaXMgYWxsb3dlZAovLyBIZXJlLCBhY3Rpb24gcmVmZXJzIHRvIHRoZSBPbkNvbXBsZXRlIGluIGNvbWJpbmF0aW9uIHdpdGggd2hldGhlciB0aGUgYXBwIGlzIGJlaW5nIGNyZWF0ZWQgb3IgY2FsbGVkCi8vIEV2ZXJ5IHBvc3NpYmxlIGFjdGlvbiBmb3IgdGhpcyBjb250cmFjdCBpcyByZXByZXNlbnRlZCBpbiB0aGUgc3dpdGNoIHN0YXRlbWVudAovLyBJZiB0aGUgYWN0aW9uIGlzIG5vdCBpbXBsZW1lbnRlZCBpbiB0aGUgY29udHJhY3QsIGl0cyByZXNwZWN0aXZlIGJyYW5jaCB3aWxsIGJlICIqTk9UX0lNUExFTUVOVEVEIiB3aGljaCBqdXN0IGNvbnRhaW5zICJlcnIiCnR4biBBcHBsaWNhdGlvbklECiEKaW50YyA2IC8vIDYKKgp0eG4gT25Db21wbGV0aW9uCisKc3dpdGNoICpjYWxsX05vT3AgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpjcmVhdGVfTm9PcCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQKCipOT1RfSU1QTEVNRU5URUQ6CgkvLyBUaGUgcmVxdWVzdGVkIGFjdGlvbiBpcyBub3QgaW1wbGVtZW50ZWQgaW4gdGhpcyBjb250cmFjdC4gQXJlIHlvdSB1c2luZyB0aGUgY29ycmVjdCBPbkNvbXBsZXRlPyBEaWQgeW91IHNldCB5b3VyIGFwcCBJRD8KCWVycgoKLy8gY3JlYXRlQXBwbGljYXRpb24odWludDY0LGFkZHJlc3MsdWludDY0KXZvaWQKKmFiaV9yb3V0ZV9jcmVhdGVBcHBsaWNhdGlvbjoKCS8vIGNvbnRyYWN0VmVyc2lvbjogdWludDY0Cgl0eG5hIEFwcGxpY2F0aW9uQXJncyAzCglidG9pCgoJLy8gb3BlcmF0b3JBZGRyZXNzOiBhZGRyZXNzCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAyCglkdXAKCWxlbgoJcHVzaGludCAzMgoJPT0KCgkvLyBhcmd1bWVudCAxIChvcGVyYXRvckFkZHJlc3MpIGZvciBjcmVhdGVBcHBsaWNhdGlvbiBtdXN0IGJlIGEgYWRkcmVzcwoJYXNzZXJ0CgoJLy8gY3JlYXRpbmdDb250cmFjdDogdWludDY0Cgl0eG5hIEFwcGxpY2F0aW9uQXJncyAxCglidG9pCgoJLy8gZXhlY3V0ZSBjcmVhdGVBcHBsaWNhdGlvbih1aW50NjQsYWRkcmVzcyx1aW50NjQpdm9pZAoJY2FsbHN1YiBjcmVhdGVBcHBsaWNhdGlvbgoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gY3JlYXRlQXBwbGljYXRpb24oY3JlYXRpbmdDb250cmFjdDogQXBwSUQsIG9wZXJhdG9yQWRkcmVzczogQWRkcmVzcywgY29udHJhY3RWZXJzaW9uOiB1aW50NjQpOiB2b2lkCi8vCi8vICoqKioqKioqKioqKioqKioqKgovLyBQdWJsaWMgTWV0aG9kcyAgICAqCi8vICoqKioqKioqKioqKioqKioqKgovLwovLyBjcmVhdGVBcHBsaWNhdGlvbiBtZXRob2QgY2FsbGVkIGF0IGNyZWF0aW9uLCBpbml0aWFsaXplcyBzb21lIGdsb2JhbEtleSB2YWx1ZXMKLy8gQHBhcmFtIHtBcHBJRH0gY3JlYXRpbmdDb250cmFjdCAtIEFwcGxpY2F0aW9uSUQgZm9yIHRoZSBjcmVhdG9yIGNvbnRyYWN0IChDYWVsdXNBZG1pbkNvbnRyYWN0KQovLyBAcGFyYW0ge0FkZHJlc3N9IG9wZXJhdG9yQWRkcmVzcyAtIEFkZHJlc3Mgb2YgdGhlIG5vZGUgb3BlcmF0b3IgdXNlZCB0byBzaWduIG9ubGluZS9vZmZsaW5lIHR4bnMgYW5kIHBhcnRpY2lwYXRlIGluIGF1Y3Rpb25zCi8vIEBwYXJhbSB7dWludDY0fSBjb250cmFjdFZlcnNpb24gLSBBcHByb3ZhbCBQcm9ncmFtIHZlcnNpb24gZm9yIHRoZSBub2RlIGNvbnRyYWN0LCBzdG9yZWQgaW4gdGhlIENhZWx1c0FkbWluQ29udHJhY3QKY3JlYXRlQXBwbGljYXRpb246Cglwcm90byAzIDAKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6NjMKCS8vIHRoaXMubWluX0NvbW1pdC52YWx1ZSA9IE1JTl9BTEdPX1NUQUtFX0ZPUl9SRVdBUkRTCglieXRlYyA3IC8vICAibWluU3Rha2UiCglpbnRjIDMgLy8gMzAwMDAwMDAwMDAKCWFwcF9nbG9iYWxfcHV0CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjY0CgkvLyB0aGlzLmNyZWF0b3JDb250cmFjdF9BcHBJRC52YWx1ZSA9IGNyZWF0aW5nQ29udHJhY3QKCWJ5dGVjIDggLy8gICJjcmVhdG9yIgoJZnJhbWVfZGlnIC0xIC8vIGNyZWF0aW5nQ29udHJhY3Q6IEFwcElECglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo2NQoJLy8gdGhpcy5vcGVyYXRvcl9BZGRyZXNzLnZhbHVlID0gb3BlcmF0b3JBZGRyZXNzCglieXRlYyAyIC8vICAib3BlcmF0b3IiCglmcmFtZV9kaWcgLTIgLy8gb3BlcmF0b3JBZGRyZXNzOiBBZGRyZXNzCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo2NgoJLy8gdGhpcy52YWxpZGF0b3JQb29sQ29udHJhY3RfdmVyc2lvbi52YWx1ZSA9IGNvbnRyYWN0VmVyc2lvbgoJcHVzaGJ5dGVzIDB4NjM2ZjZlNzQ3MjYxNjM3NDU2NjU3MjczNjk2ZjZlIC8vICJjb250cmFjdFZlcnNpb24iCglmcmFtZV9kaWcgLTMgLy8gY29udHJhY3RWZXJzaW9uOiB1aW50NjQKCWFwcF9nbG9iYWxfcHV0CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjY5CgkvLyB0aGlzLm9wZXJhdG9yX0NvbW1pdC52YWx1ZSA9IDAKCWJ5dGVjIDEgLy8gICJvcGVyYXRvckNvbW1pdCIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo3MAoJLy8gdGhpcy5kZWxlZ2F0ZWRfc3Rha2UudmFsdWUgPSAwCglieXRlYyA2IC8vICAiZGVsZWdhdGVkU3Rha2UiCglpbnRjIDEgLy8gMAoJYXBwX2dsb2JhbF9wdXQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6NzEKCS8vIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlID0gMAoJYnl0ZWMgMCAvLyAgIm1heERTdGFrZSIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo3NAoJLy8gdGhpcy5zYXR1cmF0aW9uX0JVRkZFUi52YWx1ZSA9IDAKCWJ5dGVjIDQgLy8gICJzYXR1cmF0aW9uQnVmZmVyIgoJaW50YyAxIC8vIDAKCWFwcF9nbG9iYWxfcHV0CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjc1CgkvLyB0aGlzLnBlcmZvcm1hbmNlX2NvdW50ZXIudmFsdWUgPSAwCglieXRlYyA1IC8vICAicGVyZm9ybWFuY2UiCglpbnRjIDEgLy8gMAoJYXBwX2dsb2JhbF9wdXQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6NzYKCS8vIHRoaXMuaXNEZWxpbnF1ZW50LnZhbHVlID0gZmFsc2UKCXB1c2hieXRlcyAweDY5NzM0NDY1NmM2OTZlNzE3NTY1NmU3NCAvLyAiaXNEZWxpbnF1ZW50IgoJaW50YyAxIC8vIDAKCXB1c2hieXRlcyAweDAwCglpbnRjIDEgLy8gMAoJdW5jb3ZlciAyCglzZXRiaXQKCWFwcF9nbG9iYWxfcHV0CglyZXRzdWIKCi8vIGFkZFRvT3BlcmF0b3JDb21taXQocGF5KXZvaWQKKmFiaV9yb3V0ZV9hZGRUb09wZXJhdG9yQ29tbWl0OgoJLy8gY29tbWl0OiBwYXkKCXR4biBHcm91cEluZGV4CglpbnRjIDAgLy8gMQoJLQoJZHVwCglndHhucyBUeXBlRW51bQoJaW50YyAwIC8vICBwYXkKCT09CgoJLy8gYXJndW1lbnQgMCAoY29tbWl0KSBmb3IgYWRkVG9PcGVyYXRvckNvbW1pdCBtdXN0IGJlIGEgcGF5IHRyYW5zYWN0aW9uCglhc3NlcnQKCgkvLyBleGVjdXRlIGFkZFRvT3BlcmF0b3JDb21taXQocGF5KXZvaWQKCWNhbGxzdWIgYWRkVG9PcGVyYXRvckNvbW1pdAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gYWRkVG9PcGVyYXRvckNvbW1pdChjb21taXQ6IFBheVR4bik6IHZvaWQKLy8KLy8gVXNlZCBieSB0aGUgbm9kZSBvcGVyYXRvciB0byBhZGQgdG8gaGlzIHN0YWtlIGFtb3VudCBmb3IgdGhlIG5vZGUKLy8KLy8gQHBhcmFtIHtQYXlUeG59IGNvbW1pdCAtIG5vZGUgb3BlcmF0b3Igc3Rha2UgY29tbWl0bWVudAovLyBAdGhyb3dzIHtFcnJvcn0gaWYgdGhlIHNlbmRlciBpc24ndCB0aGUgbm9kZSBvcGVyYXRvciwgdGhlIHJlY2VpdmVyIGlzbid0IHRoZSBhcHAgYWRkcmVzcyBvciBpZiB0aGUgdG90YWwgYmFsYW5jZSBpcyBhYm92ZSAzME0gQWxnbwphZGRUb09wZXJhdG9yQ29tbWl0OgoJcHJvdG8gMSAwCgoJLy8gUHVzaCBlbXB0eSBieXRlcyBhZnRlciB0aGUgZnJhbWUgcG9pbnRlciB0byByZXNlcnZlIHNwYWNlIGZvciBsb2NhbCB2YXJpYWJsZXMKCWJ5dGVjIDMgLy8gMHgKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6ODYKCS8vIHRvdGFsQmFsYW5jZVVwZGF0ZWQgPSB0aGlzLm9wZXJhdG9yX0NvbW1pdC52YWx1ZSArIGNvbW1pdC5hbW91bnQKCWJ5dGVjIDEgLy8gICJvcGVyYXRvckNvbW1pdCIKCWFwcF9nbG9iYWxfZ2V0CglmcmFtZV9kaWcgLTEgLy8gY29tbWl0OiBQYXlUeG4KCWd0eG5zIEFtb3VudAoJKwoJZnJhbWVfYnVyeSAwIC8vIHRvdGFsQmFsYW5jZVVwZGF0ZWQ6IHVpbnQ2NAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo4NwoJLy8gYXNzZXJ0KHRvdGFsQmFsYW5jZVVwZGF0ZWQgPCBNQVhfQUxHT19TVEFLRV9QRVJfQUNDT1VOVCwgJ0NvbnRyYWN0IG1heCBiYWxhbmNlIGNhbm5vdCBiZSBvdmVyIDMwTSBBbGdvJykKCWZyYW1lX2RpZyAwIC8vIHRvdGFsQmFsYW5jZVVwZGF0ZWQ6IHVpbnQ2NAoJaW50YyAyIC8vIDUwMDAwMDAwMDAwMDAwCgk8CgoJLy8gQ29udHJhY3QgbWF4IGJhbGFuY2UgY2Fubm90IGJlIG92ZXIgMzBNIEFsZ28KCWFzc2VydAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czo4OQoJLy8gdmVyaWZ5UGF5VHhuKGNvbW1pdCwgewoJLy8gICAgICAgc2VuZGVyOiB0aGlzLm9wZXJhdG9yX0FkZHJlc3MudmFsdWUsCgkvLyAgICAgICByZWNlaXZlcjogdGhpcy5hcHAuYWRkcmVzcywKCS8vICAgICAgIGFtb3VudDogY29tbWl0LmFtb3VudCwKCS8vICAgICB9KQoJLy8gdmVyaWZ5IHNlbmRlcgoJZnJhbWVfZGlnIC0xIC8vIGNvbW1pdDogUGF5VHhuCglndHhucyBTZW5kZXIKCWJ5dGVjIDIgLy8gICJvcGVyYXRvciIKCWFwcF9nbG9iYWxfZ2V0Cgk9PQoKCS8vIHRyYW5zYWN0aW9uIHZlcmlmaWNhdGlvbiBmYWlsZWQ6IHsidHhuIjoiY29tbWl0IiwiZmllbGQiOiJzZW5kZXIiLCJleHBlY3RlZCI6InRoaXMub3BlcmF0b3JfQWRkcmVzcy52YWx1ZSJ9Cglhc3NlcnQKCgkvLyB2ZXJpZnkgcmVjZWl2ZXIKCWZyYW1lX2RpZyAtMSAvLyBjb21taXQ6IFBheVR4bgoJZ3R4bnMgUmVjZWl2ZXIKCWdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCgk9PQoKCS8vIHRyYW5zYWN0aW9uIHZlcmlmaWNhdGlvbiBmYWlsZWQ6IHsidHhuIjoiY29tbWl0IiwiZmllbGQiOiJyZWNlaXZlciIsImV4cGVjdGVkIjoidGhpcy5hcHAuYWRkcmVzcyJ9Cglhc3NlcnQKCgkvLyB2ZXJpZnkgYW1vdW50CglmcmFtZV9kaWcgLTEgLy8gY29tbWl0OiBQYXlUeG4KCWd0eG5zIEFtb3VudAoJZnJhbWVfZGlnIC0xIC8vIGNvbW1pdDogUGF5VHhuCglndHhucyBBbW91bnQKCT09CgoJLy8gdHJhbnNhY3Rpb24gdmVyaWZpY2F0aW9uIGZhaWxlZDogeyJ0eG4iOiJjb21taXQiLCJmaWVsZCI6ImFtb3VudCIsImV4cGVjdGVkIjoiY29tbWl0LmFtb3VudCJ9Cglhc3NlcnQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6OTQKCS8vIHRoaXMub3BlcmF0b3JfQ29tbWl0LnZhbHVlICs9IGNvbW1pdC5hbW91bnQKCWJ5dGVjIDEgLy8gICJvcGVyYXRvckNvbW1pdCIKCWFwcF9nbG9iYWxfZ2V0CglmcmFtZV9kaWcgLTEgLy8gY29tbWl0OiBQYXlUeG4KCWd0eG5zIEFtb3VudAoJKwoJYnl0ZWMgMSAvLyAgIm9wZXJhdG9yQ29tbWl0IgoJc3dhcAoJYXBwX2dsb2JhbF9wdXQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6OTUKCS8vIHRoaXMudXBkYXRlRGVsZWdhdGlvbkZhY3RvcnMoKQoJY2FsbHN1YiB1cGRhdGVEZWxlZ2F0aW9uRmFjdG9ycwoJcmV0c3ViCgovLyByZW1vdmVGcm9tT3BlcmF0b3JDb21taXQodWludDY0KXZvaWQKKmFiaV9yb3V0ZV9yZW1vdmVGcm9tT3BlcmF0b3JDb21taXQ6CgkvLyBjbGFpbVJlcXVlc3Q6IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQoJYnRvaQoKCS8vIGV4ZWN1dGUgcmVtb3ZlRnJvbU9wZXJhdG9yQ29tbWl0KHVpbnQ2NCl2b2lkCgljYWxsc3ViIHJlbW92ZUZyb21PcGVyYXRvckNvbW1pdAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gcmVtb3ZlRnJvbU9wZXJhdG9yQ29tbWl0KGNsYWltUmVxdWVzdDogdWludDY0KTogdm9pZAovLwovLyBVc2VkIGJ5IHRoZSBub2RlIG9wZXJhdG9yIHRvIHJlbW92ZSBmcm9tIGhpcyBzdGFrZSBhbW91bnQgZm9yIHRoZSBub2RlCi8vIEBwYXJhbSB7dWludDY0fSBjbGFpbVJlcXVlc3QgLSBhbW91bnQgY2xhaW1lZCBieSB0aGUgbm9kZSBvcGVyYXRvciB0byBiZSByZW1vdmVkIGZyb20gdGhlIGNvbnRyYWN0IGJhbGFuY2UgYW5kIHN1YnRyYWN0ZWQgZnJvbSB0aGUgb3BlcmF0b3JfY29tbWl0IGNvdW50ZXIKLy8gQHRocm93cyB7RXJyb3J9IGlmIHRoZSBzZW5kZXIgaXNuJ3QgdGhlIG5vZGUgb3BlcmF0b3Igb3IgaWYgdGhlIHRvdGFsIGNvbW1pdCBieSB0aGUgbm9kZSBvcGVyYXRvciBnb2VzIGJlbG93IHRoZSBtaW4gdGhyZXNob2xkIGZvciByZXdhcmRzIGVsaWdpYmlsaXR5CnJlbW92ZUZyb21PcGVyYXRvckNvbW1pdDoKCXByb3RvIDEgMAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoxMDQKCS8vIHZlcmlmeUFwcENhbGxUeG4odGhpcy50eG4sIHsKCS8vICAgICAgIHNlbmRlcjogdGhpcy5vcGVyYXRvcl9BZGRyZXNzLnZhbHVlLAoJLy8gICAgIH0pCgkvLyB2ZXJpZnkgc2VuZGVyCgl0eG4gU2VuZGVyCglieXRlYyAyIC8vICAib3BlcmF0b3IiCglhcHBfZ2xvYmFsX2dldAoJPT0KCgkvLyB0cmFuc2FjdGlvbiB2ZXJpZmljYXRpb24gZmFpbGVkOiB7InR4biI6InRoaXMudHhuIiwiZmllbGQiOiJzZW5kZXIiLCJleHBlY3RlZCI6InRoaXMub3BlcmF0b3JfQWRkcmVzcy52YWx1ZSJ9Cglhc3NlcnQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MTA4CgkvLyBhc3NlcnQoCgkvLyAgICAgICB0aGlzLm9wZXJhdG9yX0NvbW1pdC52YWx1ZSAtIGNsYWltUmVxdWVzdCA+IE1JTl9BTEdPX1NUQUtFX0ZPUl9SRVdBUkRTLAoJLy8gICAgICAgJ05vZGUgT3BlcmF0b3IgY2FuIHRha2UgaGlzIHN0YWtlIGJlbG93IDMwayBvbmx5IGlmIHRoZSBub2RlIGNvbnRyYWN0IHdpbGwgYmUgY2xvc2VkJwoJLy8gICAgICkKCWJ5dGVjIDEgLy8gICJvcGVyYXRvckNvbW1pdCIKCWFwcF9nbG9iYWxfZ2V0CglmcmFtZV9kaWcgLTEgLy8gY2xhaW1SZXF1ZXN0OiB1aW50NjQKCS0KCWludGMgMyAvLyAzMDAwMDAwMDAwMAoJPgoKCS8vIE5vZGUgT3BlcmF0b3IgY2FuIHRha2UgaGlzIHN0YWtlIGJlbG93IDMwayBvbmx5IGlmIHRoZSBub2RlIGNvbnRyYWN0IHdpbGwgYmUgY2xvc2VkCglhc3NlcnQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MTEyCgkvLyBzZW5kUGF5bWVudCh7CgkvLyAgICAgICBzZW5kZXI6IHRoaXMuYXBwLmFkZHJlc3MsCgkvLyAgICAgICByZWNlaXZlcjogdGhpcy5vcGVyYXRvcl9BZGRyZXNzLnZhbHVlLAoJLy8gICAgICAgYW1vdW50OiBjbGFpbVJlcXVlc3QsCgkvLyAgICAgICBmZWU6IDAsCgkvLyAgICAgfSkKCWl0eG5fYmVnaW4KCWludGMgMCAvLyAgcGF5CglpdHhuX2ZpZWxkIFR5cGVFbnVtCgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjExMwoJLy8gc2VuZGVyOiB0aGlzLmFwcC5hZGRyZXNzCglnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwoJaXR4bl9maWVsZCBTZW5kZXIKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MTE0CgkvLyByZWNlaXZlcjogdGhpcy5vcGVyYXRvcl9BZGRyZXNzLnZhbHVlCglieXRlYyAyIC8vICAib3BlcmF0b3IiCglhcHBfZ2xvYmFsX2dldAoJaXR4bl9maWVsZCBSZWNlaXZlcgoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoxMTUKCS8vIGFtb3VudDogY2xhaW1SZXF1ZXN0CglmcmFtZV9kaWcgLTEgLy8gY2xhaW1SZXF1ZXN0OiB1aW50NjQKCWl0eG5fZmllbGQgQW1vdW50CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjExNgoJLy8gZmVlOiAwCglpbnRjIDEgLy8gMAoJaXR4bl9maWVsZCBGZWUKCgkvLyBTdWJtaXQgaW5uZXIgdHJhbnNhY3Rpb24KCWl0eG5fc3VibWl0CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjExOAoJLy8gdGhpcy51cGRhdGVEZWxlZ2F0aW9uRmFjdG9ycygpCgljYWxsc3ViIHVwZGF0ZURlbGVnYXRpb25GYWN0b3JzCglyZXRzdWIKCi8vIHBlcmZvcm1hbmNlQ2hlY2soKXZvaWQKKmFiaV9yb3V0ZV9wZXJmb3JtYW5jZUNoZWNrOgoJLy8gZXhlY3V0ZSBwZXJmb3JtYW5jZUNoZWNrKCl2b2lkCgljYWxsc3ViIHBlcmZvcm1hbmNlQ2hlY2sKCWludGMgMCAvLyAxCglyZXR1cm4KCi8vIHBlcmZvcm1hbmNlQ2hlY2soKTogdm9pZApwZXJmb3JtYW5jZUNoZWNrOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGdldFRvbGVyYXRlZEJsb2NrRGVsdGEoKXVpbnQ2NAoqYWJpX3JvdXRlX2dldFRvbGVyYXRlZEJsb2NrRGVsdGE6CgkvLyBUaGUgQUJJIHJldHVybiBwcmVmaXgKCXB1c2hieXRlcyAweDE1MWY3Yzc1CgoJLy8gZXhlY3V0ZSBnZXRUb2xlcmF0ZWRCbG9ja0RlbHRhKCl1aW50NjQKCWNhbGxzdWIgZ2V0VG9sZXJhdGVkQmxvY2tEZWx0YQoJaXRvYgoJY29uY2F0Cglsb2cKCWludGMgMCAvLyAxCglyZXR1cm4KCi8vIGdldFRvbGVyYXRlZEJsb2NrRGVsdGEoKTogdWludDY0CmdldFRvbGVyYXRlZEJsb2NrRGVsdGE6Cglwcm90byAwIDEKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MTI1CgkvLyByZXR1cm4gMDsKCWludGMgMSAvLyAwCglyZXRzdWIKCi8vIHJlcG9ydFJld2FyZHModWludDY0KXZvaWQKKmFiaV9yb3V0ZV9yZXBvcnRSZXdhcmRzOgoJLy8gYmxvY2s6IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQoJYnRvaQoKCS8vIGV4ZWN1dGUgcmVwb3J0UmV3YXJkcyh1aW50NjQpdm9pZAoJY2FsbHN1YiByZXBvcnRSZXdhcmRzCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyByZXBvcnRSZXdhcmRzKGJsb2NrOiB1aW50NjQpOiB2b2lkCnJlcG9ydFJld2FyZHM6Cglwcm90byAxIDAKCgkvLyBQdXNoIGVtcHR5IGJ5dGVzIGFmdGVyIHRoZSBmcmFtZSBwb2ludGVyIHRvIHJlc2VydmUgc3BhY2UgZm9yIGxvY2FsIHZhcmlhYmxlcwoJYnl0ZWMgMyAvLyAweAoJZHVwCgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjEzMgoJLy8gcmVwb3J0ID0gYmxvY2tzW2Jsb2NrXS5wcm9wb3NlclBheW91dAoJZnJhbWVfZGlnIC0xIC8vIGJsb2NrOiB1aW50NjQKCWJsb2NrIEJsa1Byb3Bvc2VyUGF5b3V0CglmcmFtZV9idXJ5IDAgLy8gcmVwb3J0OiB1aW50NjQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MTMzCgkvLyB0YWtlRmVlID0gKHJlcG9ydCAqIDYpIC8gMTAwCglmcmFtZV9kaWcgMCAvLyByZXBvcnQ6IHVpbnQ2NAoJaW50YyA2IC8vIDYKCSoKCXB1c2hpbnQgMTAwCgkvCglmcmFtZV9idXJ5IDEgLy8gdGFrZUZlZTogdWludDY0CglyZXRzdWIKCi8vIGJpZCgpdm9pZAoqYWJpX3JvdXRlX2JpZDoKCS8vIGV4ZWN1dGUgYmlkKCl2b2lkCgljYWxsc3ViIGJpZAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gYmlkKCk6IHZvaWQKYmlkOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGFkZF9zdGFrZSgpdm9pZAoqYWJpX3JvdXRlX2FkZF9zdGFrZToKCS8vIGV4ZWN1dGUgYWRkX3N0YWtlKCl2b2lkCgljYWxsc3ViIGFkZF9zdGFrZQoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gYWRkX3N0YWtlKCk6IHZvaWQKYWRkX3N0YWtlOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIHNuaXRjaF9idXJuKCl2b2lkCiphYmlfcm91dGVfc25pdGNoX2J1cm46CgkvLyBleGVjdXRlIHNuaXRjaF9idXJuKCl2b2lkCgljYWxsc3ViIHNuaXRjaF9idXJuCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBzbml0Y2hfYnVybigpOiB2b2lkCnNuaXRjaF9idXJuOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIHNuaXRjaCgpdm9pZAoqYWJpX3JvdXRlX3NuaXRjaDoKCS8vIGV4ZWN1dGUgc25pdGNoKCl2b2lkCgljYWxsc3ViIHNuaXRjaAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gc25pdGNoKCk6IHZvaWQKc25pdGNoOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGdldF9zbml0Y2hlZCgpdm9pZAoqYWJpX3JvdXRlX2dldF9zbml0Y2hlZDoKCS8vIGV4ZWN1dGUgZ2V0X3NuaXRjaGVkKCl2b2lkCgljYWxsc3ViIGdldF9zbml0Y2hlZAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gZ2V0X3NuaXRjaGVkKCk6IHZvaWQKZ2V0X3NuaXRjaGVkOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGNsYXdiYWNrX3N0YWtlKCl2b2lkCiphYmlfcm91dGVfY2xhd2JhY2tfc3Rha2U6CgkvLyBleGVjdXRlIGNsYXdiYWNrX3N0YWtlKCl2b2lkCgljYWxsc3ViIGNsYXdiYWNrX3N0YWtlCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBjbGF3YmFja19zdGFrZSgpOiB2b2lkCmNsYXdiYWNrX3N0YWtlOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGNsYXdiYWNrX3N0YWtlX3RvX3ZhbGlkYXRvcigpdm9pZAoqYWJpX3JvdXRlX2NsYXdiYWNrX3N0YWtlX3RvX3ZhbGlkYXRvcjoKCS8vIGV4ZWN1dGUgY2xhd2JhY2tfc3Rha2VfdG9fdmFsaWRhdG9yKCl2b2lkCgljYWxsc3ViIGNsYXdiYWNrX3N0YWtlX3RvX3ZhbGlkYXRvcgoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gY2xhd2JhY2tfc3Rha2VfdG9fdmFsaWRhdG9yKCk6IHZvaWQKY2xhd2JhY2tfc3Rha2VfdG9fdmFsaWRhdG9yOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGNsYWltTGVmdEFsZ28oKXZvaWQKKmFiaV9yb3V0ZV9jbGFpbUxlZnRBbGdvOgoJLy8gZXhlY3V0ZSBjbGFpbUxlZnRBbGdvKCl2b2lkCgljYWxsc3ViIGNsYWltTGVmdEFsZ28KCWludGMgMCAvLyAxCglyZXR1cm4KCi8vIGNsYWltTGVmdEFsZ28oKTogdm9pZApjbGFpbUxlZnRBbGdvOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGNoZWNrQWxnb2RWZXJzaW9uKCl2b2lkCiphYmlfcm91dGVfY2hlY2tBbGdvZFZlcnNpb246CgkvLyBleGVjdXRlIGNoZWNrQWxnb2RWZXJzaW9uKCl2b2lkCgljYWxsc3ViIGNoZWNrQWxnb2RWZXJzaW9uCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBjaGVja0FsZ29kVmVyc2lvbigpOiB2b2lkCmNoZWNrQWxnb2RWZXJzaW9uOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGdvT25saW5lKHBheSxzdHJpbmcsc3RyaW5nLHN0cmluZyx1aW50NjQsdWludDY0LHVpbnQ2NCl2b2lkCiphYmlfcm91dGVfZ29PbmxpbmU6CgkvLyB2b3RlS2V5RGlsdXRpb246IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgNgoJYnRvaQoKCS8vIHZvdGVMYXN0OiB1aW50NjQKCXR4bmEgQXBwbGljYXRpb25BcmdzIDUKCWJ0b2kKCgkvLyB2b3RlRmlyc3Q6IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgNAoJYnRvaQoKCS8vIHN0YXRlUHJvb2ZQSzogc3RyaW5nCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAzCglleHRyYWN0IDIgMAoKCS8vIHNlbGVjdGlvblBLOiBzdHJpbmcKCXR4bmEgQXBwbGljYXRpb25BcmdzIDIKCWV4dHJhY3QgMiAwCgoJLy8gdm90ZVBLOiBzdHJpbmcKCXR4bmEgQXBwbGljYXRpb25BcmdzIDEKCWV4dHJhY3QgMiAwCgoJLy8gZmVlUGF5bWVudDogcGF5Cgl0eG4gR3JvdXBJbmRleAoJaW50YyAwIC8vIDEKCS0KCWR1cAoJZ3R4bnMgVHlwZUVudW0KCWludGMgMCAvLyAgcGF5Cgk9PQoKCS8vIGFyZ3VtZW50IDYgKGZlZVBheW1lbnQpIGZvciBnb09ubGluZSBtdXN0IGJlIGEgcGF5IHRyYW5zYWN0aW9uCglhc3NlcnQKCgkvLyBleGVjdXRlIGdvT25saW5lKHBheSxzdHJpbmcsc3RyaW5nLHN0cmluZyx1aW50NjQsdWludDY0LHVpbnQ2NCl2b2lkCgljYWxsc3ViIGdvT25saW5lCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBnb09ubGluZShmZWVQYXltZW50OiBQYXlUeG4sIHZvdGVQSzogc3RyaW5nLCBzZWxlY3Rpb25QSzogc3RyaW5nLCBzdGF0ZVByb29mUEs6IHN0cmluZywgdm90ZUZpcnN0OiB1aW50NjQsIHZvdGVMYXN0OiB1aW50NjQsIHZvdGVLZXlEaWx1dGlvbjogdWludDY0KTogdm9pZAovLwovLyBVc2VkIHRvIHNldCB0aGUgQ29udHJhY3QgYWNjb3VudCBvbmxpbmUgZm9yIGNvbnNlbnN1cy4gQWx3YXlzIGNoZWNrIHRoYXQgYWNjb3VudCBpcyBvbmxpbmUgYW5kIGluY2VudGl2ZXNFbGlnaWJsZSBiZWZvcmUgaGF2aW5nIGRlbGVnYXRhYmxlIHN0YWtlCi8vCi8vIEBwYXJhbSB7UGF5VHhufSBmZWVQYXltZW50IC0gUGF5bWVudCB0cmFuc2FjdGlvbiB0byB0aGUgY29udHJhY3QgdG8gY292ZXIgY29zdHMgZm9yIEVsaWdpYmlsaXR5IGZlZTsgMCBmb3IgcmVuZXdhbC4KLy8gQHBhcmFtIHtzdHJpbmd9IHZvdGVQSyAtIFRoZSB2b3RlIHB1YmxpYyBrZXkKLy8gQHBhcmFtIHtzdHJpbmd9IHNlbGVjdGlvblBLIC0gVGhlIHNlbGVjdGlvbiBwdWJsaWMga2V5Ci8vIEBwYXJhbSB7c3RyaW5nfSBzdGF0ZVByb29mUEsgLSB0aGUgc3RhdGUgcHJvb2YgcHVibGljIGtleQovLyBAcGFyYW0ge3VpbnQ2NH0gdm90ZUZpcnN0IC0gSW5kZXggb2YgZmlyc3QgdmFsaWQgYmxvY2sgZm9yIHRoZSBwYXJ0aWNpcGF0aW9uIGtleXMKLy8gQHBhcmFtIHt1aW50NjR9IHZvdGVMYXN0IC0gSW5kZXggb2YgbGFzdCB2YWxpZCBibG9jayBmb3IgZm9yIHRoZSBwYXJ0aWNpcGF0aW9uIGtleXMKLy8gQHBhcmFtIHt1aW50NjR9IHZvdGVLZXlEaWx1dGlvbiAtIFRoZSB2b3RlIGtleSBkaWx1dGlvbiB2YWx1ZQovLyBAdGhyb3dzIHtFcnJvcn0gaWYgdGhlIGNhbGxlciBpc24ndCB0aGUgbm9kZSBvcGVyYXRvcgpnb09ubGluZToKCXByb3RvIDcgMAoKCS8vIFB1c2ggZW1wdHkgYnl0ZXMgYWZ0ZXIgdGhlIGZyYW1lIHBvaW50ZXIgdG8gcmVzZXJ2ZSBzcGFjZSBmb3IgbG9jYWwgdmFyaWFibGVzCglieXRlYyAzIC8vIDB4CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjE4NQoJLy8gYXNzZXJ0KAoJLy8gICAgICAgdGhpcy5hcHAuYWRkcmVzcy5iYWxhbmNlID49IE1JTl9BTEdPX1NUQUtFX0ZPUl9SRVdBUkRTLAoJLy8gICAgICAgJ0NvbnRyYWN0IG5lZWRzIDMwayBBbGdvIGFzIG1pbmltdW0gYmFsYW5jZSBmb3IgcmV3YXJkcyBlbGlnaWJpbGl0eScKCS8vICAgICApCglnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwoJYWNjdF9wYXJhbXNfZ2V0IEFjY3RCYWxhbmNlCglwb3AKCWludGMgMyAvLyAzMDAwMDAwMDAwMAoJPj0KCgkvLyBDb250cmFjdCBuZWVkcyAzMGsgQWxnbyBhcyBtaW5pbXVtIGJhbGFuY2UgZm9yIHJld2FyZHMgZWxpZ2liaWxpdHkKCWFzc2VydAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoxOTEKCS8vIGFzc2VydCgKCS8vICAgICAgIHRoaXMub3BlcmF0b3JfQ29tbWl0LnZhbHVlID49IHRoaXMubWluX0NvbW1pdC52YWx1ZSwKCS8vICAgICAgICdPcGVyYXRvciBjb21taXQgbXVzdCBiZSBoaWdoZXIgdGhhbiBtaW5pbXVtIGJhbGFuY2UgZm9yIHJld2FyZHMgZWxpZ2liaWxpdHknCgkvLyAgICAgKQoJYnl0ZWMgMSAvLyAgIm9wZXJhdG9yQ29tbWl0IgoJYXBwX2dsb2JhbF9nZXQKCWJ5dGVjIDcgLy8gICJtaW5TdGFrZSIKCWFwcF9nbG9iYWxfZ2V0Cgk+PQoKCS8vIE9wZXJhdG9yIGNvbW1pdCBtdXN0IGJlIGhpZ2hlciB0aGFuIG1pbmltdW0gYmFsYW5jZSBmb3IgcmV3YXJkcyBlbGlnaWJpbGl0eQoJYXNzZXJ0CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjE5NgoJLy8gZXh0cmFGZWUgPSB0aGlzLmdldEdvT25saW5lRmVlQW1vdW50KCkKCWNhbGxzdWIgZ2V0R29PbmxpbmVGZWVBbW91bnQKCWZyYW1lX2J1cnkgMCAvLyBleHRyYUZlZTogdWludDY0CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjE5OAoJLy8gdmVyaWZ5UGF5VHhuKGZlZVBheW1lbnQsIHsgcmVjZWl2ZXI6IHRoaXMuYXBwLmFkZHJlc3MsIGFtb3VudDogZXh0cmFGZWUgfSkKCS8vIHZlcmlmeSByZWNlaXZlcgoJZnJhbWVfZGlnIC0xIC8vIGZlZVBheW1lbnQ6IFBheVR4bgoJZ3R4bnMgUmVjZWl2ZXIKCWdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCgk9PQoKCS8vIHRyYW5zYWN0aW9uIHZlcmlmaWNhdGlvbiBmYWlsZWQ6IHsidHhuIjoiZmVlUGF5bWVudCIsImZpZWxkIjoicmVjZWl2ZXIiLCJleHBlY3RlZCI6InRoaXMuYXBwLmFkZHJlc3MifQoJYXNzZXJ0CgoJLy8gdmVyaWZ5IGFtb3VudAoJZnJhbWVfZGlnIC0xIC8vIGZlZVBheW1lbnQ6IFBheVR4bgoJZ3R4bnMgQW1vdW50CglmcmFtZV9kaWcgMCAvLyBleHRyYUZlZTogdWludDY0Cgk9PQoKCS8vIHRyYW5zYWN0aW9uIHZlcmlmaWNhdGlvbiBmYWlsZWQ6IHsidHhuIjoiZmVlUGF5bWVudCIsImZpZWxkIjoiYW1vdW50IiwiZXhwZWN0ZWQiOiJleHRyYUZlZSJ9Cglhc3NlcnQKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjAwCgkvLyBzZW5kT25saW5lS2V5UmVnaXN0cmF0aW9uKHsKCS8vICAgICAgIHZvdGVQSzogdm90ZVBLLAoJLy8gICAgICAgc2VsZWN0aW9uUEs6IHNlbGVjdGlvblBLLAoJLy8gICAgICAgc3RhdGVQcm9vZlBLOiBzdGF0ZVByb29mUEssCgkvLyAgICAgICB2b3RlRmlyc3Q6IHZvdGVGaXJzdCwKCS8vICAgICAgIHZvdGVMYXN0OiB2b3RlTGFzdCwKCS8vICAgICAgIHZvdGVLZXlEaWx1dGlvbjogdm90ZUtleURpbHV0aW9uLAoJLy8gICAgICAgZmVlOiBleHRyYUZlZSwKCS8vICAgICB9KQoJaXR4bl9iZWdpbgoJaW50YyA0IC8vICBrZXlyZWcKCWl0eG5fZmllbGQgVHlwZUVudW0KCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjAxCgkvLyB2b3RlUEs6IHZvdGVQSwoJZnJhbWVfZGlnIC0yIC8vIHZvdGVQSzogc3RyaW5nCglpdHhuX2ZpZWxkIFZvdGVQSwoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyMDIKCS8vIHNlbGVjdGlvblBLOiBzZWxlY3Rpb25QSwoJZnJhbWVfZGlnIC0zIC8vIHNlbGVjdGlvblBLOiBzdHJpbmcKCWl0eG5fZmllbGQgU2VsZWN0aW9uUEsKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjAzCgkvLyBzdGF0ZVByb29mUEs6IHN0YXRlUHJvb2ZQSwoJZnJhbWVfZGlnIC00IC8vIHN0YXRlUHJvb2ZQSzogc3RyaW5nCglpdHhuX2ZpZWxkIFN0YXRlUHJvb2ZQSwoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyMDQKCS8vIHZvdGVGaXJzdDogdm90ZUZpcnN0CglmcmFtZV9kaWcgLTUgLy8gdm90ZUZpcnN0OiB1aW50NjQKCWl0eG5fZmllbGQgVm90ZUZpcnN0CgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjIwNQoJLy8gdm90ZUxhc3Q6IHZvdGVMYXN0CglmcmFtZV9kaWcgLTYgLy8gdm90ZUxhc3Q6IHVpbnQ2NAoJaXR4bl9maWVsZCBWb3RlTGFzdAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyMDYKCS8vIHZvdGVLZXlEaWx1dGlvbjogdm90ZUtleURpbHV0aW9uCglmcmFtZV9kaWcgLTcgLy8gdm90ZUtleURpbHV0aW9uOiB1aW50NjQKCWl0eG5fZmllbGQgVm90ZUtleURpbHV0aW9uCgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjIwNwoJLy8gZmVlOiBleHRyYUZlZQoJZnJhbWVfZGlnIDAgLy8gZXh0cmFGZWU6IHVpbnQ2NAoJaXR4bl9maWVsZCBGZWUKCgkvLyBTdWJtaXQgaW5uZXIgdHJhbnNhY3Rpb24KCWl0eG5fc3VibWl0CglyZXRzdWIKCi8vIGdvT2ZmbGluZSh1aW50NjQpdm9pZAoqYWJpX3JvdXRlX2dvT2ZmbGluZToKCS8vIG9mZmxpbmVDYXNlOiB1aW50NjQKCXR4bmEgQXBwbGljYXRpb25BcmdzIDEKCWJ0b2kKCgkvLyBleGVjdXRlIGdvT2ZmbGluZSh1aW50NjQpdm9pZAoJY2FsbHN1YiBnb09mZmxpbmUKCWludGMgMCAvLyAxCglyZXR1cm4KCi8vIGdvT2ZmbGluZShvZmZsaW5lQ2FzZTogdWludDY0KTogdm9pZAovLwovLyBTZXQgdGhlIGNvbnRyYWN0IGFjY291bnQgdG8gb2ZmbGluZSBzbyB0aGF0IGl0IGRvZXNuJ3QgcGFydGljaXBhdGUgaW4gY29uc2Vuc3VzIGFueW1vcmUuCi8vIGlmIGdyYWNlZnVsIHRoZW4gaXQgb25seSBtZWFucyB0aGF0IHRoZXJlIHdhcyBzb21lIG1pZ3JhdGlvbiBvciBvdGhlciBvcGVyYXRpb24gW0NBU0UgMV0KLy8gaWYgdXNlZCB0byBmb3JjZSB0aGUgYWNjb3VudCBvZmZsaW5lIGJlY2F1c2Ugb2YgYmFkIGJlaGF2aW9yLCB0aGVuIHNldCB1cCBhIGZsYWcgZm9yIHBlbmFsdGllcyBbQ0FTRSAyXQovLwovLyBAcGFyYW0ge3VpbnQ2NH0gb2ZmbGluZUNhc2UgLSB7MH06IGdyYWNlZnVsIG9mZmxpbmUgb2YgdGhlIG5vZGUgYnkgdGhlIG5vZGUgcnVubmVyIG9yIHRoZSBtYWluIENhZWx1cyBjb250cmFjdAovLyB7MX06IG5vZGUgaXMgbWlzYmVoYXZpbmcgYW5kIG5lZWRzIHRvIGJlIHNldCBvZmZsaW5lIGJ5IHRoZSBtYWluIENhZWx1cyBjb250cmFjdApnb09mZmxpbmU6Cglwcm90byAxIDAKCgkvLyAqaWYwX2NvbmRpdGlvbgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjIyOAoJLy8gb2ZmbGluZUNhc2UgPT09IDAKCWZyYW1lX2RpZyAtMSAvLyBvZmZsaW5lQ2FzZTogdWludDY0CglpbnRjIDEgLy8gMAoJPT0KCWJ6ICppZjBfZW5kCgoJLy8gKmlmMF9jb25zZXF1ZW50CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjI5CgkvLyBzZW5kT2ZmbGluZUtleVJlZ2lzdHJhdGlvbih7fSkKCWl0eG5fYmVnaW4KCWludGMgNCAvLyAga2V5cmVnCglpdHhuX2ZpZWxkIFR5cGVFbnVtCgoJLy8gRmVlIGZpZWxkIG5vdCBzZXQsIGRlZmF1bHRpbmcgdG8gMAoJaW50YyAxIC8vIDAKCWl0eG5fZmllbGQgRmVlCgoJLy8gU3VibWl0IGlubmVyIHRyYW5zYWN0aW9uCglpdHhuX3N1Ym1pdAoKKmlmMF9lbmQ6CgkvLyAqaWYxX2NvbmRpdGlvbgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjIzMgoJLy8gb2ZmbGluZUNhc2UgPT09IDEKCWZyYW1lX2RpZyAtMSAvLyBvZmZsaW5lQ2FzZTogdWludDY0CglpbnRjIDAgLy8gMQoJPT0KCWJ6ICppZjFfZW5kCgoJLy8gKmlmMV9jb25zZXF1ZW50CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjM3CgkvLyB2ZXJpZnlBcHBDYWxsVHhuKHRoaXMudHhuLCB7CgkvLyAgICAgICAgIHNlbmRlcjogdGhpcy5jcmVhdG9yQ29udHJhY3RfQXBwSUQudmFsdWUuYWRkcmVzcywKCS8vICAgICAgIH0pCgkvLyB2ZXJpZnkgc2VuZGVyCgl0eG4gU2VuZGVyCglieXRlYyA4IC8vICAiY3JlYXRvciIKCWFwcF9nbG9iYWxfZ2V0CglhcHBfcGFyYW1zX2dldCBBcHBBZGRyZXNzCglwb3AKCT09CgoJLy8gdHJhbnNhY3Rpb24gdmVyaWZpY2F0aW9uIGZhaWxlZDogeyJ0eG4iOiJ0aGlzLnR4biIsImZpZWxkIjoic2VuZGVyIiwiZXhwZWN0ZWQiOiJ0aGlzLmNyZWF0b3JDb250cmFjdF9BcHBJRC52YWx1ZS5hZGRyZXNzIn0KCWFzc2VydAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNDMKCS8vIHRoaXMucGVyZm9ybWFuY2VfY291bnRlci52YWx1ZSA9IDAKCWJ5dGVjIDUgLy8gICJwZXJmb3JtYW5jZSIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNDQKCS8vIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlID0gMAoJYnl0ZWMgMCAvLyAgIm1heERTdGFrZSIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNDUKCS8vIHNlbmRPZmZsaW5lS2V5UmVnaXN0cmF0aW9uKHt9KQoJaXR4bl9iZWdpbgoJaW50YyA0IC8vICBrZXlyZWcKCWl0eG5fZmllbGQgVHlwZUVudW0KCgkvLyBGZWUgZmllbGQgbm90IHNldCwgZGVmYXVsdGluZyB0byAwCglpbnRjIDEgLy8gMAoJaXR4bl9maWVsZCBGZWUKCgkvLyBTdWJtaXQgaW5uZXIgdHJhbnNhY3Rpb24KCWl0eG5fc3VibWl0CgoqaWYxX2VuZDoKCXJldHN1YgoKLy8gdXBkYXRlRGVsZWdhdGlvbkZhY3RvcnMoKTogdm9pZAp1cGRhdGVEZWxlZ2F0aW9uRmFjdG9yczoKCXByb3RvIDAgMAoKCS8vICppZjJfY29uZGl0aW9uCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjUyCgkvLyB0aGlzLm9wZXJhdG9yX0NvbW1pdC52YWx1ZSA+IE1JTl9BTEdPX1NUQUtFX0ZPUl9SRVdBUkRTCglieXRlYyAxIC8vICAib3BlcmF0b3JDb21taXQiCglhcHBfZ2xvYmFsX2dldAoJaW50YyAzIC8vIDMwMDAwMDAwMDAwCgk+CglieiAqaWYyX2Vsc2UKCgkvLyAqaWYyX2NvbnNlcXVlbnQKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNTMKCS8vIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlID0gdGhpcy5vcGVyYXRvcl9Db21taXQudmFsdWUKCWJ5dGVjIDAgLy8gICJtYXhEU3Rha2UiCglieXRlYyAxIC8vICAib3BlcmF0b3JDb21taXQiCglhcHBfZ2xvYmFsX2dldAoJYXBwX2dsb2JhbF9wdXQKCWIgKmlmMl9lbmQKCippZjJfZWxzZToKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNTUKCS8vIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlID0gMAoJYnl0ZWMgMCAvLyAgIm1heERTdGFrZSIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKKmlmMl9lbmQ6CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjU5CgkvLyB0aGlzLm1heF9kZWxlZ2F0YWJsZV9zdGFrZS52YWx1ZSArPSBQRVJGT1JNQU5DRV9TVEFLRV9JTkNSRUFTRSAqICh0aGlzLnBlcmZvcm1hbmNlX2NvdW50ZXIudmFsdWUgLyA1KQoJYnl0ZWMgMCAvLyAgIm1heERTdGFrZSIKCWFwcF9nbG9iYWxfZ2V0CglwdXNoaW50IDEwMDAwMDAwMDAwCglieXRlYyA1IC8vICAicGVyZm9ybWFuY2UiCglhcHBfZ2xvYmFsX2dldAoJcHVzaGludCA1CgkvCgkqCgkrCglieXRlYyAwIC8vICAibWF4RFN0YWtlIgoJc3dhcAoJYXBwX2dsb2JhbF9wdXQKCgkvLyAqaWYzX2NvbmRpdGlvbgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjI2MgoJLy8gdGhpcy5hcHAuYWRkcmVzcy5iYWxhbmNlID4gTUFYX0FMR09fU1RBS0VfUEVSX0FDQ09VTlQKCWdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCglhY2N0X3BhcmFtc19nZXQgQWNjdEJhbGFuY2UKCXBvcAoJaW50YyAyIC8vIDUwMDAwMDAwMDAwMDAwCgk+CglieiAqaWYzX2Vsc2VpZjFfY29uZGl0aW9uCgoJLy8gKmlmM19jb25zZXF1ZW50CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjYzCgkvLyB0aGlzLm1heF9kZWxlZ2F0YWJsZV9zdGFrZS52YWx1ZSA9IDAKCWJ5dGVjIDAgLy8gICJtYXhEU3Rha2UiCglpbnRjIDEgLy8gMAoJYXBwX2dsb2JhbF9wdXQKCWIgKmlmM19lbmQKCippZjNfZWxzZWlmMV9jb25kaXRpb246CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjY0CgkvLyB0aGlzLmFwcC5hZGRyZXNzLmJhbGFuY2UgKyB0aGlzLm1heF9kZWxlZ2F0YWJsZV9zdGFrZS52YWx1ZSA+IE1BWF9BTEdPX1NUQUtFX1BFUl9BQ0NPVU5UCglnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwoJYWNjdF9wYXJhbXNfZ2V0IEFjY3RCYWxhbmNlCglwb3AKCWJ5dGVjIDAgLy8gICJtYXhEU3Rha2UiCglhcHBfZ2xvYmFsX2dldAoJKwoJaW50YyAyIC8vIDUwMDAwMDAwMDAwMDAwCgk+CglieiAqaWYzX2VuZAoKCS8vICppZjNfZWxzZWlmMV9jb25zZXF1ZW50CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjY1CgkvLyB0aGlzLm1heF9kZWxlZ2F0YWJsZV9zdGFrZS52YWx1ZSA9CgkvLyAgICAgICAgIHRoaXMuYXBwLmFkZHJlc3MuYmFsYW5jZSArIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlIC0gTUFYX0FMR09fU1RBS0VfUEVSX0FDQ09VTlQKCWJ5dGVjIDAgLy8gICJtYXhEU3Rha2UiCglnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwoJYWNjdF9wYXJhbXNfZ2V0IEFjY3RCYWxhbmNlCglwb3AKCWJ5dGVjIDAgLy8gICJtYXhEU3Rha2UiCglhcHBfZ2xvYmFsX2dldAoJKwoJaW50YyAyIC8vIDUwMDAwMDAwMDAwMDAwCgktCglhcHBfZ2xvYmFsX3B1dAoKKmlmM19lbmQ6CgkvLyAqaWY0X2NvbmRpdGlvbgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjI3MAoJLy8gdGhpcy5tYXhfZGVsZWdhdGFibGVfc3Rha2UudmFsdWUgPiAwCglieXRlYyAwIC8vICAibWF4RFN0YWtlIgoJYXBwX2dsb2JhbF9nZXQKCWludGMgMSAvLyAwCgk+CglieiAqaWY0X2Vsc2UKCgkvLyAqaWY0X2NvbnNlcXVlbnQKCS8vIGNvbnRyYWN0c1xDYWVsdXNWYWxpZGF0b3IuYWxnby50czoyNzEKCS8vIHRoaXMuc2F0dXJhdGlvbl9CVUZGRVIudmFsdWUgPSAodGhpcy5kZWxlZ2F0ZWRfc3Rha2UudmFsdWUgKiAxMDAwKSAvIHRoaXMubWF4X2RlbGVnYXRhYmxlX3N0YWtlLnZhbHVlCglieXRlYyA0IC8vICAic2F0dXJhdGlvbkJ1ZmZlciIKCWJ5dGVjIDYgLy8gICJkZWxlZ2F0ZWRTdGFrZSIKCWFwcF9nbG9iYWxfZ2V0CglpbnRjIDUgLy8gMTAwMAoJKgoJYnl0ZWMgMCAvLyAgIm1heERTdGFrZSIKCWFwcF9nbG9iYWxfZ2V0CgkvCglhcHBfZ2xvYmFsX3B1dAoJYiAqaWY0X2VuZAoKKmlmNF9lbHNlOgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjI3MwoJLy8gdGhpcy5zYXR1cmF0aW9uX0JVRkZFUi52YWx1ZSA9IDEwMDAKCWJ5dGVjIDQgLy8gICJzYXR1cmF0aW9uQnVmZmVyIgoJaW50YyA1IC8vIDEwMDAKCWFwcF9nbG9iYWxfcHV0CgoqaWY0X2VuZDoKCXJldHN1YgoKLy8gZ2V0R29PbmxpbmVGZWVBbW91bnQoKTogdWludDY0Ci8vCi8vICoqKioqKioqKioqKioqKioqCi8vIFByaXZhdGUgTWV0aG9kcyAgKgovLyAqKioqKioqKioqKioqKioqKgpnZXRHb09ubGluZUZlZUFtb3VudDoKCXByb3RvIDAgMQoKCS8vICppZjVfY29uZGl0aW9uCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjgzCgkvLyAhdGhpcy5nZXRFbGlnaWJpbGl0eUZsYWcoKQoJY2FsbHN1YiBnZXRFbGlnaWJpbGl0eUZsYWcKCSEKCWJ6ICppZjVfZW5kCgoJLy8gKmlmNV9jb25zZXF1ZW50CgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6Mjg0CgkvLyByZXR1cm4gZ2xvYmFscy5wYXlvdXRzR29PbmxpbmVGZWU7CglnbG9iYWwgUGF5b3V0c0dvT25saW5lRmVlCglyZXRzdWIKCippZjVfZW5kOgoJLy8gY29udHJhY3RzXENhZWx1c1ZhbGlkYXRvci5hbGdvLnRzOjI4NgoJLy8gcmV0dXJuIDA7CglpbnRjIDEgLy8gMAoJcmV0c3ViCgovLyBnZXRFbGlnaWJpbGl0eUZsYWcoKTogYm9vbGVhbgpnZXRFbGlnaWJpbGl0eUZsYWc6Cglwcm90byAwIDEKCgkvLyBjb250cmFjdHNcQ2FlbHVzVmFsaWRhdG9yLmFsZ28udHM6MjkwCgkvLyByZXR1cm4gdGhpcy5hcHAuYWRkcmVzcy5pbmNlbnRpdmVFbGlnaWJsZTsKCWdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCglhY2N0X3BhcmFtc19nZXQgQWNjdEluY2VudGl2ZUVsaWdpYmxlCglwb3AKCXJldHN1YgoKKmNyZWF0ZV9Ob09wOgoJcHVzaGJ5dGVzIDB4MTJmOTBjNzMgLy8gbWV0aG9kICJjcmVhdGVBcHBsaWNhdGlvbih1aW50NjQsYWRkcmVzcyx1aW50NjQpdm9pZCIKCXR4bmEgQXBwbGljYXRpb25BcmdzIDAKCW1hdGNoICphYmlfcm91dGVfY3JlYXRlQXBwbGljYXRpb24KCgkvLyB0aGlzIGNvbnRyYWN0IGRvZXMgbm90IGltcGxlbWVudCB0aGUgZ2l2ZW4gQUJJIG1ldGhvZCBmb3IgY3JlYXRlIE5vT3AKCWVycgoKKmNhbGxfTm9PcDoKCXB1c2hieXRlcyAweGRmYTIwNzY0IC8vIG1ldGhvZCAiYWRkVG9PcGVyYXRvckNvbW1pdChwYXkpdm9pZCIKCXB1c2hieXRlcyAweGY2Nzg2MDg0IC8vIG1ldGhvZCAicmVtb3ZlRnJvbU9wZXJhdG9yQ29tbWl0KHVpbnQ2NCl2b2lkIgoJcHVzaGJ5dGVzIDB4N2NmZmM3ODcgLy8gbWV0aG9kICJwZXJmb3JtYW5jZUNoZWNrKCl2b2lkIgoJcHVzaGJ5dGVzIDB4NGJlMjg2NzUgLy8gbWV0aG9kICJnZXRUb2xlcmF0ZWRCbG9ja0RlbHRhKCl1aW50NjQiCglwdXNoYnl0ZXMgMHg0NGE1YjU3NiAvLyBtZXRob2QgInJlcG9ydFJld2FyZHModWludDY0KXZvaWQiCglwdXNoYnl0ZXMgMHhlMDhlZjIxZSAvLyBtZXRob2QgImJpZCgpdm9pZCIKCXB1c2hieXRlcyAweDdlMzJmN2E4IC8vIG1ldGhvZCAiYWRkX3N0YWtlKCl2b2lkIgoJcHVzaGJ5dGVzIDB4NWZmZDA1NmYgLy8gbWV0aG9kICJzbml0Y2hfYnVybigpdm9pZCIKCXB1c2hieXRlcyAweGZkMDQ2MTczIC8vIG1ldGhvZCAic25pdGNoKCl2b2lkIgoJcHVzaGJ5dGVzIDB4Zjk0MTc2MjMgLy8gbWV0aG9kICJnZXRfc25pdGNoZWQoKXZvaWQiCglwdXNoYnl0ZXMgMHhkZjQ3MWZkNiAvLyBtZXRob2QgImNsYXdiYWNrX3N0YWtlKCl2b2lkIgoJcHVzaGJ5dGVzIDB4NGQ2OWUxY2IgLy8gbWV0aG9kICJjbGF3YmFja19zdGFrZV90b192YWxpZGF0b3IoKXZvaWQiCglwdXNoYnl0ZXMgMHhhNjllYTRhNyAvLyBtZXRob2QgImNsYWltTGVmdEFsZ28oKXZvaWQiCglwdXNoYnl0ZXMgMHgxOTllMjk4ZCAvLyBtZXRob2QgImNoZWNrQWxnb2RWZXJzaW9uKCl2b2lkIgoJcHVzaGJ5dGVzIDB4Yjc0MTk4MjcgLy8gbWV0aG9kICJnb09ubGluZShwYXksc3RyaW5nLHN0cmluZyxzdHJpbmcsdWludDY0LHVpbnQ2NCx1aW50NjQpdm9pZCIKCXB1c2hieXRlcyAweGE4YzQ3ZTc4IC8vIG1ldGhvZCAiZ29PZmZsaW5lKHVpbnQ2NCl2b2lkIgoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMAoJbWF0Y2ggKmFiaV9yb3V0ZV9hZGRUb09wZXJhdG9yQ29tbWl0ICphYmlfcm91dGVfcmVtb3ZlRnJvbU9wZXJhdG9yQ29tbWl0ICphYmlfcm91dGVfcGVyZm9ybWFuY2VDaGVjayAqYWJpX3JvdXRlX2dldFRvbGVyYXRlZEJsb2NrRGVsdGEgKmFiaV9yb3V0ZV9yZXBvcnRSZXdhcmRzICphYmlfcm91dGVfYmlkICphYmlfcm91dGVfYWRkX3N0YWtlICphYmlfcm91dGVfc25pdGNoX2J1cm4gKmFiaV9yb3V0ZV9zbml0Y2ggKmFiaV9yb3V0ZV9nZXRfc25pdGNoZWQgKmFiaV9yb3V0ZV9jbGF3YmFja19zdGFrZSAqYWJpX3JvdXRlX2NsYXdiYWNrX3N0YWtlX3RvX3ZhbGlkYXRvciAqYWJpX3JvdXRlX2NsYWltTGVmdEFsZ28gKmFiaV9yb3V0ZV9jaGVja0FsZ29kVmVyc2lvbiAqYWJpX3JvdXRlX2dvT25saW5lICphYmlfcm91dGVfZ29PZmZsaW5lCgoJLy8gdGhpcyBjb250cmFjdCBkb2VzIG5vdCBpbXBsZW1lbnQgdGhlIGdpdmVuIEFCSSBtZXRob2QgZm9yIGNhbGwgTm9PcAoJZXJy",
     "clear": "I3ByYWdtYSB2ZXJzaW9uIDEx"
   },
   "byteCode": {
-    "approval": "CyAHAQCAwPTBmK8LgNiO4W8C6AcGJgkJbWF4RFN0YWtlDm9wZXJhdG9yQ29tbWl0CG9wZXJhdG9yABBzYXR1cmF0aW9uQnVmZmVyC3BlcmZvcm1hbmNlDmRlbGVnYXRlZFN0YWtlCG1pblN0YWtlB2NyZWF0b3IxGBQhBgsxGQiNDAK8AAAAAAAAAAAAAAKuAAAAAAAAAAAAAAA2GgMXNhoCSRWBIBJENhoBF8AyiAACIkOKAwAnByVnJwiL/2cqi/5ngA9jb250cmFjdFZlcnNpb26L/WcpI2cnBiNnKCNnJwQjZycFI2eADGlzRGVsaW5xdWVudCOAAQAjTwJUZ4kxFiIJSTgQIhJEiAACIkOKAQArKWSL/zgICIwAiwAkDESL/zgAKmQSRIv/OAcyChJEi/84CIv/OAgSRClki/84CAgpTGeIAXuJNhoBF4gAAiJDigEAMQAqZBJEKWSL/wklDUSxIrIQMgqyACpksgeL/7III7IBs4gBSYmIAAIiQ4oAAImABBUffHWIAAUWULAiQ4oAASOJNhoBF4gAAiJDigEAK0mL/9EJjACLACEGC4FkCowBiYgAAiJDigAAiYgAAiJDigAAiYgAAiJDigAAiYgAAiJDigAAiYgAAiJDigAAiYgAAiJDigAAiYgAAiJDigAAiYgAAiJDigAAiYgAAiJDigAAiTYaBhc2GgUXNhoEFzYaA1cCADYaAlcCADYaAVcCADEWIglJOBAiEkSIAAIiQ4oHACsxACpkEkQyCnMASCUPRClkJwdkD0SIAN+MAIv/OAcyChJEi/84CIsAEkSxIQSyEIv+sgqL/bILi/yyP4v7sgyL+rINi/myDosAsgGziTYaAReIAAIiQ4oBAIv/IxJBAAmxIQSyECOyAbOL/yISQQAaMQAnCGRyCEgSRCcFI2coI2exIQSyECOyAbOJigAAKWQlDUEABygpZGdCAAMoI2coZIGAyK+gJScFZIEFCgsIKExnMgpzAEgkDUEABigjZ0IAGTIKcwBIKGQIJA1BAAwoMgpzAEgoZAgkCWcoZCMNQQAPJwQnBmQhBQsoZApnQgAFJwQhBWeJigABiAAJFEEAAzITiSOJigABMgpzDEiJgASEMLqLNhoAjgH9RgCABN+iB2SABPZ4YISABHz/x4eABEvihnWABESltXaABOCO8h6ABH4y96iABF/9BW+ABP0EYXOABPlBdiOABN9HH9aABE1p4cuABKaepKeABBmeKY2ABLdBmCeABKjEfng2GgCOEP0m/W/9of2q/b393P3l/e799/4A/gn+Ev4b/iT+Lf6rAA==",
+    "approval": "CyAHAQCAwPTBmK8LgNiO4W8C6AcGJgkJbWF4RFN0YWtlDm9wZXJhdG9yQ29tbWl0CG9wZXJhdG9yABBzYXR1cmF0aW9uQnVmZmVyC3BlcmZvcm1hbmNlDmRlbGVnYXRlZFN0YWtlCG1pblN0YWtlB2NyZWF0b3IxGBQhBgsxGQiNDAK0AAAAAAAAAAAAAAKmAAAAAAAAAAAAAAA2GgMXNhoCSRWBIBJENhoBF4gAAiJDigMAJwclZycIi/9nKov+Z4APY29udHJhY3RWZXJzaW9ui/1nKSNnJwYjZygjZycEI2cnBSNngAxpc0RlbGlucXVlbnQjgAEAI08CVGeJMRYiCUk4ECISRIgAAiJDigEAKylki/84CAiMAIsAJAxEi/84ACpkEkSL/zgHMgoSRIv/OAiL/zgIEkQpZIv/OAgIKUxniAF1iTYaAReIAAIiQ4oBADEAKmQSRClki/8JJQ1EsSKyEDIKsgAqZLIHi/+yCCOyAbOIAUOJiAACIkOKAACJgAQVH3x1iAAFFlCwIkOKAAEjiTYaAReIAAIiQ4oBACtJi//RCYwAiwAhBguBZAqMAYmIAAIiQ4oAAImIAAIiQ4oAAImIAAIiQ4oAAImIAAIiQ4oAAImIAAIiQ4oAAImIAAIiQ4oAAImIAAIiQ4oAAImIAAIiQ4oAAImIAAIiQ4oAAIk2GgYXNhoFFzYaBBc2GgNXAgA2GgJXAgA2GgFXAgAxFiIJSTgQIhJEiAACIkOKBwArMgpzAEglD0QpZCcHZA9EiADfjACL/zgHMgoSRIv/OAiLABJEsSEEshCL/rIKi/2yC4v8sj+L+7IMi/qyDYv5sg6LALIBs4k2GgEXiAACIkOKAQCL/yMSQQAJsSEEshAjsgGzi/8iEkEAGjEAJwhkcghIEkQnBSNnKCNnsSEEshAjsgGziYoAAClkJQ1BAAcoKWRnQgADKCNnKGSBgMivoCUnBWSBBQoLCChMZzIKcwBIJA1BAAYoI2dCABkyCnMASChkCCQNQQAMKDIKcwBIKGQIJAlnKGQjDUEADycEJwZkIQULKGQKZ0IABScEIQVniYoAAYgACRRBAAMyE4kjiYoAATIKcwxIiYAEEvkMczYaAI4B/U4AgATfogdkgAT2eGCEgAR8/8eHgARL4oZ1gAREpbV2gATgjvIegAR+MveogARf/QVvgAT9BGFzgAT5QXYjgATfRx/WgARNaeHLgASmnqSngAQZnimNgAS3QZgngASoxH54NhoAjhD9LP11/af9sP3D/eL96/30/f3+Bv4P/hj+If4q/jP+qwA=",
     "clear": "Cw=="
   },
   "compilerInfo": {
