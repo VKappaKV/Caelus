@@ -13,9 +13,9 @@ export class CaelusValidatorPool extends Contract {
 
   // Contract checks params
 
-  creatorContract_AppID = GlobalStateKey<AppID>({ key: 'creator' });
+  creatorContract_AppReference = GlobalStateKey<AppReference>({ key: 'creator' });
 
-  algod_version = GlobalStateKey<bytes>({ key: 'algodVersion' });
+  algod_version = GlobalStateKey<string>({ key: 'algodV' });
 
   validatorPoolContract_version = GlobalStateKey<uint64>({ key: 'contractVersion' });
 
@@ -31,7 +31,7 @@ export class CaelusValidatorPool extends Contract {
 
   delegated_stake = GlobalStateKey<uint64>({ key: 'delegatedStake' });
 
-  max_delegatable_stake = GlobalStateKey<uint64>({ key: 'max_dStake' });
+  max_delegatable_stake = GlobalStateKey<uint64>({ key: 'maxDStake' });
 
   // Node performance params
 
@@ -53,13 +53,13 @@ export class CaelusValidatorPool extends Contract {
 
   /**
    * createApplication method called at creation, initializes some globalKey values
-   * @param {AppID} creatingContract - ApplicationID for the creator contract (CaelusAdminContract)
+   * @param {AppReference} creatingContract - ApplicationID for the creator contract (CaelusAdminContract)
    * @param {Address} operatorAddress - Address of the node operator used to sign online/offline txns and participate in auctions
    * @param {uint64} contractVersion - Approval Program version for the node contract, stored in the CaelusAdminContract
    */
-  createApplication(creatingContract: AppID, operatorAddress: Address, contractVersion: uint64): void {
+  createApplication(creatingContract: AppReference, operatorAddress: Address, contractVersion: uint64): void {
     this.min_Commit.value = MIN_ALGO_STAKE_FOR_REWARDS;
-    this.creatorContract_AppID.value = creatingContract;
+    this.creatorContract_AppReference.value = creatingContract;
     this.operator_Address.value = operatorAddress;
     this.validatorPoolContract_version.value = contractVersion;
 
@@ -99,7 +99,10 @@ export class CaelusValidatorPool extends Contract {
    * @throws {Error} if the sender isn't the node operator or if the total commit by the node operator goes below the min threshold for rewards eligibility
    */
   removeFromOperatorCommit(claimRequest: uint64): void {
-    assert(this.txn.sender === this.operator_Address.value, 'Only the Node Operator can claim his stake');
+    verifyAppCallTxn(this.txn, {
+      sender: this.operator_Address.value,
+    });
+    // assert(this.txn.sender === this.operator_Address.value, 'Only the Node Operator can claim his stake');
     assert(
       this.operator_Commit.value - claimRequest > MIN_ALGO_STAKE_FOR_REWARDS,
       'Node Operator can take his stake below 30k only if the node contract will be closed'
@@ -150,9 +153,9 @@ export class CaelusValidatorPool extends Contract {
    * Used to set the Contract account online for consensus. Always check that account is online and incentivesEligible before having delegatable stake
    *
    * @param {PayTxn} feePayment - Payment transaction to the contract to cover costs for Eligibility fee; 0 for renewal.
-   * @param {bytes} votePK - The vote public key
-   * @param {bytes} selectionPK - The selection public key
-   * @param {bytes} stateProofPK - the state proof public key
+   * @param {string} votePK - The vote public key
+   * @param {string} selectionPK - The selection public key
+   * @param {string} stateProofPK - the state proof public key
    * @param {uint64} voteFirst - Index of first valid block for the participation keys
    * @param {uint64} voteLast - Index of last valid block for for the participation keys
    * @param {uint64} voteKeyDilution - The vote key dilution value
@@ -160,18 +163,21 @@ export class CaelusValidatorPool extends Contract {
    */
   goOnline(
     feePayment: PayTxn,
-    votePK: bytes,
-    selectionPK: bytes,
-    stateProofPK: bytes,
+    votePK: string,
+    selectionPK: string,
+    stateProofPK: string,
     voteFirst: uint64,
     voteLast: uint64,
     voteKeyDilution: uint64
   ): void {
     // Check that sender is the node operator
-    assert(
+    /*     assert(
       this.txn.sender === this.operator_Address.value,
       'Only the Node Operator can register online with participation key'
-    );
+    ); */
+    verifyAppCallTxn(this.txn, {
+      sender: this.operator_Address.value,
+    });
 
     // Check that contract balance is at least 30k Algo
     assert(
@@ -209,20 +215,27 @@ export class CaelusValidatorPool extends Contract {
    *                              {1}: node is misbehaving and needs to be set offline by the main Caelus contract
    */
   goOffline(offlineCase: uint64): void {
-    assert(
-      this.txn.sender === this.operator_Address.value || this.txn.sender === this.creatorContract_AppID.value.address,
+    /* assert(
+      this.txn.sender === this.operator_Address.value ||
+        this.txn.sender === this.creatorContract_AppReference.value.address,
       'Only Node Operator or Caelus Admin contract can set the contract offline'
-    );
+    ); */
+    /* verifyAppCallTxn(this.txn, {
+      sender: this.creatorContract_AppReference.value.address || this.operator_Address.value,
+    }); */
 
     if (offlineCase === 0) {
       sendOfflineKeyRegistration({});
     }
 
     if (offlineCase === 1) {
-      assert(
-        this.txn.sender === this.creatorContract_AppID.value.address,
+      /* assert(
+        this.txn.sender === this.creatorContract_AppReference.value.address,
         'Only the Caelus main contract can set the contract offline and issue a penalty'
-      );
+      ); */
+      verifyAppCallTxn(this.txn, {
+        sender: this.creatorContract_AppReference.value.address,
+      });
       // if it's going to be set offline by the CaelusAdmin Contract might change penalty to just clawback every stake
       // directly and reset all the values to 0; with Delinquency max_delegatable_stake can't be recalculated to start
       // to the init node commit but only on performance for a certain number of blocks depending on the tolerated block delta
@@ -265,9 +278,8 @@ export class CaelusValidatorPool extends Contract {
   /** *****************
    * Private Methods  *
    ****************** */
-
   private getGoOnlineFeeAmount(): uint64 {
-    if (!this.getEligibilityFlag) {
+    if (!this.getEligibilityFlag()) {
       return globals.payoutsGoOnlineFee;
     }
     return 0;

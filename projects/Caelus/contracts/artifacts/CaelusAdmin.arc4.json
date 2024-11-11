@@ -1,0 +1,13 @@
+{
+  "name": "CaelusAdmin",
+  "desc": "",
+  "methods": [
+    {
+      "name": "createApplication",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ]
+}

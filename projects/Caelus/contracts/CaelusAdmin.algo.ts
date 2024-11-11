@@ -10,7 +10,7 @@ import { Contract } from '@algorandfoundation/tealscript';
  * - deploy Validator Pool Contracts;
  */
 export class CaelusAdmin extends Contract {
-  programVersion = 11;
+  /*   programVersion = 11;
 
   pegRatio = GlobalStateKey<ufixed<64, 2>>({ key: 'peg' });
 
@@ -22,13 +22,12 @@ export class CaelusAdmin extends Contract {
 
   totalAlgoStaked = GlobalStateKey<uint64>({ key: 'totalstake' });
 
-  init_bsALGO = GlobalStateKey<boolean>({ key: 'init_bsALGO' });
-
-  createApplication(): void {
+  init_bsALGO = GlobalStateKey<boolean>({ key: 'init_bsALGO' }); */
+  /*   createApplication(): void {
     this.totalAlgoStaked.value = 0;
     this.init_bsALGO.value = false;
     this.initializedPoolContract.value = false;
     this.validatorPoolContractVersion.value = 0;
     this.pegRatio.value = 1.0;
-  }
+  } */
 }
