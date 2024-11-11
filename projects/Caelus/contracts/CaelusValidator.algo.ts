@@ -223,6 +223,9 @@ export class CaelusValidatorPool extends Contract {
         this.txn.sender === this.creatorContract_AppID.value.address,
         'Only the Caelus main contract can set the contract offline and issue a penalty'
       );
+      // if it's going to be set offline by the CaelusAdmin Contract might change penalty to just clawback every stake
+      // directly and reset all the values to 0; with Delinquency max_delegatable_stake can't be recalculated to start
+      // to the init node commit but only on performance for a certain number of blocks depending on the tolerated block delta
       this.performance_counter.value = 0;
       this.max_delegatable_stake.value = 0; // setting the contract to a state where it can get snitched from other contract or directly by a following txn appCall
       sendOfflineKeyRegistration({});
