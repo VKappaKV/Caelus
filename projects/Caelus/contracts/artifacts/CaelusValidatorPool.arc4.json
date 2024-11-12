@@ -67,12 +67,7 @@
     },
     {
       "name": "reportRewards",
-      "args": [
-        {
-          "name": "block",
-          "type": "uint64"
-        }
-      ],
+      "args": [],
       "returns": {
         "type": "void"
       }
@@ -85,14 +80,14 @@
       }
     },
     {
-      "name": "add_stake",
+      "name": "addStake",
       "args": [],
       "returns": {
         "type": "void"
       }
     },
     {
-      "name": "snitch_burn",
+      "name": "snitchBurn",
       "args": [],
       "returns": {
         "type": "void"
@@ -106,21 +101,21 @@
       }
     },
     {
-      "name": "get_snitched",
+      "name": "getSnitched",
       "args": [],
       "returns": {
         "type": "void"
       }
     },
     {
-      "name": "clawback_stake",
+      "name": "clawbackStake",
       "args": [],
       "returns": {
         "type": "void"
       }
     },
     {
-      "name": "clawback_stake_to_validator",
+      "name": "clawbackStakeToValidator",
       "args": [],
       "returns": {
         "type": "void"
@@ -151,17 +146,17 @@
         },
         {
           "name": "votePK",
-          "type": "string",
+          "type": "byte[]",
           "desc": "The vote public key"
         },
         {
           "name": "selectionPK",
-          "type": "string",
+          "type": "byte[]",
           "desc": "The selection public key"
         },
         {
           "name": "stateProofPK",
-          "type": "string",
+          "type": "byte[]",
           "desc": "the state proof public key"
         },
         {

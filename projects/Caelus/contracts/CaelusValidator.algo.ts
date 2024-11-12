@@ -15,7 +15,7 @@ export class CaelusValidatorPool extends Contract {
 
   creatorContractAppID = GlobalStateKey<AppID>({ key: 'creator' });
 
-  algodVersion = GlobalStateKey<string>({ key: 'algodV' });
+ // algodVersion = GlobalStateKey<bytes>({ key: 'algodV' });
 
   poolName = GlobalStateKey<string>({ key: 'name' });
 
@@ -167,9 +167,9 @@ export class CaelusValidatorPool extends Contract {
    * Used to set the Contract account online for consensus. Always check that account is online and incentivesEligible before having delegatable stake
    *
    * @param {PayTxn} feePayment - Payment transaction to the contract to cover costs for Eligibility fee; 0 for renewal.
-   * @param {string} votePK - The vote public key
-   * @param {string} selectionPK - The selection public key
-   * @param {string} stateProofPK - the state proof public key
+   * @param {bytes} votePK - The vote public key
+   * @param {bytes} selectionPK - The selection public key
+   * @param {bytes} stateProofPK - the state proof public key
    * @param {uint64} voteFirst - Index of first valid block for the participation keys
    * @param {uint64} voteLast - Index of last valid block for for the participation keys
    * @param {uint64} voteKeyDilution - The vote key dilution value
@@ -177,18 +177,18 @@ export class CaelusValidatorPool extends Contract {
    */
   goOnline(
     feePayment: PayTxn,
-    votePK: string,
-    selectionPK: string,
-    stateProofPK: string,
+    votePK: bytes,
+    selectionPK: bytes,
+    stateProofPK: bytes,
     voteFirst: uint64,
     voteLast: uint64,
     voteKeyDilution: uint64
   ): void {
     // Check that sender is the node operator
-    /*     assert(
-      this.txn.sender === this.operator_Address.value,
+    assert(
+      this.txn.sender === this.operatorAddress.value,
       'Only the Node Operator can register online with participation key'
-    ); */
+    );
     /* verifyAppCallTxn(this.txn, {
       sender: this.operator_Address.value,
     }); */
