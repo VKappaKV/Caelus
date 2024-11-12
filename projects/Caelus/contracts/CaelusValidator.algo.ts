@@ -189,9 +189,6 @@ export class CaelusValidatorPool extends Contract {
       this.txn.sender === this.operatorAddress.value,
       'Only the Node Operator can register online with participation key'
     );
-    /* verifyAppCallTxn(this.txn, {
-      sender: this.operator_Address.value,
-    }); */
 
     // Check that contract balance is at least 30k Algo
     assert(
@@ -229,13 +226,10 @@ export class CaelusValidatorPool extends Contract {
    *                              {1}: node is misbehaving and needs to be set offline by the main Caelus contract
    */
   goOffline(offlineCase: uint64): void {
-    /* assert(
-      this.txn.sender === this.operator_Address.value || this.txn.sender === this.creatorContract_AppID.value.address,
+    assert(
+      this.txn.sender === this.operatorAddress.value || this.txn.sender === this.creatorContractAppID.value.address,
       'Only Node Operator or Caelus Admin contract can set the contract offline'
-    ); */
-    /* verifyAppCallTxn(this.txn, {
-      sender: this.creatorContract_AppID.value.address || this.operator_Address.value,
-    }); */
+    );
 
     if (offlineCase === 0) {
       sendOfflineKeyRegistration({});
