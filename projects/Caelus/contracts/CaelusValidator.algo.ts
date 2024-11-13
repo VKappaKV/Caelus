@@ -15,8 +15,6 @@ export class CaelusValidatorPool extends Contract {
 
   creatorContractAppID = GlobalStateKey<AppID>({ key: 'creator' });
 
- // algodVersion = GlobalStateKey<bytes>({ key: 'algodV' }); forced by the node runner (removable if can't be properly checked)
-
   poolName = GlobalStateKey<string>({ key: 'name' });
 
   validatorPoolContractVersion = GlobalStateKey<uint64>({ key: 'contractVersion' });
@@ -169,14 +167,11 @@ export class CaelusValidatorPool extends Contract {
   // used by CA contract to remove the delegated stake and send it back to the auction
   clawbackStake(): void {}
 
-  // used by other CV contracts to claim stake in case of delinquent stake
+  // used by other CV contracts to claim stake in case of stake above limit
   clawbackStakeToValidator(): void {}
 
   // used by CA to clean up remaining Algo
   claimLeftAlgo(): void {}
-
-  // TODO in the future. Can we trustlessly check the algod version? Or does it need an oracle?
-  checkAlgodVersion(): void {}
 
   /**
    * Used to set the Contract account online for consensus. Always check that account is online and incentivesEligible before having delegatable stake
@@ -265,6 +260,7 @@ export class CaelusValidatorPool extends Contract {
       this.lastDelinquencyReportBlock.value = globals.round; // flag delinquency state
       this.performanceCounter.value = 0;
       this.maxDelegatableStake.value = 0; // setting the contract to a state where it can get snitched from other contract or directly by a following txn appCall
+      this.clawbackStake()  // send delegated stake back to auction contract to be moved to other nodes
       sendOfflineKeyRegistration({});
     }
   }
