@@ -5,6 +5,8 @@ export const SSC_VALUE_UINT = 28500; // cost for value as uint64
 export const SSC_VALUE_BYTES = 50000; // cost for value as bytes
 
 export const PROTOCOL_COMMISSION = 10;
+export const PERFORMANCE_STEP = 5;
+export const MAX_DELINQUENCY_TOLERATED = 10;
 
 export const EPOCH_LENGTH = 30857; // TBD if epochs are needed
 export const ALGORAND_STAKING_BLOCK_DELAY = 320; // # of blocks until algorand sees online balance changes in staking
