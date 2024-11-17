@@ -1,5 +1,5 @@
 import { Contract } from '@algorandfoundation/tealscript';
-import { MAX_ALGO_STAKE_PER_ACCOUNT, MIN_ALGO_STAKE_FOR_REWARDS, PERFORMANCE_STAKE_INCREASE, PERFORMANCE_STEP } from './constants.algo';
+import { MAX_ALGO_STAKE_PER_ACCOUNT, MAX_DELINQUENCY_TOLERATED, MIN_ALGO_STAKE_FOR_REWARDS, PERFORMANCE_STAKE_INCREASE, PERFORMANCE_STEP } from './constants.algo';
 
 /**
  * Caelus Validator Pool Contract.
@@ -24,8 +24,6 @@ export class CaelusValidatorPool extends Contract {
   operatorAddress = GlobalStateKey<Address>({ key: 'operator' });
 
   operatorCommit = GlobalStateKey<uint64>({ key: 'operatorCommit' });
-
-  minCommit = GlobalStateKey<uint64>({ key: 'minStake' });
 
   // Delegated Stake params
 
@@ -60,7 +58,6 @@ export class CaelusValidatorPool extends Contract {
    * @param {uint64} contractVersion - Approval Program version for the node contract, stored in the CaelusAdminContract
    */
   createApplication(creatingContract: AppID, operatorAddress: Address, contractVersion: uint64, poolName: string): void {
-    this.minCommit.value = MIN_ALGO_STAKE_FOR_REWARDS;
     this.creatorContractAppID.value = creatingContract;
     this.operatorAddress.value = operatorAddress;
     this.validatorPoolContractVersion.value = contractVersion;
@@ -126,16 +123,39 @@ export class CaelusValidatorPool extends Contract {
   // Todo
   // check where falls the last reported proposed block within the tolerated block delta
   // --> reports delinquency if below expectations; updates last DeliquencyReportBlock and checks if current call is too close from last
-  performanceCheck(): void {}
+  performanceCheck(): void {
+    // check to not make checks be stacked in close proximity calls
+    assert(globals.round - this.lastDelinquencyReportBlock.value > this.getExpectedProposalsDelta(), 'Wait at least one ProposalsDelta between Performance checks');
+    const currentAccountDelta = globals.round - this.app.address.lastProposed;
+    const isPerformingAsExpected = this.getExpectedProposalsDelta() > currentAccountDelta 
+    const isPerformingAsTolerated = this.getToleratedBlockDelta() > currentAccountDelta 
+    // exit if account is performing as expected
+    if (isPerformingAsExpected && isPerformingAsTolerated){
+      return
+    } 
+    if (!isPerformingAsExpected){
+      this.performanceCounter.value = this.performanceCounter.value > 0 ? this.performanceCounter.value - 1 : 0;
+    }
+    if (!isPerformingAsTolerated){
+      this.delinquencyScore.value++;
+      this.delinquencyThresholdCheck()
+    }
+    this.lastDelinquencyReportBlock.value = globals.round;
+  }
 
   // call this method if Account has been flagged as delinquent; wait fixed amount of time before resetting it; and expects payment if necessary (?)
   solveDelinquency(): void{}
 
-  //
+  // private as consequence to RewardReport? 
   fixDelinquencyScore(): void{}
 
-  // calculate tolerated wait time given the online stake for this account vs total online stake
+  // calculate tolerated wait for round after the expected threshold has passed
   getToleratedBlockDelta(): uint64 {
+    return 0;
+  }
+
+  // calculate round number between proposals given the online stake for this account vs total online stake
+  getExpectedProposalsDelta(): uint64 {
     return 0;
   }
 
@@ -172,6 +192,9 @@ export class CaelusValidatorPool extends Contract {
 
   // used by other CV contracts to claim stake in case of stake above limit or for penalty detected by a validator
   clawbackStakeToValidator(): void {}
+
+  // use: callable by anyone through CA; check contract version vs latest;  
+  upgradeToNewValidatorVersion(): void{}
 
   // used by CA to clean up remaining Algo
   claimLeftAlgo(): void {}
@@ -216,13 +239,13 @@ export class CaelusValidatorPool extends Contract {
 
     // Check that contract balance is at least 30k Algo
     assert(
-      this.app.address.balance >= MIN_ALGO_STAKE_FOR_REWARDS,
+      this.app.address.balance >= globals.payoutsMinBalance,
       'Contract needs 30k Algo as minimum balance for rewards eligibility'
     );
 
     // Check that operator commit to the contract balance is at least 30k Algo
     assert(
-      this.operatorCommit.value >= this.minCommit.value,
+      this.operatorCommit.value >= globals.payoutsMinBalance,
       'Operator commit must be higher than minimum balance for rewards eligibility'
     );
     assert(!this.isDelinquent.value, 'account cannot be set to online if delinquency flag is active, must solve delinquency first');
@@ -266,13 +289,10 @@ export class CaelusValidatorPool extends Contract {
         this.txn.sender === this.creatorContractAppID.value.address,
         'Only the Caelus main contract can set the contract offline and issue a penalty'
       );
-      // if it's going to be set offline by the CaelusAdmin Contract might change penalty to just clawback every stake
-      // directly and reset all the values to 0; with Delinquency maxDelegatableStake can't be recalculated to start
-      // to the init node commit but only on performance for a certain number of blocks depending on the tolerated block delta
-      this.isDelinquent.value = true; 
-      this.lastDelinquencyReportBlock.value = globals.round; // flag delinquency state
+      assert(
+        this.isDelinquent.value, 'Only Delinquent nodes can be forced offline'
+      );
       this.performanceCounter.value = 0;
-      this.maxDelegatableStake.value = 0; // setting the contract to a state where it can get snitched from other contract or directly by a following txn appCall
       this.clawbackStake()  // send delegated stake back to auction contract to be moved to other nodes
       sendOfflineKeyRegistration({});
     }
@@ -293,6 +313,10 @@ export class CaelusValidatorPool extends Contract {
 
   private getEligibilityFlag(): boolean {
     return this.app.address.incentiveEligible;
+  }
+
+  private delinquencyThresholdCheck(): void{
+    this.isDelinquent.value = this.delinquencyScore.value > MAX_DELINQUENCY_TOLERATED 
   }
 
   private updateDelegationFactors(): void {
