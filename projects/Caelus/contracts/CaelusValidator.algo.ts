@@ -155,6 +155,9 @@ export class CaelusValidatorPool extends Contract {
   // called by the auction contract to assign stake to the node contract at mint
   addStake(): void {}
 
+  //called by the auction contract at burn
+  takeStake():void{}
+
   // call the auction contract to report the saturation buffer of itself or another validator contract
   snitchBurn(): void {}
 
@@ -164,14 +167,24 @@ export class CaelusValidatorPool extends Contract {
   // TBD if it makes sense to keep this one or not and just move logic to checks methods
   getSnitched(): void {}
 
-  // used by CA contract to remove the delegated stake and send it back to the auction
+  // used by CA contract to remove the delegated stake and send it back to the auction in case of snitch
   clawbackStake(): void {}
 
-  // used by other CV contracts to claim stake in case of stake above limit
+  // used by other CV contracts to claim stake in case of stake above limit or for penalty detected by a validator
   clawbackStakeToValidator(): void {}
 
   // used by CA to clean up remaining Algo
   claimLeftAlgo(): void {}
+
+  registerToXGov(): void{}
+
+  delegateXGovVoting():void{}
+
+  // shut down contract account
+  // only for CA, funds must have been withdrawn first, clean up and close
+  closeOutOfApplication(...args: any[]): void {
+    
+  }
 
   /**
    * Used to set the Contract account online for consensus. Always check that account is online and incentivesEligible before having delegatable stake
@@ -299,7 +312,7 @@ export class CaelusValidatorPool extends Contract {
       this.maxDelegatableStake.value = 0;
     } else if (this.app.address.balance + this.maxDelegatableStake.value > MAX_ALGO_STAKE_PER_ACCOUNT) {
       this.maxDelegatableStake.value =
-        this.app.address.balance + this.maxDelegatableStake.value - MAX_ALGO_STAKE_PER_ACCOUNT;
+        MAX_ALGO_STAKE_PER_ACCOUNT - this.app.address.balance;
     }
 
     // calculate saturation buffer with 3 decimal precision
