@@ -110,6 +110,10 @@ export class CaelusValidatorPool extends Contract {
       'Node Operator can take his stake below 30k only if the node contract will be closed'
     );
 
+    assert(
+      this.operatorCommit.value > claimRequest, 'Node Operator cannot claim more than he has'
+    )
+
     sendPayment({
       sender: this.app.address,
       receiver: this.operatorAddress.value,
@@ -126,9 +130,10 @@ export class CaelusValidatorPool extends Contract {
   performanceCheck(): void {
     // check to not make checks be stacked in close proximity calls
     assert(globals.round - this.lastDelinquencyReportBlock.value > this.getExpectedProposalsDelta(), 'Wait at least one ProposalsDelta between Performance checks');
-    const currentAccountDelta = globals.round - this.app.address.lastProposed;
-    const isPerformingAsExpected = this.getExpectedProposalsDelta() > currentAccountDelta 
-    const isPerformingAsTolerated = this.getToleratedBlockDelta() > currentAccountDelta 
+    const deltaWithLatestProposal = globals.round - this.app.address.lastProposed;
+    // todo: check if isPerformingAsExpected needs a higher delay
+    const isPerformingAsExpected = this.getExpectedProposalsDelta() > deltaWithLatestProposal 
+    const isPerformingAsTolerated = this.getToleratedBlockDelta() > deltaWithLatestProposal 
     // exit if account is performing as expected
     if (isPerformingAsExpected && isPerformingAsTolerated){
       return
@@ -138,42 +143,81 @@ export class CaelusValidatorPool extends Contract {
     }
     if (!isPerformingAsTolerated){
       this.delinquencyScore.value++;
-      this.delinquencyThresholdCheck()
+      this.delinquencyThresholdCheck() // if higher than tolerated will set account to isDelinquent; should this be an automatic follow up to set account offline?
     }
     this.lastDelinquencyReportBlock.value = globals.round;
   }
 
   // call this method if Account has been flagged as delinquent; wait fixed amount of time before resetting it; and expects payment if necessary (?)
-  solveDelinquency(): void{}
+  solveDelinquency(): void{
+    assert(this.isDelinquent.value, 'Account is not delinquent');
+    // should there be an additional fee?
+    // check that all the delegated stake has been given back to the auction contract?
+    this.isDelinquent.value = true;
+  }
 
-  // private as consequence to RewardReport? 
-  fixDelinquencyScore(): void{}
+  private fixDelinquencyScore(): void{
+    if(this.delinquencyScore.value <= 0){
+      return
+    }
+    // cleanup only if the latest delinquency report is far older 
+    if(globals.round - this.lastDelinquencyReportBlock.value < this.getToleratedBlockDelta()){
+      return
+    }
+  }
 
   // calculate tolerated wait for round after the expected threshold has passed
-  getToleratedBlockDelta(): uint64 {
-    return 0;
+  private getToleratedBlockDelta(): uint64 {
+    return this.getExpectedProposalsDelta() * 10; 
   }
 
   // calculate round number between proposals given the online stake for this account vs total online stake
-  getExpectedProposalsDelta(): uint64 {
+  private getExpectedProposalsDelta(): uint64 {
+    const currentOnlineStake = onlineStake()
+    const currentAccountStake = this.app.address.voterBalance
+    const accountTotalStakeShare = currentAccountStake / currentOnlineStake;
+    // TODO how to calculate the number of rounds per DAY/EPOCH -> How many does the account propose? --> calculate the delta ; set a rounding error
     return 0;
   }
 
   // report the proposed block and send the rewards to the rewards_reserve_address; keep the operator fee
-  reportRewards(/* block: uint64 */): void {
+  reportRewards(block: uint64): void {
     // call CaelusAdmin contract
-    // use the block proposer to get performance++
-    // on successfull reward report clear delinquencyScore (or reduce significantly if last delinquencyReport is older than Delta)
-    // use the proposerPayout to declare the amount
-    // const report = blocks[block].proposerPayout;
-    // const takeFee = (report * 6) / 100;
+    const isOperatorReportTime = globals.round - block < 700;
+    const report = blocks[block].proposerPayout;
+    const takeFee = (report * 6) / 100; // do I need to ch
+    // TODO send here the payout to the CaelusAdmin; if it fails it won't advance the value update in the method
+    this.performanceCheck()
+    if (this.getExpectedProposalsDelta() < (globals.round - this.lastRewardReport.value)){
+      this.performanceCounter.value++;
+      this.fixDelinquencyScore();
+    }
+    this.lastRewardReport.value = block;
+    if(isOperatorReportTime){
+      this.operatorCommit.value += takeFee;
+    } else { //snitch rewards
+      const snitched = takeFee / 2;
+      const opKeeps = takeFee - snitched; // might there be some math float bs that just using both /2 it breaks 
+      this.operatorCommit.value += opKeeps;
+      sendPayment({
+        receiver: this.txn.sender,
+        amount: snitched,
+        fee: 0
+      })
+    }
   }
 
   // call the auction contract to report the saturation buffer & delegatable stake
   bid(): void {}
 
   // called by the auction contract to assign stake to the node contract at mint
-  addStake(): void {}
+  addStake(txnWithStake: PayTxn): void {
+    // should I check receiver? Is there a problem if not? Sender would just be gifting Algo; would this fuck up calculation for the LST?
+    verifyPayTxn(txnWithStake, {
+      receiver: this.app.address
+    })
+    this.delegatedStake.value += txnWithStake.amount
+  }
 
   //called by the auction contract at burn
   takeStake():void{}
@@ -197,7 +241,12 @@ export class CaelusValidatorPool extends Contract {
   upgradeToNewValidatorVersion(): void{}
 
   // used by CA to clean up remaining Algo
-  claimLeftAlgo(): void {}
+  claimLeftAlgo(): void {
+    assert(this.app.address.voterBalance == 0, 'Account Stake must be offline'); // is there another flag to check online/offline status?
+    assert(this.delegatedStake.value == 0, 'All delegated Stake must have been removed');
+    assert(this.operatorCommit.value ==0, 'Node Operator must have withdrawn his commitment');
+    // make app call to send remaining Algo back to auction contract
+  }
 
   registerToXGov(): void{}
 
@@ -311,7 +360,8 @@ export class CaelusValidatorPool extends Contract {
     return 0;
   }
 
-  private getEligibilityFlag(): boolean {
+  @abi.readonly
+  getEligibilityFlag(): boolean {
     return this.app.address.incentiveEligible;
   }
 
