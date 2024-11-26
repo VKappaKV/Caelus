@@ -33,6 +33,36 @@ export const APP_SPEC: AppSpec = {
       "call_config": {
         "no_op": "CREATE"
       }
+    },
+    "mintRequest()void": {
+      "call_config": {
+        "no_op": "CALL"
+      }
+    },
+    "burnRequest()void": {
+      "call_config": {
+        "no_op": "CALL"
+      }
+    },
+    "bid(uint64)void": {
+      "call_config": {
+        "no_op": "CALL"
+      }
+    },
+    "delegateStake(uint64)void": {
+      "call_config": {
+        "no_op": "CALL"
+      }
+    },
+    "snitch()void": {
+      "call_config": {
+        "no_op": "CALL"
+      }
+    },
+    "burnStake()void": {
+      "call_config": {
+        "no_op": "CALL"
+      }
     }
   },
   "bare_call_config": {
@@ -48,14 +78,39 @@ export const APP_SPEC: AppSpec = {
       "reserved": {}
     },
     "global": {
-      "declared": {},
+      "declared": {
+        "epochLen": {
+          "type": "uint64",
+          "key": "epochlen"
+        },
+        "initializedPoolContract": {
+          "type": "bytes",
+          "key": "initPoolContract"
+        },
+        "validatorPoolContractVersion": {
+          "type": "uint64",
+          "key": "validatorPoolVersion"
+        },
+        "totalAlgoStaked": {
+          "type": "uint64",
+          "key": "totalstake"
+        },
+        "validatorPoolContractApprovalProgram": {
+          "type": "bytes",
+          "key": "validatorApprovalProgram"
+        },
+        "init_bsALGO": {
+          "type": "bytes",
+          "key": "init_bsALGO"
+        }
+      },
       "reserved": {}
     }
   },
   "state": {
     "global": {
-      "num_byte_slices": 0,
-      "num_uints": 0
+      "num_byte_slices": 3,
+      "num_uints": 3
     },
     "local": {
       "num_byte_slices": 0,
@@ -63,8 +118,8 @@ export const APP_SPEC: AppSpec = {
     }
   },
   "source": {
-    "approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCgovLyBUaGlzIFRFQUwgd2FzIGdlbmVyYXRlZCBieSBURUFMU2NyaXB0IHYwLjEwNS41Ci8vIGh0dHBzOi8vZ2l0aHViLmNvbS9hbGdvcmFuZGZvdW5kYXRpb24vVEVBTFNjcmlwdAoKLy8gVGhpcyBjb250cmFjdCBpcyBjb21wbGlhbnQgd2l0aCBhbmQvb3IgaW1wbGVtZW50cyB0aGUgZm9sbG93aW5nIEFSQ3M6IFsgQVJDNCBdCgovLyBUaGUgZm9sbG93aW5nIHRlbiBsaW5lcyBvZiBURUFMIGhhbmRsZSBpbml0aWFsIHByb2dyYW0gZmxvdwovLyBUaGlzIHBhdHRlcm4gaXMgdXNlZCB0byBtYWtlIGl0IGVhc3kgZm9yIGFueW9uZSB0byBwYXJzZSB0aGUgc3RhcnQgb2YgdGhlIHByb2dyYW0gYW5kIGRldGVybWluZSBpZiBhIHNwZWNpZmljIGFjdGlvbiBpcyBhbGxvd2VkCi8vIEhlcmUsIGFjdGlvbiByZWZlcnMgdG8gdGhlIE9uQ29tcGxldGUgaW4gY29tYmluYXRpb24gd2l0aCB3aGV0aGVyIHRoZSBhcHAgaXMgYmVpbmcgY3JlYXRlZCBvciBjYWxsZWQKLy8gRXZlcnkgcG9zc2libGUgYWN0aW9uIGZvciB0aGlzIGNvbnRyYWN0IGlzIHJlcHJlc2VudGVkIGluIHRoZSBzd2l0Y2ggc3RhdGVtZW50Ci8vIElmIHRoZSBhY3Rpb24gaXMgbm90IGltcGxlbWVudGVkIGluIHRoZSBjb250cmFjdCwgaXRzIHJlc3BlY3RpdmUgYnJhbmNoIHdpbGwgYmUgIipOT1RfSU1QTEVNRU5URUQiIHdoaWNoIGp1c3QgY29udGFpbnMgImVyciIKdHhuIEFwcGxpY2F0aW9uSUQKIQpwdXNoaW50IDYKKgp0eG4gT25Db21wbGV0aW9uCisKc3dpdGNoICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpjcmVhdGVfTm9PcCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQKCipOT1RfSU1QTEVNRU5URUQ6CgkvLyBUaGUgcmVxdWVzdGVkIGFjdGlvbiBpcyBub3QgaW1wbGVtZW50ZWQgaW4gdGhpcyBjb250cmFjdC4gQXJlIHlvdSB1c2luZyB0aGUgY29ycmVjdCBPbkNvbXBsZXRlPyBEaWQgeW91IHNldCB5b3VyIGFwcCBJRD8KCWVycgoKKmFiaV9yb3V0ZV9jcmVhdGVBcHBsaWNhdGlvbjoKCXB1c2hpbnQgMQoJcmV0dXJuCgoqY3JlYXRlX05vT3A6CglwdXNoYnl0ZXMgMHhiODQ0N2IzNiAvLyBtZXRob2QgImNyZWF0ZUFwcGxpY2F0aW9uKCl2b2lkIgoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMAoJbWF0Y2ggKmFiaV9yb3V0ZV9jcmVhdGVBcHBsaWNhdGlvbgoKCS8vIHRoaXMgY29udHJhY3QgZG9lcyBub3QgaW1wbGVtZW50IHRoZSBnaXZlbiBBQkkgbWV0aG9kIGZvciBjcmVhdGUgTm9PcAoJZXJy",
-    "clear": "I3ByYWdtYSB2ZXJzaW9uIDEw"
+    "approval": "I3ByYWdtYSB2ZXJzaW9uIDExCmludGNibG9jayAxIDAKYnl0ZWNibG9jayAweDAwCgovLyBUaGlzIFRFQUwgd2FzIGdlbmVyYXRlZCBieSBURUFMU2NyaXB0IHYwLjEwNS41Ci8vIGh0dHBzOi8vZ2l0aHViLmNvbS9hbGdvcmFuZGZvdW5kYXRpb24vVEVBTFNjcmlwdAoKLy8gVGhpcyBjb250cmFjdCBpcyBjb21wbGlhbnQgd2l0aCBhbmQvb3IgaW1wbGVtZW50cyB0aGUgZm9sbG93aW5nIEFSQ3M6IFsgQVJDNCBdCgovLyBUaGUgZm9sbG93aW5nIHRlbiBsaW5lcyBvZiBURUFMIGhhbmRsZSBpbml0aWFsIHByb2dyYW0gZmxvdwovLyBUaGlzIHBhdHRlcm4gaXMgdXNlZCB0byBtYWtlIGl0IGVhc3kgZm9yIGFueW9uZSB0byBwYXJzZSB0aGUgc3RhcnQgb2YgdGhlIHByb2dyYW0gYW5kIGRldGVybWluZSBpZiBhIHNwZWNpZmljIGFjdGlvbiBpcyBhbGxvd2VkCi8vIEhlcmUsIGFjdGlvbiByZWZlcnMgdG8gdGhlIE9uQ29tcGxldGUgaW4gY29tYmluYXRpb24gd2l0aCB3aGV0aGVyIHRoZSBhcHAgaXMgYmVpbmcgY3JlYXRlZCBvciBjYWxsZWQKLy8gRXZlcnkgcG9zc2libGUgYWN0aW9uIGZvciB0aGlzIGNvbnRyYWN0IGlzIHJlcHJlc2VudGVkIGluIHRoZSBzd2l0Y2ggc3RhdGVtZW50Ci8vIElmIHRoZSBhY3Rpb24gaXMgbm90IGltcGxlbWVudGVkIGluIHRoZSBjb250cmFjdCwgaXRzIHJlc3BlY3RpdmUgYnJhbmNoIHdpbGwgYmUgIipOT1RfSU1QTEVNRU5URUQiIHdoaWNoIGp1c3QgY29udGFpbnMgImVyciIKdHhuIEFwcGxpY2F0aW9uSUQKIQpwdXNoaW50IDYKKgp0eG4gT25Db21wbGV0aW9uCisKc3dpdGNoICpjYWxsX05vT3AgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpjcmVhdGVfTm9PcCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQKCipOT1RfSU1QTEVNRU5URUQ6CgkvLyBUaGUgcmVxdWVzdGVkIGFjdGlvbiBpcyBub3QgaW1wbGVtZW50ZWQgaW4gdGhpcyBjb250cmFjdC4gQXJlIHlvdSB1c2luZyB0aGUgY29ycmVjdCBPbkNvbXBsZXRlPyBEaWQgeW91IHNldCB5b3VyIGFwcCBJRD8KCWVycgoKLy8gY3JlYXRlQXBwbGljYXRpb24oKXZvaWQKKmFiaV9yb3V0ZV9jcmVhdGVBcHBsaWNhdGlvbjoKCS8vIGV4ZWN1dGUgY3JlYXRlQXBwbGljYXRpb24oKXZvaWQKCWNhbGxzdWIgY3JlYXRlQXBwbGljYXRpb24KCWludGMgMCAvLyAxCglyZXR1cm4KCi8vIGNyZWF0ZUFwcGxpY2F0aW9uKCk6IHZvaWQKY3JlYXRlQXBwbGljYXRpb246Cglwcm90byAwIDAKCgkvLyBjb250cmFjdHNcQ2FlbHVzQWRtaW4uYWxnby50czozMgoJLy8gdGhpcy50b3RhbEFsZ29TdGFrZWQudmFsdWUgPSAwCglwdXNoYnl0ZXMgMHg3NDZmNzQ2MTZjNzM3NDYxNmI2NSAvLyAidG90YWxzdGFrZSIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNBZG1pbi5hbGdvLnRzOjMzCgkvLyB0aGlzLmluaXRfYnNBTEdPLnZhbHVlID0gZmFsc2UKCXB1c2hieXRlcyAweDY5NmU2OTc0NWY2MjczNDE0YzQ3NGYgLy8gImluaXRfYnNBTEdPIgoJaW50YyAxIC8vIDAKCWJ5dGVjIDAgLy8gMHgwMAoJaW50YyAxIC8vIDAKCXVuY292ZXIgMgoJc2V0Yml0CglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNBZG1pbi5hbGdvLnRzOjM0CgkvLyB0aGlzLmluaXRpYWxpemVkUG9vbENvbnRyYWN0LnZhbHVlID0gZmFsc2UKCXB1c2hieXRlcyAweDY5NmU2OTc0NTA2ZjZmNmM0MzZmNmU3NDcyNjE2Mzc0IC8vICJpbml0UG9vbENvbnRyYWN0IgoJaW50YyAxIC8vIDAKCWJ5dGVjIDAgLy8gMHgwMAoJaW50YyAxIC8vIDAKCXVuY292ZXIgMgoJc2V0Yml0CglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNBZG1pbi5hbGdvLnRzOjM1CgkvLyB0aGlzLnZhbGlkYXRvclBvb2xDb250cmFjdFZlcnNpb24udmFsdWUgPSAwCglwdXNoYnl0ZXMgMHg3NjYxNmM2OTY0NjE3NDZmNzI1MDZmNmY2YzU2NjU3MjczNjk2ZjZlIC8vICJ2YWxpZGF0b3JQb29sVmVyc2lvbiIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoJcmV0c3ViCgovLyBtaW50UmVxdWVzdCgpdm9pZAoqYWJpX3JvdXRlX21pbnRSZXF1ZXN0OgoJLy8gZXhlY3V0ZSBtaW50UmVxdWVzdCgpdm9pZAoJY2FsbHN1YiBtaW50UmVxdWVzdAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gbWludFJlcXVlc3QoKTogdm9pZAptaW50UmVxdWVzdDoKCXByb3RvIDAgMAoJcmV0c3ViCgovLyBidXJuUmVxdWVzdCgpdm9pZAoqYWJpX3JvdXRlX2J1cm5SZXF1ZXN0OgoJLy8gZXhlY3V0ZSBidXJuUmVxdWVzdCgpdm9pZAoJY2FsbHN1YiBidXJuUmVxdWVzdAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gYnVyblJlcXVlc3QoKTogdm9pZApidXJuUmVxdWVzdDoKCXByb3RvIDAgMAoJcmV0c3ViCgovLyBiaWQodWludDY0KXZvaWQKKmFiaV9yb3V0ZV9iaWQ6CgkvLyB2YWxpZGF0b3JBcHBJRDogdWludDY0Cgl0eG5hIEFwcGxpY2F0aW9uQXJncyAxCglidG9pCgoJLy8gZXhlY3V0ZSBiaWQodWludDY0KXZvaWQKCWNhbGxzdWIgYmlkCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBiaWQodmFsaWRhdG9yQXBwSUQ6IEFwcElEKTogdm9pZApiaWQ6Cglwcm90byAxIDAKCXJldHN1YgoKLy8gZGVsZWdhdGVTdGFrZSh1aW50NjQpdm9pZAoqYWJpX3JvdXRlX2RlbGVnYXRlU3Rha2U6CgkvLyBhbW91bnQ6IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQoJYnRvaQoKCS8vIGV4ZWN1dGUgZGVsZWdhdGVTdGFrZSh1aW50NjQpdm9pZAoJY2FsbHN1YiBkZWxlZ2F0ZVN0YWtlCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBkZWxlZ2F0ZVN0YWtlKGFtb3VudDogdWludDY0KTogdm9pZApkZWxlZ2F0ZVN0YWtlOgoJcHJvdG8gMSAwCglyZXRzdWIKCi8vIHNuaXRjaCgpdm9pZAoqYWJpX3JvdXRlX3NuaXRjaDoKCS8vIGV4ZWN1dGUgc25pdGNoKCl2b2lkCgljYWxsc3ViIHNuaXRjaAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gc25pdGNoKCk6IHZvaWQKc25pdGNoOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGJ1cm5TdGFrZSgpdm9pZAoqYWJpX3JvdXRlX2J1cm5TdGFrZToKCS8vIGV4ZWN1dGUgYnVyblN0YWtlKCl2b2lkCgljYWxsc3ViIGJ1cm5TdGFrZQoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gYnVyblN0YWtlKCk6IHZvaWQKYnVyblN0YWtlOgoJcHJvdG8gMCAwCglyZXRzdWIKCipjcmVhdGVfTm9PcDoKCXB1c2hieXRlcyAweGI4NDQ3YjM2IC8vIG1ldGhvZCAiY3JlYXRlQXBwbGljYXRpb24oKXZvaWQiCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAwCgltYXRjaCAqYWJpX3JvdXRlX2NyZWF0ZUFwcGxpY2F0aW9uCgoJLy8gdGhpcyBjb250cmFjdCBkb2VzIG5vdCBpbXBsZW1lbnQgdGhlIGdpdmVuIEFCSSBtZXRob2QgZm9yIGNyZWF0ZSBOb09wCgllcnIKCipjYWxsX05vT3A6CglwdXNoYnl0ZXMgMHg3YzE5NzRjNyAvLyBtZXRob2QgIm1pbnRSZXF1ZXN0KCl2b2lkIgoJcHVzaGJ5dGVzIDB4NGY1OGM1MzAgLy8gbWV0aG9kICJidXJuUmVxdWVzdCgpdm9pZCIKCXB1c2hieXRlcyAweGVkZGZlNTk4IC8vIG1ldGhvZCAiYmlkKHVpbnQ2NCl2b2lkIgoJcHVzaGJ5dGVzIDB4ZTNhYTlhOTAgLy8gbWV0aG9kICJkZWxlZ2F0ZVN0YWtlKHVpbnQ2NCl2b2lkIgoJcHVzaGJ5dGVzIDB4ZmQwNDYxNzMgLy8gbWV0aG9kICJzbml0Y2goKXZvaWQiCglwdXNoYnl0ZXMgMHgyOTYyNWE4MiAvLyBtZXRob2QgImJ1cm5TdGFrZSgpdm9pZCIKCXR4bmEgQXBwbGljYXRpb25BcmdzIDAKCW1hdGNoICphYmlfcm91dGVfbWludFJlcXVlc3QgKmFiaV9yb3V0ZV9idXJuUmVxdWVzdCAqYWJpX3JvdXRlX2JpZCAqYWJpX3JvdXRlX2RlbGVnYXRlU3Rha2UgKmFiaV9yb3V0ZV9zbml0Y2ggKmFiaV9yb3V0ZV9idXJuU3Rha2UKCgkvLyB0aGlzIGNvbnRyYWN0IGRvZXMgbm90IGltcGxlbWVudCB0aGUgZ2l2ZW4gQUJJIG1ldGhvZCBmb3IgY2FsbCBOb09wCgllcnI=",
+    "clear": "I3ByYWdtYSB2ZXJzaW9uIDEx"
   },
   "contract": {
     "name": "CaelusAdmin",
@@ -72,6 +127,58 @@ export const APP_SPEC: AppSpec = {
     "methods": [
       {
         "name": "createApplication",
+        "args": [],
+        "returns": {
+          "type": "void"
+        }
+      },
+      {
+        "name": "mintRequest",
+        "args": [],
+        "returns": {
+          "type": "void"
+        }
+      },
+      {
+        "name": "burnRequest",
+        "args": [],
+        "returns": {
+          "type": "void"
+        }
+      },
+      {
+        "name": "bid",
+        "args": [
+          {
+            "name": "validatorAppID",
+            "type": "uint64"
+          }
+        ],
+        "returns": {
+          "type": "void"
+        }
+      },
+      {
+        "name": "delegateStake",
+        "args": [
+          {
+            "name": "amount",
+            "type": "uint64"
+          }
+        ],
+        "returns": {
+          "type": "void"
+        }
+      },
+      {
+        "name": "snitch",
+        "args": [],
+        "returns": {
+          "type": "void"
+        }
+      },
+      {
+        "name": "burnStake",
         "args": [],
         "returns": {
           "type": "void"
@@ -150,6 +257,57 @@ export type CaelusAdmin = {
       argsTuple: []
       returns: void
     }>
+    & Record<'mintRequest()void' | 'mintRequest', {
+      argsObj: {
+      }
+      argsTuple: []
+      returns: void
+    }>
+    & Record<'burnRequest()void' | 'burnRequest', {
+      argsObj: {
+      }
+      argsTuple: []
+      returns: void
+    }>
+    & Record<'bid(uint64)void' | 'bid', {
+      argsObj: {
+        validatorAppID: bigint | number
+      }
+      argsTuple: [validatorAppID: bigint | number]
+      returns: void
+    }>
+    & Record<'delegateStake(uint64)void' | 'delegateStake', {
+      argsObj: {
+        amount: bigint | number
+      }
+      argsTuple: [amount: bigint | number]
+      returns: void
+    }>
+    & Record<'snitch()void' | 'snitch', {
+      argsObj: {
+      }
+      argsTuple: []
+      returns: void
+    }>
+    & Record<'burnStake()void' | 'burnStake', {
+      argsObj: {
+      }
+      argsTuple: []
+      returns: void
+    }>
+  /**
+   * Defines the shape of the global and local state of the application.
+   */
+  state: {
+    global: {
+      'epochlen'?: IntegerState
+      'initPoolContract'?: BinaryState
+      'validatorPoolVersion'?: IntegerState
+      'totalstake'?: IntegerState
+      'validatorApprovalProgram'?: BinaryState
+      'init_bsALGO'?: BinaryState
+    }
+  }
 }
 /**
  * Defines the possible abi call signatures
@@ -222,6 +380,90 @@ export abstract class CaelusAdminCallFactory {
     }
   }
 
+  /**
+   * Constructs a no op call for the mintRequest()void ABI method
+   *
+   * @param args Any args for the contract call
+   * @param params Any additional parameters for the call
+   * @returns A TypedCallParams object for the call
+   */
+  static mintRequest(args: MethodArgs<'mintRequest()void'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
+    return {
+      method: 'mintRequest()void' as const,
+      methodArgs: Array.isArray(args) ? args : [],
+      ...params,
+    }
+  }
+  /**
+   * Constructs a no op call for the burnRequest()void ABI method
+   *
+   * @param args Any args for the contract call
+   * @param params Any additional parameters for the call
+   * @returns A TypedCallParams object for the call
+   */
+  static burnRequest(args: MethodArgs<'burnRequest()void'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
+    return {
+      method: 'burnRequest()void' as const,
+      methodArgs: Array.isArray(args) ? args : [],
+      ...params,
+    }
+  }
+  /**
+   * Constructs a no op call for the bid(uint64)void ABI method
+   *
+   * @param args Any args for the contract call
+   * @param params Any additional parameters for the call
+   * @returns A TypedCallParams object for the call
+   */
+  static bid(args: MethodArgs<'bid(uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
+    return {
+      method: 'bid(uint64)void' as const,
+      methodArgs: Array.isArray(args) ? args : [args.validatorAppID],
+      ...params,
+    }
+  }
+  /**
+   * Constructs a no op call for the delegateStake(uint64)void ABI method
+   *
+   * @param args Any args for the contract call
+   * @param params Any additional parameters for the call
+   * @returns A TypedCallParams object for the call
+   */
+  static delegateStake(args: MethodArgs<'delegateStake(uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
+    return {
+      method: 'delegateStake(uint64)void' as const,
+      methodArgs: Array.isArray(args) ? args : [args.amount],
+      ...params,
+    }
+  }
+  /**
+   * Constructs a no op call for the snitch()void ABI method
+   *
+   * @param args Any args for the contract call
+   * @param params Any additional parameters for the call
+   * @returns A TypedCallParams object for the call
+   */
+  static snitch(args: MethodArgs<'snitch()void'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
+    return {
+      method: 'snitch()void' as const,
+      methodArgs: Array.isArray(args) ? args : [],
+      ...params,
+    }
+  }
+  /**
+   * Constructs a no op call for the burnStake()void ABI method
+   *
+   * @param args Any args for the contract call
+   * @param params Any additional parameters for the call
+   * @returns A TypedCallParams object for the call
+   */
+  static burnStake(args: MethodArgs<'burnStake()void'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
+    return {
+      method: 'burnStake()void' as const,
+      methodArgs: Array.isArray(args) ? args : [],
+      ...params,
+    }
+  }
 }
 
 /**
@@ -321,12 +563,179 @@ export class CaelusAdminClient {
     return this.appClient.clearState(args)
   }
 
+  /**
+   * Calls the mintRequest()void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The result of the call
+   */
+  public mintRequest(args: MethodArgs<'mintRequest()void'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
+    return this.call(CaelusAdminCallFactory.mintRequest(args, params))
+  }
+
+  /**
+   * Calls the burnRequest()void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The result of the call
+   */
+  public burnRequest(args: MethodArgs<'burnRequest()void'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
+    return this.call(CaelusAdminCallFactory.burnRequest(args, params))
+  }
+
+  /**
+   * Calls the bid(uint64)void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The result of the call
+   */
+  public bid(args: MethodArgs<'bid(uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
+    return this.call(CaelusAdminCallFactory.bid(args, params))
+  }
+
+  /**
+   * Calls the delegateStake(uint64)void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The result of the call
+   */
+  public delegateStake(args: MethodArgs<'delegateStake(uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
+    return this.call(CaelusAdminCallFactory.delegateStake(args, params))
+  }
+
+  /**
+   * Calls the snitch()void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The result of the call
+   */
+  public snitch(args: MethodArgs<'snitch()void'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
+    return this.call(CaelusAdminCallFactory.snitch(args, params))
+  }
+
+  /**
+   * Calls the burnStake()void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The result of the call
+   */
+  public burnStake(args: MethodArgs<'burnStake()void'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
+    return this.call(CaelusAdminCallFactory.burnStake(args, params))
+  }
+
+  /**
+   * Extracts a binary state value out of an AppState dictionary
+   *
+   * @param state The state dictionary containing the state value
+   * @param key The key of the state value
+   * @returns A BinaryState instance containing the state value, or undefined if the key was not found
+   */
+  private static getBinaryState(state: AppState, key: string): BinaryState | undefined {
+    const value = state[key]
+    if (!value) return undefined
+    if (!('valueRaw' in value))
+      throw new Error(`Failed to parse state value for ${key}; received an int when expected a byte array`)
+    return {
+      asString(): string {
+        return value.value
+      },
+      asByteArray(): Uint8Array {
+        return value.valueRaw
+      }
+    }
+  }
+
+  /**
+   * Extracts a integer state value out of an AppState dictionary
+   *
+   * @param state The state dictionary containing the state value
+   * @param key The key of the state value
+   * @returns An IntegerState instance containing the state value, or undefined if the key was not found
+   */
+  private static getIntegerState(state: AppState, key: string): IntegerState | undefined {
+    const value = state[key]
+    if (!value) return undefined
+    if ('valueRaw' in value)
+      throw new Error(`Failed to parse state value for ${key}; received a byte array when expected a number`)
+    return {
+      asBigInt() {
+        return typeof value.value === 'bigint' ? value.value : BigInt(value.value)
+      },
+      asNumber(): number {
+        return typeof value.value === 'bigint' ? Number(value.value) : value.value
+      },
+    }
+  }
+
+  /**
+   * Returns the smart contract's global state wrapped in a strongly typed accessor with options to format the stored value
+   */
+  public async getGlobalState(): Promise<CaelusAdmin['state']['global']> {
+    const state = await this.appClient.getGlobalState()
+    return {
+      get epochlen() {
+        return CaelusAdminClient.getIntegerState(state, 'epochlen')
+      },
+      get initPoolContract() {
+        return CaelusAdminClient.getBinaryState(state, 'initPoolContract')
+      },
+      get validatorPoolVersion() {
+        return CaelusAdminClient.getIntegerState(state, 'validatorPoolVersion')
+      },
+      get totalstake() {
+        return CaelusAdminClient.getIntegerState(state, 'totalstake')
+      },
+      get validatorApprovalProgram() {
+        return CaelusAdminClient.getBinaryState(state, 'validatorApprovalProgram')
+      },
+      get init_bsALGO() {
+        return CaelusAdminClient.getBinaryState(state, 'init_bsALGO')
+      },
+    }
+  }
+
   public compose(): CaelusAdminComposer {
     const client = this
     const atc = new AtomicTransactionComposer()
     let promiseChain:Promise<unknown> = Promise.resolve()
     const resultMappers: Array<undefined | ((x: any) => any)> = []
     return {
+      mintRequest(args: MethodArgs<'mintRequest()void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs) {
+        promiseChain = promiseChain.then(() => client.mintRequest(args, {...params, sendParams: {...params?.sendParams, skipSending: true, atc}}))
+        resultMappers.push(undefined)
+        return this
+      },
+      burnRequest(args: MethodArgs<'burnRequest()void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs) {
+        promiseChain = promiseChain.then(() => client.burnRequest(args, {...params, sendParams: {...params?.sendParams, skipSending: true, atc}}))
+        resultMappers.push(undefined)
+        return this
+      },
+      bid(args: MethodArgs<'bid(uint64)void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs) {
+        promiseChain = promiseChain.then(() => client.bid(args, {...params, sendParams: {...params?.sendParams, skipSending: true, atc}}))
+        resultMappers.push(undefined)
+        return this
+      },
+      delegateStake(args: MethodArgs<'delegateStake(uint64)void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs) {
+        promiseChain = promiseChain.then(() => client.delegateStake(args, {...params, sendParams: {...params?.sendParams, skipSending: true, atc}}))
+        resultMappers.push(undefined)
+        return this
+      },
+      snitch(args: MethodArgs<'snitch()void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs) {
+        promiseChain = promiseChain.then(() => client.snitch(args, {...params, sendParams: {...params?.sendParams, skipSending: true, atc}}))
+        resultMappers.push(undefined)
+        return this
+      },
+      burnStake(args: MethodArgs<'burnStake()void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs) {
+        promiseChain = promiseChain.then(() => client.burnStake(args, {...params, sendParams: {...params?.sendParams, skipSending: true, atc}}))
+        resultMappers.push(undefined)
+        return this
+      },
       clearState(args?: BareCallArgs & AppClientComposeCallCoreParams & CoreAppCallArgs) {
         promiseChain = promiseChain.then(() => client.clearState({...args, sendParams: {...args?.sendParams, skipSending: true, atc}}))
         resultMappers.push(undefined)
@@ -360,6 +769,60 @@ export class CaelusAdminClient {
   }
 }
 export type CaelusAdminComposer<TReturns extends [...any[]] = []> = {
+  /**
+   * Calls the mintRequest()void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
+   */
+  mintRequest(args: MethodArgs<'mintRequest()void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs): CaelusAdminComposer<[...TReturns, MethodReturn<'mintRequest()void'>]>
+
+  /**
+   * Calls the burnRequest()void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
+   */
+  burnRequest(args: MethodArgs<'burnRequest()void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs): CaelusAdminComposer<[...TReturns, MethodReturn<'burnRequest()void'>]>
+
+  /**
+   * Calls the bid(uint64)void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
+   */
+  bid(args: MethodArgs<'bid(uint64)void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs): CaelusAdminComposer<[...TReturns, MethodReturn<'bid(uint64)void'>]>
+
+  /**
+   * Calls the delegateStake(uint64)void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
+   */
+  delegateStake(args: MethodArgs<'delegateStake(uint64)void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs): CaelusAdminComposer<[...TReturns, MethodReturn<'delegateStake(uint64)void'>]>
+
+  /**
+   * Calls the snitch()void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
+   */
+  snitch(args: MethodArgs<'snitch()void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs): CaelusAdminComposer<[...TReturns, MethodReturn<'snitch()void'>]>
+
+  /**
+   * Calls the burnStake()void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
+   */
+  burnStake(args: MethodArgs<'burnStake()void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs): CaelusAdminComposer<[...TReturns, MethodReturn<'burnStake()void'>]>
+
   /**
    * Makes a clear_state call to an existing instance of the CaelusAdmin smart contract.
    *

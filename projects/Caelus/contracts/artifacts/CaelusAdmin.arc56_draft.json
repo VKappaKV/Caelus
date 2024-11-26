@@ -14,6 +14,94 @@
         ],
         "call": []
       }
+    },
+    {
+      "name": "mintRequest",
+      "args": [],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    },
+    {
+      "name": "burnRequest",
+      "args": [],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    },
+    {
+      "name": "bid",
+      "args": [
+        {
+          "name": "validatorAppID",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    },
+    {
+      "name": "delegateStake",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    },
+    {
+      "name": "snitch",
+      "args": [],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    },
+    {
+      "name": "burnStake",
+      "args": [],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
     }
   ],
   "arcs": [
@@ -24,8 +112,8 @@
   "state": {
     "schema": {
       "global": {
-        "bytes": 0,
-        "ints": 0
+        "bytes": 3,
+        "ints": 3
       },
       "local": {
         "bytes": 0,
@@ -33,7 +121,38 @@
       }
     },
     "keys": {
-      "global": {},
+      "global": {
+        "epochLen": {
+          "key": "ZXBvY2hsZW4=",
+          "keyType": "AVMBytes",
+          "valueType": "uint64"
+        },
+        "initializedPoolContract": {
+          "key": "aW5pdFBvb2xDb250cmFjdA==",
+          "keyType": "AVMBytes",
+          "valueType": "bool"
+        },
+        "validatorPoolContractVersion": {
+          "key": "dmFsaWRhdG9yUG9vbFZlcnNpb24=",
+          "keyType": "AVMBytes",
+          "valueType": "uint64"
+        },
+        "totalAlgoStaked": {
+          "key": "dG90YWxzdGFrZQ==",
+          "keyType": "AVMBytes",
+          "valueType": "uint64"
+        },
+        "validatorPoolContractApprovalProgram": {
+          "key": "dmFsaWRhdG9yQXBwcm92YWxQcm9ncmFt",
+          "keyType": "AVMBytes",
+          "valueType": "AVMBytes"
+        },
+        "init_bsALGO": {
+          "key": "aW5pdF9ic0FMR08=",
+          "keyType": "AVMBytes",
+          "valueType": "bool"
+        }
+      },
       "local": {},
       "box": {}
     },
@@ -52,68 +171,80 @@
       "sourceInfo": [
         {
           "teal": 1,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
           "pc": [
             0
           ]
         },
         {
-          "teal": 13,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
+          "teal": 2,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
           "pc": [
             1,
-            2
+            2,
+            3,
+            4
           ]
         },
         {
-          "teal": 14,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
+          "teal": 3,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
           "pc": [
-            3
-          ]
-        },
-        {
-          "teal": 15,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
-          "pc": [
-            4,
-            5
-          ]
-        },
-        {
-          "teal": 16,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
-          "pc": [
-            6
-          ]
-        },
-        {
-          "teal": 17,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
-          "pc": [
+            5,
+            6,
             7,
             8
           ]
         },
         {
-          "teal": 18,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
+          "teal": 15,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
           "pc": [
-            9
+            9,
+            10
+          ]
+        },
+        {
+          "teal": 16,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            11
+          ]
+        },
+        {
+          "teal": 17,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            12,
+            13
+          ]
+        },
+        {
+          "teal": 18,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            14
           ]
         },
         {
           "teal": 19,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
           "pc": [
-            10,
-            11,
-            12,
-            13,
-            14,
             15,
-            16,
-            17,
+            16
+          ]
+        },
+        {
+          "teal": 20,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            17
+          ]
+        },
+        {
+          "teal": 21,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
             18,
             19,
             20,
@@ -131,69 +262,679 @@
             32,
             33,
             34,
-            35
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43
           ]
         },
         {
-          "teal": 23,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
+          "teal": 25,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
           "errorMessage": "The requested action is not implemented in this contract. Are you using the correct OnComplete? Did you set your app ID?",
           "pc": [
-            36
-          ]
-        },
-        {
-          "teal": 26,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
-          "pc": [
-            37,
-            38
-          ]
-        },
-        {
-          "teal": 27,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
-          "pc": [
-            39
+            44
           ]
         },
         {
           "teal": 30,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
+          "source": "contracts\\CaelusAdmin.algo.ts:31",
           "pc": [
-            40,
-            41,
-            42,
-            43,
-            44,
-            45
+            45,
+            46,
+            47
           ]
         },
         {
           "teal": 31,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
+          "source": "contracts\\CaelusAdmin.algo.ts:31",
           "pc": [
-            46,
-            47,
             48
           ]
         },
         {
           "teal": 32,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
+          "source": "contracts\\CaelusAdmin.algo.ts:31",
           "pc": [
-            49,
+            49
+          ]
+        },
+        {
+          "teal": 36,
+          "source": "contracts\\CaelusAdmin.algo.ts:31",
+          "pc": [
             50,
             51,
             52
           ]
         },
         {
-          "teal": 35,
-          "source": "contracts\\CaelusAdmin.algo.ts:12",
+          "teal": 40,
+          "source": "contracts\\CaelusAdmin.algo.ts:32",
+          "pc": [
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64
+          ]
+        },
+        {
+          "teal": 41,
+          "source": "contracts\\CaelusAdmin.algo.ts:32",
+          "pc": [
+            65
+          ]
+        },
+        {
+          "teal": 42,
+          "source": "contracts\\CaelusAdmin.algo.ts:32",
+          "pc": [
+            66
+          ]
+        },
+        {
+          "teal": 46,
+          "source": "contracts\\CaelusAdmin.algo.ts:33",
+          "pc": [
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79
+          ]
+        },
+        {
+          "teal": 47,
+          "source": "contracts\\CaelusAdmin.algo.ts:33",
+          "pc": [
+            80
+          ]
+        },
+        {
+          "teal": 48,
+          "source": "contracts\\CaelusAdmin.algo.ts:33",
+          "pc": [
+            81
+          ]
+        },
+        {
+          "teal": 49,
+          "source": "contracts\\CaelusAdmin.algo.ts:33",
+          "pc": [
+            82
+          ]
+        },
+        {
+          "teal": 50,
+          "source": "contracts\\CaelusAdmin.algo.ts:33",
+          "pc": [
+            83,
+            84
+          ]
+        },
+        {
+          "teal": 51,
+          "source": "contracts\\CaelusAdmin.algo.ts:33",
+          "pc": [
+            85
+          ]
+        },
+        {
+          "teal": 52,
+          "source": "contracts\\CaelusAdmin.algo.ts:33",
+          "pc": [
+            86
+          ]
+        },
+        {
+          "teal": 56,
+          "source": "contracts\\CaelusAdmin.algo.ts:34",
+          "pc": [
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104
+          ]
+        },
+        {
+          "teal": 57,
+          "source": "contracts\\CaelusAdmin.algo.ts:34",
+          "pc": [
+            105
+          ]
+        },
+        {
+          "teal": 58,
+          "source": "contracts\\CaelusAdmin.algo.ts:34",
+          "pc": [
+            106
+          ]
+        },
+        {
+          "teal": 59,
+          "source": "contracts\\CaelusAdmin.algo.ts:34",
+          "pc": [
+            107
+          ]
+        },
+        {
+          "teal": 60,
+          "source": "contracts\\CaelusAdmin.algo.ts:34",
+          "pc": [
+            108,
+            109
+          ]
+        },
+        {
+          "teal": 61,
+          "source": "contracts\\CaelusAdmin.algo.ts:34",
+          "pc": [
+            110
+          ]
+        },
+        {
+          "teal": 62,
+          "source": "contracts\\CaelusAdmin.algo.ts:34",
+          "pc": [
+            111
+          ]
+        },
+        {
+          "teal": 66,
+          "source": "contracts\\CaelusAdmin.algo.ts:35",
+          "pc": [
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133
+          ]
+        },
+        {
+          "teal": 67,
+          "source": "contracts\\CaelusAdmin.algo.ts:35",
+          "pc": [
+            134
+          ]
+        },
+        {
+          "teal": 68,
+          "source": "contracts\\CaelusAdmin.algo.ts:35",
+          "pc": [
+            135
+          ]
+        },
+        {
+          "teal": 69,
+          "source": "contracts\\CaelusAdmin.algo.ts:31",
+          "pc": [
+            136
+          ]
+        },
+        {
+          "teal": 74,
+          "source": "contracts\\CaelusAdmin.algo.ts:40",
+          "pc": [
+            137,
+            138,
+            139
+          ]
+        },
+        {
+          "teal": 75,
+          "source": "contracts\\CaelusAdmin.algo.ts:40",
+          "pc": [
+            140
+          ]
+        },
+        {
+          "teal": 76,
+          "source": "contracts\\CaelusAdmin.algo.ts:40",
+          "pc": [
+            141
+          ]
+        },
+        {
+          "teal": 80,
+          "source": "contracts\\CaelusAdmin.algo.ts:40",
+          "pc": [
+            142,
+            143,
+            144
+          ]
+        },
+        {
+          "teal": 81,
+          "source": "contracts\\CaelusAdmin.algo.ts:40",
+          "pc": [
+            145
+          ]
+        },
+        {
+          "teal": 86,
+          "source": "contracts\\CaelusAdmin.algo.ts:42",
+          "pc": [
+            146,
+            147,
+            148
+          ]
+        },
+        {
+          "teal": 87,
+          "source": "contracts\\CaelusAdmin.algo.ts:42",
+          "pc": [
+            149
+          ]
+        },
+        {
+          "teal": 88,
+          "source": "contracts\\CaelusAdmin.algo.ts:42",
+          "pc": [
+            150
+          ]
+        },
+        {
+          "teal": 92,
+          "source": "contracts\\CaelusAdmin.algo.ts:42",
+          "pc": [
+            151,
+            152,
+            153
+          ]
+        },
+        {
+          "teal": 93,
+          "source": "contracts\\CaelusAdmin.algo.ts:42",
+          "pc": [
+            154
+          ]
+        },
+        {
+          "teal": 98,
+          "source": "contracts\\CaelusAdmin.algo.ts:45",
+          "pc": [
+            155,
+            156,
+            157
+          ]
+        },
+        {
+          "teal": 99,
+          "source": "contracts\\CaelusAdmin.algo.ts:45",
+          "pc": [
+            158
+          ]
+        },
+        {
+          "teal": 102,
+          "source": "contracts\\CaelusAdmin.algo.ts:45",
+          "pc": [
+            159,
+            160,
+            161
+          ]
+        },
+        {
+          "teal": 103,
+          "source": "contracts\\CaelusAdmin.algo.ts:45",
+          "pc": [
+            162
+          ]
+        },
+        {
+          "teal": 104,
+          "source": "contracts\\CaelusAdmin.algo.ts:45",
+          "pc": [
+            163
+          ]
+        },
+        {
+          "teal": 108,
+          "source": "contracts\\CaelusAdmin.algo.ts:45",
+          "pc": [
+            164,
+            165,
+            166
+          ]
+        },
+        {
+          "teal": 109,
+          "source": "contracts\\CaelusAdmin.algo.ts:45",
+          "pc": [
+            167
+          ]
+        },
+        {
+          "teal": 114,
+          "source": "contracts\\CaelusAdmin.algo.ts:56",
+          "pc": [
+            168,
+            169,
+            170
+          ]
+        },
+        {
+          "teal": 115,
+          "source": "contracts\\CaelusAdmin.algo.ts:56",
+          "pc": [
+            171
+          ]
+        },
+        {
+          "teal": 118,
+          "source": "contracts\\CaelusAdmin.algo.ts:56",
+          "pc": [
+            172,
+            173,
+            174
+          ]
+        },
+        {
+          "teal": 119,
+          "source": "contracts\\CaelusAdmin.algo.ts:56",
+          "pc": [
+            175
+          ]
+        },
+        {
+          "teal": 120,
+          "source": "contracts\\CaelusAdmin.algo.ts:56",
+          "pc": [
+            176
+          ]
+        },
+        {
+          "teal": 124,
+          "source": "contracts\\CaelusAdmin.algo.ts:56",
+          "pc": [
+            177,
+            178,
+            179
+          ]
+        },
+        {
+          "teal": 125,
+          "source": "contracts\\CaelusAdmin.algo.ts:56",
+          "pc": [
+            180
+          ]
+        },
+        {
+          "teal": 130,
+          "source": "contracts\\CaelusAdmin.algo.ts:59",
+          "pc": [
+            181,
+            182,
+            183
+          ]
+        },
+        {
+          "teal": 131,
+          "source": "contracts\\CaelusAdmin.algo.ts:59",
+          "pc": [
+            184
+          ]
+        },
+        {
+          "teal": 132,
+          "source": "contracts\\CaelusAdmin.algo.ts:59",
+          "pc": [
+            185
+          ]
+        },
+        {
+          "teal": 136,
+          "source": "contracts\\CaelusAdmin.algo.ts:59",
+          "pc": [
+            186,
+            187,
+            188
+          ]
+        },
+        {
+          "teal": 137,
+          "source": "contracts\\CaelusAdmin.algo.ts:59",
+          "pc": [
+            189
+          ]
+        },
+        {
+          "teal": 142,
+          "source": "contracts\\CaelusAdmin.algo.ts:61",
+          "pc": [
+            190,
+            191,
+            192
+          ]
+        },
+        {
+          "teal": 143,
+          "source": "contracts\\CaelusAdmin.algo.ts:61",
+          "pc": [
+            193
+          ]
+        },
+        {
+          "teal": 144,
+          "source": "contracts\\CaelusAdmin.algo.ts:61",
+          "pc": [
+            194
+          ]
+        },
+        {
+          "teal": 148,
+          "source": "contracts\\CaelusAdmin.algo.ts:61",
+          "pc": [
+            195,
+            196,
+            197
+          ]
+        },
+        {
+          "teal": 149,
+          "source": "contracts\\CaelusAdmin.algo.ts:61",
+          "pc": [
+            198
+          ]
+        },
+        {
+          "teal": 152,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            199,
+            200,
+            201,
+            202,
+            203,
+            204
+          ]
+        },
+        {
+          "teal": 153,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            205,
+            206,
+            207
+          ]
+        },
+        {
+          "teal": 154,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            208,
+            209,
+            210,
+            211
+          ]
+        },
+        {
+          "teal": 157,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
           "errorMessage": "this contract does not implement the given ABI method for create NoOp",
           "pc": [
-            53
+            212
+          ]
+        },
+        {
+          "teal": 160,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            213,
+            214,
+            215,
+            216,
+            217,
+            218
+          ]
+        },
+        {
+          "teal": 161,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            219,
+            220,
+            221,
+            222,
+            223,
+            224
+          ]
+        },
+        {
+          "teal": 162,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            225,
+            226,
+            227,
+            228,
+            229,
+            230
+          ]
+        },
+        {
+          "teal": 163,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            231,
+            232,
+            233,
+            234,
+            235,
+            236
+          ]
+        },
+        {
+          "teal": 164,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            237,
+            238,
+            239,
+            240,
+            241,
+            242
+          ]
+        },
+        {
+          "teal": 165,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            243,
+            244,
+            245,
+            246,
+            247,
+            248
+          ]
+        },
+        {
+          "teal": 166,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            249,
+            250,
+            251
+          ]
+        },
+        {
+          "teal": 167,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "pc": [
+            252,
+            253,
+            254,
+            255,
+            256,
+            257,
+            258,
+            259,
+            260,
+            261,
+            262,
+            263,
+            264,
+            265
+          ]
+        },
+        {
+          "teal": 170,
+          "source": "contracts\\CaelusAdmin.algo.ts:13",
+          "errorMessage": "this contract does not implement the given ABI method for call NoOp",
+          "pc": [
+            266
           ]
         }
       ],
@@ -205,12 +946,12 @@
     }
   },
   "source": {
-    "approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCgovLyBUaGlzIFRFQUwgd2FzIGdlbmVyYXRlZCBieSBURUFMU2NyaXB0IHYwLjEwNS41Ci8vIGh0dHBzOi8vZ2l0aHViLmNvbS9hbGdvcmFuZGZvdW5kYXRpb24vVEVBTFNjcmlwdAoKLy8gVGhpcyBjb250cmFjdCBpcyBjb21wbGlhbnQgd2l0aCBhbmQvb3IgaW1wbGVtZW50cyB0aGUgZm9sbG93aW5nIEFSQ3M6IFsgQVJDNCBdCgovLyBUaGUgZm9sbG93aW5nIHRlbiBsaW5lcyBvZiBURUFMIGhhbmRsZSBpbml0aWFsIHByb2dyYW0gZmxvdwovLyBUaGlzIHBhdHRlcm4gaXMgdXNlZCB0byBtYWtlIGl0IGVhc3kgZm9yIGFueW9uZSB0byBwYXJzZSB0aGUgc3RhcnQgb2YgdGhlIHByb2dyYW0gYW5kIGRldGVybWluZSBpZiBhIHNwZWNpZmljIGFjdGlvbiBpcyBhbGxvd2VkCi8vIEhlcmUsIGFjdGlvbiByZWZlcnMgdG8gdGhlIE9uQ29tcGxldGUgaW4gY29tYmluYXRpb24gd2l0aCB3aGV0aGVyIHRoZSBhcHAgaXMgYmVpbmcgY3JlYXRlZCBvciBjYWxsZWQKLy8gRXZlcnkgcG9zc2libGUgYWN0aW9uIGZvciB0aGlzIGNvbnRyYWN0IGlzIHJlcHJlc2VudGVkIGluIHRoZSBzd2l0Y2ggc3RhdGVtZW50Ci8vIElmIHRoZSBhY3Rpb24gaXMgbm90IGltcGxlbWVudGVkIGluIHRoZSBjb250cmFjdCwgaXRzIHJlc3BlY3RpdmUgYnJhbmNoIHdpbGwgYmUgIipOT1RfSU1QTEVNRU5URUQiIHdoaWNoIGp1c3QgY29udGFpbnMgImVyciIKdHhuIEFwcGxpY2F0aW9uSUQKIQpwdXNoaW50IDYKKgp0eG4gT25Db21wbGV0aW9uCisKc3dpdGNoICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpjcmVhdGVfTm9PcCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQKCipOT1RfSU1QTEVNRU5URUQ6CgkvLyBUaGUgcmVxdWVzdGVkIGFjdGlvbiBpcyBub3QgaW1wbGVtZW50ZWQgaW4gdGhpcyBjb250cmFjdC4gQXJlIHlvdSB1c2luZyB0aGUgY29ycmVjdCBPbkNvbXBsZXRlPyBEaWQgeW91IHNldCB5b3VyIGFwcCBJRD8KCWVycgoKKmFiaV9yb3V0ZV9jcmVhdGVBcHBsaWNhdGlvbjoKCXB1c2hpbnQgMQoJcmV0dXJuCgoqY3JlYXRlX05vT3A6CglwdXNoYnl0ZXMgMHhiODQ0N2IzNiAvLyBtZXRob2QgImNyZWF0ZUFwcGxpY2F0aW9uKCl2b2lkIgoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMAoJbWF0Y2ggKmFiaV9yb3V0ZV9jcmVhdGVBcHBsaWNhdGlvbgoKCS8vIHRoaXMgY29udHJhY3QgZG9lcyBub3QgaW1wbGVtZW50IHRoZSBnaXZlbiBBQkkgbWV0aG9kIGZvciBjcmVhdGUgTm9PcAoJZXJy",
-    "clear": "I3ByYWdtYSB2ZXJzaW9uIDEw"
+    "approval": "I3ByYWdtYSB2ZXJzaW9uIDExCmludGNibG9jayAxIDAKYnl0ZWNibG9jayAweDAwCgovLyBUaGlzIFRFQUwgd2FzIGdlbmVyYXRlZCBieSBURUFMU2NyaXB0IHYwLjEwNS41Ci8vIGh0dHBzOi8vZ2l0aHViLmNvbS9hbGdvcmFuZGZvdW5kYXRpb24vVEVBTFNjcmlwdAoKLy8gVGhpcyBjb250cmFjdCBpcyBjb21wbGlhbnQgd2l0aCBhbmQvb3IgaW1wbGVtZW50cyB0aGUgZm9sbG93aW5nIEFSQ3M6IFsgQVJDNCBdCgovLyBUaGUgZm9sbG93aW5nIHRlbiBsaW5lcyBvZiBURUFMIGhhbmRsZSBpbml0aWFsIHByb2dyYW0gZmxvdwovLyBUaGlzIHBhdHRlcm4gaXMgdXNlZCB0byBtYWtlIGl0IGVhc3kgZm9yIGFueW9uZSB0byBwYXJzZSB0aGUgc3RhcnQgb2YgdGhlIHByb2dyYW0gYW5kIGRldGVybWluZSBpZiBhIHNwZWNpZmljIGFjdGlvbiBpcyBhbGxvd2VkCi8vIEhlcmUsIGFjdGlvbiByZWZlcnMgdG8gdGhlIE9uQ29tcGxldGUgaW4gY29tYmluYXRpb24gd2l0aCB3aGV0aGVyIHRoZSBhcHAgaXMgYmVpbmcgY3JlYXRlZCBvciBjYWxsZWQKLy8gRXZlcnkgcG9zc2libGUgYWN0aW9uIGZvciB0aGlzIGNvbnRyYWN0IGlzIHJlcHJlc2VudGVkIGluIHRoZSBzd2l0Y2ggc3RhdGVtZW50Ci8vIElmIHRoZSBhY3Rpb24gaXMgbm90IGltcGxlbWVudGVkIGluIHRoZSBjb250cmFjdCwgaXRzIHJlc3BlY3RpdmUgYnJhbmNoIHdpbGwgYmUgIipOT1RfSU1QTEVNRU5URUQiIHdoaWNoIGp1c3QgY29udGFpbnMgImVyciIKdHhuIEFwcGxpY2F0aW9uSUQKIQpwdXNoaW50IDYKKgp0eG4gT25Db21wbGV0aW9uCisKc3dpdGNoICpjYWxsX05vT3AgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpjcmVhdGVfTm9PcCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQKCipOT1RfSU1QTEVNRU5URUQ6CgkvLyBUaGUgcmVxdWVzdGVkIGFjdGlvbiBpcyBub3QgaW1wbGVtZW50ZWQgaW4gdGhpcyBjb250cmFjdC4gQXJlIHlvdSB1c2luZyB0aGUgY29ycmVjdCBPbkNvbXBsZXRlPyBEaWQgeW91IHNldCB5b3VyIGFwcCBJRD8KCWVycgoKLy8gY3JlYXRlQXBwbGljYXRpb24oKXZvaWQKKmFiaV9yb3V0ZV9jcmVhdGVBcHBsaWNhdGlvbjoKCS8vIGV4ZWN1dGUgY3JlYXRlQXBwbGljYXRpb24oKXZvaWQKCWNhbGxzdWIgY3JlYXRlQXBwbGljYXRpb24KCWludGMgMCAvLyAxCglyZXR1cm4KCi8vIGNyZWF0ZUFwcGxpY2F0aW9uKCk6IHZvaWQKY3JlYXRlQXBwbGljYXRpb246Cglwcm90byAwIDAKCgkvLyBjb250cmFjdHNcQ2FlbHVzQWRtaW4uYWxnby50czozMgoJLy8gdGhpcy50b3RhbEFsZ29TdGFrZWQudmFsdWUgPSAwCglwdXNoYnl0ZXMgMHg3NDZmNzQ2MTZjNzM3NDYxNmI2NSAvLyAidG90YWxzdGFrZSIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNBZG1pbi5hbGdvLnRzOjMzCgkvLyB0aGlzLmluaXRfYnNBTEdPLnZhbHVlID0gZmFsc2UKCXB1c2hieXRlcyAweDY5NmU2OTc0NWY2MjczNDE0YzQ3NGYgLy8gImluaXRfYnNBTEdPIgoJaW50YyAxIC8vIDAKCWJ5dGVjIDAgLy8gMHgwMAoJaW50YyAxIC8vIDAKCXVuY292ZXIgMgoJc2V0Yml0CglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNBZG1pbi5hbGdvLnRzOjM0CgkvLyB0aGlzLmluaXRpYWxpemVkUG9vbENvbnRyYWN0LnZhbHVlID0gZmFsc2UKCXB1c2hieXRlcyAweDY5NmU2OTc0NTA2ZjZmNmM0MzZmNmU3NDcyNjE2Mzc0IC8vICJpbml0UG9vbENvbnRyYWN0IgoJaW50YyAxIC8vIDAKCWJ5dGVjIDAgLy8gMHgwMAoJaW50YyAxIC8vIDAKCXVuY292ZXIgMgoJc2V0Yml0CglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0c1xDYWVsdXNBZG1pbi5hbGdvLnRzOjM1CgkvLyB0aGlzLnZhbGlkYXRvclBvb2xDb250cmFjdFZlcnNpb24udmFsdWUgPSAwCglwdXNoYnl0ZXMgMHg3NjYxNmM2OTY0NjE3NDZmNzI1MDZmNmY2YzU2NjU3MjczNjk2ZjZlIC8vICJ2YWxpZGF0b3JQb29sVmVyc2lvbiIKCWludGMgMSAvLyAwCglhcHBfZ2xvYmFsX3B1dAoJcmV0c3ViCgovLyBtaW50UmVxdWVzdCgpdm9pZAoqYWJpX3JvdXRlX21pbnRSZXF1ZXN0OgoJLy8gZXhlY3V0ZSBtaW50UmVxdWVzdCgpdm9pZAoJY2FsbHN1YiBtaW50UmVxdWVzdAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gbWludFJlcXVlc3QoKTogdm9pZAptaW50UmVxdWVzdDoKCXByb3RvIDAgMAoJcmV0c3ViCgovLyBidXJuUmVxdWVzdCgpdm9pZAoqYWJpX3JvdXRlX2J1cm5SZXF1ZXN0OgoJLy8gZXhlY3V0ZSBidXJuUmVxdWVzdCgpdm9pZAoJY2FsbHN1YiBidXJuUmVxdWVzdAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gYnVyblJlcXVlc3QoKTogdm9pZApidXJuUmVxdWVzdDoKCXByb3RvIDAgMAoJcmV0c3ViCgovLyBiaWQodWludDY0KXZvaWQKKmFiaV9yb3V0ZV9iaWQ6CgkvLyB2YWxpZGF0b3JBcHBJRDogdWludDY0Cgl0eG5hIEFwcGxpY2F0aW9uQXJncyAxCglidG9pCgoJLy8gZXhlY3V0ZSBiaWQodWludDY0KXZvaWQKCWNhbGxzdWIgYmlkCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBiaWQodmFsaWRhdG9yQXBwSUQ6IEFwcElEKTogdm9pZApiaWQ6Cglwcm90byAxIDAKCXJldHN1YgoKLy8gZGVsZWdhdGVTdGFrZSh1aW50NjQpdm9pZAoqYWJpX3JvdXRlX2RlbGVnYXRlU3Rha2U6CgkvLyBhbW91bnQ6IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQoJYnRvaQoKCS8vIGV4ZWN1dGUgZGVsZWdhdGVTdGFrZSh1aW50NjQpdm9pZAoJY2FsbHN1YiBkZWxlZ2F0ZVN0YWtlCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBkZWxlZ2F0ZVN0YWtlKGFtb3VudDogdWludDY0KTogdm9pZApkZWxlZ2F0ZVN0YWtlOgoJcHJvdG8gMSAwCglyZXRzdWIKCi8vIHNuaXRjaCgpdm9pZAoqYWJpX3JvdXRlX3NuaXRjaDoKCS8vIGV4ZWN1dGUgc25pdGNoKCl2b2lkCgljYWxsc3ViIHNuaXRjaAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gc25pdGNoKCk6IHZvaWQKc25pdGNoOgoJcHJvdG8gMCAwCglyZXRzdWIKCi8vIGJ1cm5TdGFrZSgpdm9pZAoqYWJpX3JvdXRlX2J1cm5TdGFrZToKCS8vIGV4ZWN1dGUgYnVyblN0YWtlKCl2b2lkCgljYWxsc3ViIGJ1cm5TdGFrZQoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gYnVyblN0YWtlKCk6IHZvaWQKYnVyblN0YWtlOgoJcHJvdG8gMCAwCglyZXRzdWIKCipjcmVhdGVfTm9PcDoKCXB1c2hieXRlcyAweGI4NDQ3YjM2IC8vIG1ldGhvZCAiY3JlYXRlQXBwbGljYXRpb24oKXZvaWQiCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAwCgltYXRjaCAqYWJpX3JvdXRlX2NyZWF0ZUFwcGxpY2F0aW9uCgoJLy8gdGhpcyBjb250cmFjdCBkb2VzIG5vdCBpbXBsZW1lbnQgdGhlIGdpdmVuIEFCSSBtZXRob2QgZm9yIGNyZWF0ZSBOb09wCgllcnIKCipjYWxsX05vT3A6CglwdXNoYnl0ZXMgMHg3YzE5NzRjNyAvLyBtZXRob2QgIm1pbnRSZXF1ZXN0KCl2b2lkIgoJcHVzaGJ5dGVzIDB4NGY1OGM1MzAgLy8gbWV0aG9kICJidXJuUmVxdWVzdCgpdm9pZCIKCXB1c2hieXRlcyAweGVkZGZlNTk4IC8vIG1ldGhvZCAiYmlkKHVpbnQ2NCl2b2lkIgoJcHVzaGJ5dGVzIDB4ZTNhYTlhOTAgLy8gbWV0aG9kICJkZWxlZ2F0ZVN0YWtlKHVpbnQ2NCl2b2lkIgoJcHVzaGJ5dGVzIDB4ZmQwNDYxNzMgLy8gbWV0aG9kICJzbml0Y2goKXZvaWQiCglwdXNoYnl0ZXMgMHgyOTYyNWE4MiAvLyBtZXRob2QgImJ1cm5TdGFrZSgpdm9pZCIKCXR4bmEgQXBwbGljYXRpb25BcmdzIDAKCW1hdGNoICphYmlfcm91dGVfbWludFJlcXVlc3QgKmFiaV9yb3V0ZV9idXJuUmVxdWVzdCAqYWJpX3JvdXRlX2JpZCAqYWJpX3JvdXRlX2RlbGVnYXRlU3Rha2UgKmFiaV9yb3V0ZV9zbml0Y2ggKmFiaV9yb3V0ZV9idXJuU3Rha2UKCgkvLyB0aGlzIGNvbnRyYWN0IGRvZXMgbm90IGltcGxlbWVudCB0aGUgZ2l2ZW4gQUJJIG1ldGhvZCBmb3IgY2FsbCBOb09wCgllcnI=",
+    "clear": "I3ByYWdtYSB2ZXJzaW9uIDEx"
   },
   "byteCode": {
-    "approval": "CjEYFIEGCzEZCI0MAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAIEBQ4AEuER7NjYaAI4B//AA",
-    "clear": "Cg=="
+    "approval": "CyACAQAmAQEAMRgUgQYLMRkIjQwAqQAAAAAAAAAAAAAAmwAAAAAAAAAAAAAAiAACIkOKAACACnRvdGFsc3Rha2UjZ4ALaW5pdF9ic0FMR08jKCNPAlRngBBpbml0UG9vbENvbnRyYWN0IygjTwJUZ4AUdmFsaWRhdG9yUG9vbFZlcnNpb24jZ4mIAAIiQ4oAAImIAAIiQ4oAAIk2GgEXiAACIkOKAQCJNhoBF4gAAiJDigEAiYgAAiJDigAAiYgAAiJDigAAiYAEuER7NjYaAI4B/1kAgAR8GXTHgARPWMUwgATt3+WYgATjqpqQgAT9BGFzgAQpYlqCNhoAjgb/f/+I/5H/nv+r/7QA",
+    "clear": "Cw=="
   },
   "compilerInfo": {
     "compiler": "algod",

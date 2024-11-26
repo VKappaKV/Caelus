@@ -16,8 +16,6 @@ export class CaelusValidatorPool extends Contract {
 
   creatorContractAppID = GlobalStateKey<AppID>({ key: 'creator' })
 
-  poolName = GlobalStateKey<string>({ key: 'name' })
-
   validatorPoolContractVersion = GlobalStateKey<uint64>({ key: 'contractVersion' })
 
   xGovVotingAddress = GlobalStateKey<Address>({key: 'xGovVoter'})
@@ -52,7 +50,7 @@ export class CaelusValidatorPool extends Contract {
 
   isDelinquent = GlobalStateKey<boolean>({ key: 'isDelinquent' })
 
-  lastDelinquencyReportBlock = GlobalStateKey<uint64>({ key: 'delinquencyReport' })
+  lastDelinquencyReport = GlobalStateKey<uint64>({ key: 'delinquencyReport' })
 
   delinquencyScore = GlobalStateKey<uint64>({key:'delinquencyScore'})
 
@@ -68,12 +66,11 @@ export class CaelusValidatorPool extends Contract {
    * @param {Address} operatorAddress - Address of the node operator used to sign online/offline txns and participate in auctions
    * @param {uint64} contractVersion - Approval Program version for the node contract, stored in the CaelusAdminContract
    */
-  createApplication(creatingContract: AppID, operatorAddress: Address, contractVersion: uint64, poolName: string, xGovVotingAddress: Address, vestID: AssetID, stVestID: AssetID): void {
+  createApplication(creatingContract: AppID, operatorAddress: Address, contractVersion: uint64, xGovVotingAddress: Address, vestID: AssetID, stVestID: AssetID): void {
     this.creatorContractAppID.value = creatingContract
     this.operatorAddress.value = operatorAddress
     this.validatorPoolContractVersion.value = contractVersion
     this.xGovVotingAddress.value = xGovVotingAddress
-    this.poolName.value = poolName
     this.vestID.value = vestID
     this.stVestID.value = stVestID
 
@@ -149,7 +146,7 @@ export class CaelusValidatorPool extends Contract {
       this.setDelinquency()
     } 
     // check to not make checks be stacked in close proximity calls
-    assert(globals.round - this.lastDelinquencyReportBlock.value > this.getExpectedProposalsDelta(), 'Wait at least one ProposalsDelta between Performance checks')
+    assert(globals.round - this.lastDelinquencyReport.value > this.getExpectedProposalsDelta(), 'Wait at least one ProposalsDelta between Performance checks')
     const deltaWithLatestProposal = globals.round - this.app.address.lastProposed
     // todo: check if isPerformingAsExpected needs a higher delay
     const isPerformingAsExpected = this.getExpectedProposalsDelta() > deltaWithLatestProposal 
@@ -159,40 +156,26 @@ export class CaelusValidatorPool extends Contract {
       return
     } 
     if (!isPerformingAsExpected && this.app.address.lastHeartbeat < globals.round - this.getExpectedProposalsDelta()){
-      this.performanceCounter.value = this.performanceCounter.value > 0 ? this.delinquencyScore.value++ : 0
+      this.performanceCounter.value = this.performanceCounter.value > 0 ? this.delinquencyScore.value += 1 : 0
     }
     if (!isPerformingAsTolerated){
       this.delinquencyScore.value += 4
-      this.delinquencyThresholdCheck() // if higher than tolerated will set account to isDelinquent should this be an automatic follow up to set account offline?
+      this.setDelinquencyOnThresholdCheck()
     }
-    this.lastDelinquencyReportBlock.value = globals.round
+    this.lastDelinquencyReport.value = globals.round
   }
 
   // call this method if Account has been flagged as delinquent wait fixed amount of time before resetting it and expects payment if necessary (?)
   solveDelinquency(): void{
     assert(this.isDelinquent.value, 'Account is not delinquent')
     assert(this.txn.sender === this.operatorAddress.value, 'Only the Node Operator can clear up Delinquency')
-    // should there be an additional fee? 0.1% of the stake?
     assert(this.delegatedStake.value == 0, 'Before clearing up delinquency all the delegated stake must be redistributed')
-    this.isDelinquent.value = true
+    assert(this.lastDelinquencyReport.value < this.lastRewardReport.value) // validator has to win a proposal to clear up delinquency
+    assert(this.delinquencyThresholdCheck(), 'Delinquency score must be below threshold')
+    this.isDelinquent.value = false
     this.canBeDelegated.value = true
   }
 
-
-
-  // calculate tolerated wait for round after the expected threshold has passed
-  private getToleratedBlockDelta(): uint64 {
-    return this.getExpectedProposalsDelta() * 10 
-  }
-
-  // calculate round number between proposals given the online stake for this account vs total online stake
-  private getExpectedProposalsDelta(): uint64 {
-    const currentOnlineStake = onlineStake() // is this in microAlgo ?
-    const currentAccountStake = this.app.address.voterBalance
-    const accountTotalStakeShare = currentAccountStake / currentOnlineStake
-    // TODO how to calculate the number of rounds per DAY/EPOCH -> How many does the account propose? --> calculate the delta  set a rounding error
-    return 0
-  }
 
   // report the proposed block and send the rewards to the rewards_reserve_address keep the operator fee
   reportRewards(block: uint64): void {
@@ -203,9 +186,9 @@ export class CaelusValidatorPool extends Contract {
     // TODO send here the payout to the CaelusAdmin if it fails it won't advance the value update in the method : amount = report - takeFee
     
     if (this.getExpectedProposalsDelta() < (globals.round - this.lastRewardReport.value)){
-      this.performanceCounter.value++
-      this.fixDelinquencyScore()
-    }
+      this.performanceCounter.value += 1
+    } 
+    this.fixDelinquencyScore()
     this.lastRewardReport.value = block
     if(isOperatorReportTime){
       this.operatorCommit.value += takeFee
@@ -275,9 +258,6 @@ export class CaelusValidatorPool extends Contract {
   // use: callable by anyone through CA check contract version vs latest  
   upgradeToNewValidatorVersion(): void{}
 
-  // to use in case of IE flag drop (whatever the case an attacker sent enough Algo to set the Balance above the threshold)
-  resetIncentiveEligibleFlag(): void{}
-
   // use this to allow for a flashloan 
   flashloan(): void{}
 
@@ -335,10 +315,10 @@ export class CaelusValidatorPool extends Contract {
       'Only the Node Operator can register online with participation key'
     )
 
-    // Check that contract balance is at least 30k Algo
+    // Check that contract balance is at least 30k Algo and less than MAX_STAKE_PER_ACCOUNT
     assert(
-      this.app.address.balance >= globals.payoutsMinBalance,
-      'Contract needs 30k Algo as minimum balance for rewards eligibility'
+      this.app.address.balance >= globals.payoutsMinBalance && this.app.address.balance <= MAX_STAKE_PER_ACCOUNT,
+      'Contract needs 30k Algo as minimum balance for rewards eligibility and at most 50M Algo'
     )
 
     // Check that operator commit to the contract balance is at least 30k Algo
@@ -346,8 +326,6 @@ export class CaelusValidatorPool extends Contract {
       this.operatorCommit.value >= globals.payoutsMinBalance,
       'Operator commit must be higher than minimum balance for rewards eligibility'
     )
-    assert(!this.isDelinquent.value, 'account cannot be set to online if delinquency flag is active, must solve delinquency first')
-
     const extraFee = this.getGoOnlineFeeAmount()
 
     verifyPayTxn(feePayment, { receiver: this.app.address, amount: extraFee })
@@ -366,37 +344,18 @@ export class CaelusValidatorPool extends Contract {
 
   /**
    * Set the contract account to offline so that it doesn't participate in consensus anymore.
-   * if graceful then it only means that there was some migration or other operation [CASE 1]
-   * if used to force the account offline because of bad behavior, then set up a flag for penalties [CASE 2]
-   *
-   * @param {uint64} offlineCase - {0}: graceful offline of the node by the node runner or the main Caelus contract
-   *                               {1}: node is misbehaving and needs to be set offline by the main Caelus contract
+   * No force offline by the protocol. Lookup Delinquency status 
+   * Once the account is set offline the method ensures that it cannot be delegated to.
+   *                              
    * 
    */
-  goOffline(offlineCase: uint64): void {
+  goOffline(): void {
     assert(
       this.txn.sender === this.operatorAddress.value || this.txn.sender === this.creatorContractAppID.value.address,
       'Only Node Operator or Caelus Admin contract can set the contract offline'
     )
-
-    if (offlineCase === 0) {
       this.canBeDelegated.value = false
       sendOfflineKeyRegistration({})
-    }
-
-    if (offlineCase === 1) {
-      assert(
-        this.txn.sender === this.creatorContractAppID.value.address,
-        'Only the Caelus main contract can set the contract offline and issue a penalty'
-      )
-      assert(
-        this.isDelinquent.value, 'Only Delinquent nodes can be forced offline'
-      )
-      this.performanceCounter.value = 0
-      this.clawbackStake()  // send delegated stake back to auction contract to be moved to other nodes
-      sendOfflineKeyRegistration({})
-    }
-    this.canBeDelegated.value = false
   }
   
 
@@ -417,10 +376,35 @@ export class CaelusValidatorPool extends Contract {
     return this.app.address.incentiveEligible
   }
 
-  private delinquencyThresholdCheck(): void{
-    if(this.delinquencyScore.value > MAX_DELINQUENCY_TOLERATED){
+  private setDelinquencyOnThresholdCheck(): void{
+    if (!this.delinquencyThresholdCheck()){
       this.setDelinquency()
-    }  
+    }
+  }
+
+  private delinquencyThresholdCheck(): boolean{
+    if(this.delinquencyScore.value > MAX_DELINQUENCY_TOLERATED){
+      return false
+    }
+    return true 
+  }
+
+  private setDelinquency(): void{
+    this.canBeDelegated.value = false
+    this.performanceCounter.value = 0
+    this.updateDelegationFactors() 
+    this.isDelinquent.value = true
+  }
+
+  private fixDelinquencyScore(): void{
+    if(this.delinquencyScore.value == 0){
+      return
+    }
+    // a delinquent node is proposing blocks to clear up the score
+    if (this.isDelinquent.value){
+      this.delinquencyScore.value -= 5 
+    }
+    this.delinquencyScore.value = 0
   }
 
   private updateDelegationFactors(): void {
@@ -458,24 +442,6 @@ export class CaelusValidatorPool extends Contract {
     }
   }
 
-  private setDelinquency(): void{
-    this.canBeDelegated.value = false
-    this.performanceCounter.value = 0
-    this.updateDelegationFactors() 
-    this.isDelinquent.value = true
-  }
-
-  private fixDelinquencyScore(): void{
-    if(this.delinquencyScore.value <= 0){
-      return
-    }
-    // cleanup only if the latest delinquency report is far older 
-    if(globals.round - this.lastDelinquencyReportBlock.value < this.getToleratedBlockDelta()){
-      return
-    }
-    this.delinquencyScore.value = 0
-  }
-
   private getTierVEST(): uint64{
     const lockedVEST = this.operatorAddress.value.assetBalance(this.vestID.value)
     const ownedVEST = this.operatorAddress.value.assetBalance(this.vestID.value)
@@ -487,4 +453,19 @@ export class CaelusValidatorPool extends Contract {
     }
     return 0
   }
+
+
+    // calculate tolerated wait for round after the expected threshold has passed
+    private getToleratedBlockDelta(): uint64 {
+      return this.getExpectedProposalsDelta() * 10 
+    }
+  
+    // calculate round number between proposals given the online stake for this account vs total online stake
+    private getExpectedProposalsDelta(): uint64 {
+      const currentOnlineStake = onlineStake() // is this in microAlgo ?
+      const currentAccountStake = this.app.address.voterBalance
+      const accountTotalStakeShare = currentAccountStake / currentOnlineStake
+      // TODO how to calculate the number of rounds per DAY/EPOCH -> How many does the account propose? --> calculate the delta  set a rounding error
+      return 0
+    }
 }

@@ -17,6 +17,18 @@
         {
           "name": "contractVersion",
           "type": "uint64"
+        },
+        {
+          "name": "xGovVotingAddress",
+          "type": "address"
+        },
+        {
+          "name": "vestID",
+          "type": "uint64"
+        },
+        {
+          "name": "stVestID",
+          "type": "uint64"
         }
       ],
       "returns": {
@@ -59,29 +71,67 @@
       }
     },
     {
-      "name": "getToleratedBlockDelta",
-      "args": [],
-      "returns": {
-        "type": "uint64"
-      }
-    },
-    {
-      "name": "reportRewards",
+      "name": "solveDelinquency",
       "args": [],
       "returns": {
         "type": "void"
       }
     },
     {
-      "name": "bid",
+      "name": "reportRewards",
+      "args": [
+        {
+          "name": "block",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "issueBid",
       "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "takeStakeRequest",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
       "returns": {
         "type": "void"
       }
     },
     {
       "name": "addStake",
-      "args": [],
+      "args": [
+        {
+          "name": "txnWithStake",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "burnStake",
+      "args": [
+        {
+          "name": "amountRequested",
+          "type": "uint64"
+        },
+        {
+          "name": "receiverBurn",
+          "type": "address"
+        }
+      ],
       "returns": {
         "type": "void"
       }
@@ -94,7 +144,7 @@
       }
     },
     {
-      "name": "snitch",
+      "name": "issueSnitch",
       "args": [],
       "returns": {
         "type": "void"
@@ -122,6 +172,20 @@
       }
     },
     {
+      "name": "upgradeToNewValidatorVersion",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "flashloan",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
       "name": "claimLeftAlgo",
       "args": [],
       "returns": {
@@ -129,8 +193,20 @@
       }
     },
     {
-      "name": "checkAlgodVersion",
+      "name": "operatorExit",
       "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "closeOutOfApplication",
+      "args": [
+        {
+          "name": "args",
+          "type": "any[]"
+        }
+      ],
       "returns": {
         "type": "void"
       }
@@ -142,7 +218,7 @@
         {
           "name": "feePayment",
           "type": "pay",
-          "desc": "Payment transaction to the contract to cover costs for Eligibility fee; 0 for renewal."
+          "desc": "Payment transaction to the contract to cover costs for Eligibility fee 0 for renewal."
         },
         {
           "name": "votePK",
@@ -181,16 +257,18 @@
     },
     {
       "name": "goOffline",
-      "desc": "Set the contract account to offline so that it doesn't participate in consensus anymore.\nif graceful then it only means that there was some migration or other operation [CASE 1]\nif used to force the account offline because of bad behavior, then set up a flag for penalties [CASE 2]",
-      "args": [
-        {
-          "name": "offlineCase",
-          "type": "uint64",
-          "desc": ": graceful offline of the node by the node runner or the main Caelus contract\n                             1: node is misbehaving and needs to be set offline by the main Caelus contract"
-        }
-      ],
+      "desc": "Set the contract account to offline so that it doesn't participate in consensus anymore.\nNo force offline by the protocol. Lookup Delinquency status\nOnce the account is set offline the method ensures that it cannot be delegated to.",
+      "args": [],
       "returns": {
         "type": "void"
+      }
+    },
+    {
+      "name": "getEligibilityFlag",
+      "readonly": true,
+      "args": [],
+      "returns": {
+        "type": "bool"
       }
     }
   ]

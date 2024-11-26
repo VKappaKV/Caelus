@@ -8,6 +8,58 @@
       "returns": {
         "type": "void"
       }
+    },
+    {
+      "name": "mintRequest",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "burnRequest",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "bid",
+      "args": [
+        {
+          "name": "validatorAppID",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "delegateStake",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "snitch",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "burnStake",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
     }
   ]
 }

@@ -13,7 +13,7 @@ import { CaelusValidatorPool } from './CaelusValidator.algo';
 export class CaelusAdmin extends Contract {
   programVersion = 11;
 
-  pegRatio = GlobalStateKey<ufixed<64, 2>>({ key: 'peg' });
+  //pegRatio = GlobalStateKey<ufixed<64, 2>>({ key: 'peg' });
 
   epochLen = GlobalStateKey<uint64>({ key: 'epochlen' }); // use to recalculate pegRatio?
 
@@ -33,7 +33,7 @@ export class CaelusAdmin extends Contract {
     this.init_bsALGO.value = false;
     this.initializedPoolContract.value = false;
     this.validatorPoolContractVersion.value = 0;
-    this.pegRatio.value = 1.0;
+    //this.pegRatio.value = 1.0;
   }
 
   // user mint bsAlgo, sends Algo Payment txn and updates the balance for idle stake to claim 
@@ -46,11 +46,11 @@ export class CaelusAdmin extends Contract {
     // TODO how to check a global state key-value from either caller or given AppID
     // check caller saturation buffer value
     // compare with current highest bidder  -> fail the txn or just make it return nothing (punish spam requests)
-    const [value, exists] = validatorAppID.globalState('saturationBuffer') as bytes
+  /*   const [value, exists] = validatorAppID.globalState('saturationBuffer') as bytes
     if (exists){
       // check value with current highest bidder
     }
-
+ */
   }
   // called to send the Algo used to mint bsALGO to the highest bidder
   delegateStake(amount: uint64):void{}
