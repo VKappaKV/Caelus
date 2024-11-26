@@ -457,15 +457,14 @@ export class CaelusValidatorPool extends Contract {
 
     // calculate tolerated wait for round after the expected threshold has passed
     private getToleratedBlockDelta(): uint64 {
-      return this.getExpectedProposalsDelta() * 10 
+      return this.getExpectedProposalsDelta() * 2
     }
   
     // calculate round number between proposals given the online stake for this account vs total online stake
     private getExpectedProposalsDelta(): uint64 {
       const currentOnlineStake = onlineStake() // is this in microAlgo ?
       const currentAccountStake = this.app.address.voterBalance
-      const accountTotalStakeShare = currentAccountStake / currentOnlineStake
-      // TODO how to calculate the number of rounds per DAY/EPOCH -> How many does the account propose? --> calculate the delta  set a rounding error
-      return 0
+      const roundDelta = currentOnlineStake / currentAccountStake
+      return roundDelta*10
     }
 }
