@@ -1,7 +1,6 @@
 import { Contract } from '@algorandfoundation/tealscript'
 import { MAX_DELINQUENCY_TOLERATED, MAX_STAKE_PER_ACCOUNT, PERFORMANCE_STAKE_INCREASE, PERFORMANCE_STEP, VEST_TIER_4, VEST_TIER_5 } from './constants.algo'
 import { CaelusAdmin } from './CaelusAdmin.algo'
-
 /**
  * Caelus Validator Pool Contract.
  */
@@ -138,31 +137,28 @@ export class CaelusValidatorPool extends Contract {
     this.updateDelegationFactors()
   }
 
-  // Todo
-  // check where falls the last reported proposed block within the tolerated block delta
-  // --> reports delinquency if below expectations updates last DeliquencyReportBlock and checks if current call is too close from last
   performanceCheck(): void {
     if (!this.app.address.incentiveEligible){
       this.setDelinquency()
+      return
     } 
     // check to not make checks be stacked in close proximity calls
-    assert(globals.round - this.lastDelinquencyReport.value > this.getExpectedProposalsDelta(), 'Wait at least one ProposalsDelta between Performance checks')
+    assert(globals.round - this.lastDelinquencyReport.value > this.getExpectedProposalsDelta()/2, 'Wait at least half the proposal expected time between Performance checks')
     const deltaWithLatestProposal = globals.round - this.app.address.lastProposed
-    // todo: check if isPerformingAsExpected needs a higher delay
     const isPerformingAsExpected = this.getExpectedProposalsDelta() > deltaWithLatestProposal 
     const isPerformingAsTolerated = this.getToleratedBlockDelta() > deltaWithLatestProposal 
     // exit if account is performing as expected
     if (isPerformingAsExpected && isPerformingAsTolerated){
       return
     } 
-    if (!isPerformingAsExpected && this.app.address.lastHeartbeat < globals.round - this.getExpectedProposalsDelta()){
-      this.performanceCounter.value = this.performanceCounter.value > 0 ? this.delinquencyScore.value += 1 : 0
-    }
     if (!isPerformingAsTolerated){
-      this.delinquencyScore.value += 4
-      this.setDelinquencyOnThresholdCheck()
+      this.delinquencyScore.value += 5
+    } else if (!isPerformingAsExpected){
+      this.delinquencyScore.value += this.lastDelinquencyReport.value > this.lastRewardReport.value || this.delinquencyScore.value > 5 ? 2 : 1
     }
+    this.setDelinquencyOnThresholdCheck()
     this.lastDelinquencyReport.value = globals.round
+    return
   }
 
   // call this method if Account has been flagged as delinquent wait fixed amount of time before resetting it and expects payment if necessary (?)
@@ -177,13 +173,19 @@ export class CaelusValidatorPool extends Contract {
   }
 
 
-  // report the proposed block and send the rewards to the rewards_reserve_address keep the operator fee
   reportRewards(block: uint64): void {
     const isOperatorReportTime = globals.round - block < 700
     const report = blocks[block].proposerPayout
     const takeFee = (report * 6) / 100
-
-    // TODO send here the payout to the CaelusAdmin if it fails it won't advance the value update in the method : amount = report - takeFee
+    
+    this.pendingGroup.addMethodCall<typeof CaelusAdmin.prototype.declareRewards, void>({
+      applicationID: this.creatorContractAppID.value,
+      methodArgs: [{
+        receiver: this.creatorContractAppID.value.address,
+        amount: report - takeFee,
+        fee: 0,
+      }]
+    })
     
     if (this.getExpectedProposalsDelta() < (globals.round - this.lastRewardReport.value)){
       this.performanceCounter.value += 1
@@ -204,21 +206,12 @@ export class CaelusValidatorPool extends Contract {
     }
     this.updateDelegationFactors()
   }
-
-  // call the auction contract to report the saturation buffer & delegatable stake
-  issueBid(): void {
-    assert(this.canBeDelegated.value, 'Account cannot take more delegated stake')
-    // TODO
-    sendMethodCall<typeof CaelusAdmin.prototype.bid>({
-
-    })
-  }
-
-  takeStakeRequest(amount: uint64): void{
+  // do I need this?
+  takeStakeRequest(stakeTxn: PayTxn): void{
     assert(this.canBeDelegated.value, 'Account cannot take more delegated stake')
   }
 
-  // called by the auction contract to assign stake to the node contract at mint
+  // called by the auction contract to assign stake to the node contract 
   addStake(txnWithStake: PayTxn): void {
     // should I check receiver? Is there a problem if not? Sender would just be gifting Algo would this fuck up calculation for the LST?
     verifyPayTxn(txnWithStake, {
@@ -239,13 +232,7 @@ export class CaelusValidatorPool extends Contract {
     this.delegatedStake.value -= amountRequested
     this.updateDelegationFactors()
   }
-
-  // call the auction contract to report the saturation buffer of itself or another validator contract
-  snitchBurn(): void {}
-
-  // call to check on performances throught the get_snitched method && check IE flag for good measure || if the snitch picks up a True value then increase node performance counter
-  issueSnitch(): void {}
-
+  
   // make the checks required by the above snitch method
   getSnitched(): void {}
 
@@ -259,7 +246,25 @@ export class CaelusValidatorPool extends Contract {
   upgradeToNewValidatorVersion(): void{}
 
   // use this to allow for a flashloan 
-  flashloan(): void{}
+  flashloan(amount: uint64, receiver: Address): void{
+    let repaid = false
+    assert(this.txn.sender === this.creatorContractAppID.value.address , 'Caller must be the Caelus Admin Contract')
+
+    for (let i = this.txn.groupIndex; i<this.txnGroup.length ; i++){
+      const txn = this.txnGroup[i]
+
+      if(txn.receiver === this.app.address && txn.amount === amount){
+        repaid = true
+        break
+      }
+    }
+    assert(repaid, 'must repay the loan!')
+    sendPayment({
+      receiver: receiver,
+      amount: amount,
+      fee: 0
+    })
+  }
 
   // used by CA to clean up remaining Algo
   claimLeftAlgo(): void {
@@ -269,18 +274,10 @@ export class CaelusValidatorPool extends Contract {
     // TODO make app call to send remaining Algo back to auction contract
   }
 
-/* 
-  TODO when things clear up with xGov development
-    registerToXGov(): void{}
-
-    delegateXGovVoting(): void{}
- */
-
   // make sure there's no delegated stake, return the operator commit to the operatorAddress and remove all operator related GKeys
   operatorExit(): void{
     assert(this.app.address.voterBalance === 0, 'Account is online, sign it offline before exiting')
-    assert(this.txn.sender === this.operatorAddress.value, 'Only the Node Operator can issue this transaction')
-    
+    assert(this.txn.sender === this.operatorAddress.value, 'Only the Node Operator can issue this transaction')    
   }
 
   // shut down contract account
@@ -344,7 +341,7 @@ export class CaelusValidatorPool extends Contract {
 
   /**
    * Set the contract account to offline so that it doesn't participate in consensus anymore.
-   * No force offline by the protocol. Lookup Delinquency status 
+   * No force offline by the protocol (might be changed to a very long time wait in case the node isn't proposing blocks at all). Lookup Delinquency status 
    * Once the account is set offline the method ensures that it cannot be delegated to.
    *                              
    * 
@@ -400,7 +397,6 @@ export class CaelusValidatorPool extends Contract {
     if(this.delinquencyScore.value == 0){
       return
     }
-    // a delinquent node is proposing blocks to clear up the score
     if (this.isDelinquent.value){
       this.delinquencyScore.value -= 5 
     }
@@ -411,26 +407,26 @@ export class CaelusValidatorPool extends Contract {
     assert(!this.isDelinquent.value, 'Account is delinquent. Solve Delinquency state before updating parameters')
     // start counting from the operator commit
     if (this.operatorCommit.value > globals.payoutsMinBalance && this.canBeDelegated.value) {
+
       this.maxDelegatableStake.value = this.operatorCommit.value
+
+      // boost commit with VEST tier: tier 4 is a 50% increase and tier 5 is a 100% increase
+      const vestBoost = (this.getTierVEST() * this.operatorCommit.value) / 2
+      this.maxDelegatableStake.value += vestBoost
+
+      // add in the performance counter to increase delegatable amount, increases of 10k delegatable stake per multiples of 5 for performanceCounter
+      this.maxDelegatableStake.value += PERFORMANCE_STAKE_INCREASE * (this.performanceCounter.value / PERFORMANCE_STEP)
+
+      // check against globals.payoutsMaxBalance (50M)
+      if (this.app.address.balance >= MAX_STAKE_PER_ACCOUNT) {
+        this.maxDelegatableStake.value = 0
+      } else if (this.app.address.balance + this.maxDelegatableStake.value > MAX_STAKE_PER_ACCOUNT) {
+        this.maxDelegatableStake.value =
+          MAX_STAKE_PER_ACCOUNT- this.app.address.balance
+      }
     } else {
       this.maxDelegatableStake.value = 0
-    }
-
-    // boost commit with VEST tier: tier 4 is a 50% increase and tier 5 is a 100% increase
-    const vestBoost = (this.getTierVEST() * this.operatorCommit.value) / 2 
-
-    this.maxDelegatableStake.value += vestBoost
-
-    // add in the performance counter to increase delegatable amount, increases of 10k delegatable stake per multiples of 5 for performanceCounter
-    this.maxDelegatableStake.value += PERFORMANCE_STAKE_INCREASE * (this.performanceCounter.value / PERFORMANCE_STEP)
-
-    // check against globals.payoutsMaxBalance (50M)
-    if (this.app.address.balance >= MAX_STAKE_PER_ACCOUNT) {
-      this.maxDelegatableStake.value = 0
-    } else if (this.app.address.balance + this.maxDelegatableStake.value > MAX_STAKE_PER_ACCOUNT) {
-      this.maxDelegatableStake.value =
-        MAX_STAKE_PER_ACCOUNT- this.app.address.balance
-    }
+    }  
 
     // calculate saturation buffer with 3 decimal precision & set flag for delegation eligibility
     if (this.maxDelegatableStake.value > 0) {
@@ -443,7 +439,7 @@ export class CaelusValidatorPool extends Contract {
   }
 
   private getTierVEST(): uint64{
-    const lockedVEST = this.operatorAddress.value.assetBalance(this.vestID.value)
+    const lockedVEST = this.operatorAddress.value.assetBalance(this.stVestID.value)
     const ownedVEST = this.operatorAddress.value.assetBalance(this.vestID.value)
     if (lockedVEST + ownedVEST >= VEST_TIER_5){
       return 2
@@ -455,16 +451,14 @@ export class CaelusValidatorPool extends Contract {
   }
 
 
-    // calculate tolerated wait for round after the expected threshold has passed
-    private getToleratedBlockDelta(): uint64 {
-      return this.getExpectedProposalsDelta() * 2
-    }
-  
-    // calculate round number between proposals given the online stake for this account vs total online stake
-    private getExpectedProposalsDelta(): uint64 {
-      const currentOnlineStake = onlineStake() // is this in microAlgo ?
-      const currentAccountStake = this.app.address.voterBalance
-      const roundDelta = currentOnlineStake / currentAccountStake
-      return roundDelta*10
-    }
+  private getToleratedBlockDelta(): uint64 {
+    return this.getExpectedProposalsDelta() * 5
+  }
+
+  private getExpectedProposalsDelta(): uint64 {
+    const currentOnlineStake = onlineStake()
+    const currentAccountStake = this.app.address.voterBalance
+    const roundDelta = currentOnlineStake / currentAccountStake
+    return roundDelta*10
+  }
 }
