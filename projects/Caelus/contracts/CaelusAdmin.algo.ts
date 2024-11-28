@@ -85,8 +85,6 @@ export class CaelusAdmin extends Contract {
   }
 
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
-    assert(this.checkNoDoubleInFlashLoan(appToInclude), 'No Duplicate AppIDs in the same FlashLoan request');
-
     this.flashLoanCounter.value += appToInclude.length;
     const keepFee = this.flashLoanCounter.value + FLASH_LOAN_FEE;
 
@@ -106,10 +104,5 @@ export class CaelusAdmin extends Contract {
         fee: 0,
       });
     }
-  }
-
-  private checkNoDoubleInFlashLoan(apps: AppID[]): boolean {
-    const uniqueSet = new Set(apps);
-    return uniqueSet.size === apps.length;
   }
 }

@@ -63,6 +63,12 @@ export class CaelusValidatorPool extends Contract {
 
   delinquencyScore = GlobalStateKey<uint64>({ key: 'delinquencyScore' });
 
+  // for Flash Loan
+
+  balanceBeforeLoan = GlobalStateKey<uint64>({ key: 'balanceBeforeLoan' });
+
+  repaid = GlobalStateKey<boolean>({ key: 'repaid' });
+
   //----------------------------------------------------------------------------------------------------------
 
   /** ******************
@@ -101,6 +107,8 @@ export class CaelusValidatorPool extends Contract {
     this.performanceCounter.value = 0;
     this.delinquencyScore.value = 0;
     this.isDelinquent.value = false;
+
+    this.repaid.value = true;
   }
 
   /**
@@ -270,25 +278,36 @@ export class CaelusValidatorPool extends Contract {
   // use: callable by anyone through CA check contract version vs latest
   upgradeToNewValidatorVersion(): void {}
 
-  // use this to allow for a flashloan
   flashloan(amount: uint64, receiver: Address): void {
-    let repaid = false;
+    if (this.repaid.value) {
+      this.balanceBeforeLoan.value = this.app.address.balance;
+      this.repaid.value = false;
+    }
     assert(this.txn.sender === this.creatorContractAppID.value.address, 'Caller must be the Caelus Admin Contract');
 
     for (let i = this.txn.groupIndex; i < this.txnGroup.length; i += 1) {
       const txn = this.txnGroup[i];
 
-      if (txn.receiver === this.app.address && txn.amount === amount) {
-        repaid = true;
-        break;
+      if (
+        txn.typeEnum === TransactionType.ApplicationCall &&
+        txn.applicationID === this.app &&
+        txn.onCompletion === 0 &&
+        txn.numAppArgs === 1 &&
+        txn.applicationArgs[0] === method('checkBalance():void')
+      ) {
+        this.repaid.value = true;
       }
     }
-    assert(repaid, 'must repay the loan!');
+    assert(this.repaid.value, 'must repay the loan!');
     sendPayment({
       receiver: receiver,
       amount: amount,
       fee: 0,
     });
+  }
+
+  checkBalance(): void {
+    assert(this.balanceBeforeLoan.value === this.app.address.balance);
   }
 
   // used by CA to clean up remaining Algo
