@@ -27,7 +27,7 @@ export class CaelusValidatorPool extends Contract {
 
   validatorPoolContractVersion = GlobalStateKey<uint64>({ key: 'contractVersion' });
 
-  xGovVotingAddress = GlobalStateKey<Address>({ key: 'xGovVoter' });
+  // xGovVotingAddress = GlobalStateKey<Address>({ key: 'xGovVoter' });
 
   vestID = GlobalStateKey<AssetID>({ key: 'vestID' });
 
@@ -39,7 +39,7 @@ export class CaelusValidatorPool extends Contract {
 
   operatorCommit = GlobalStateKey<uint64>({ key: 'operatorCommit' });
 
-  operatorXGovLoan = GlobalStateKey<uint64>({ key: 'xGovFeePayout' });
+  // operatorXGovLoan = GlobalStateKey<uint64>({ key: 'xGovFeePayout' });
 
   // Delegated Stake params
 
@@ -85,14 +85,14 @@ export class CaelusValidatorPool extends Contract {
     creatingContract: AppID,
     operatorAddress: Address,
     contractVersion: uint64,
-    xGovVotingAddress: Address,
+    // xGovVotingAddress: Address,
     vestID: AssetID,
     stVestID: AssetID
   ): void {
     this.creatorContractAppID.value = creatingContract;
     this.operatorAddress.value = operatorAddress;
     this.validatorPoolContractVersion.value = contractVersion;
-    this.xGovVotingAddress.value = xGovVotingAddress;
+    // this.xGovVotingAddress.value = xGovVotingAddress;
     this.vestID.value = vestID;
     this.stVestID.value = stVestID;
 
@@ -421,7 +421,7 @@ export class CaelusValidatorPool extends Contract {
     this.canBeDelegated.value = false;
     this.performanceCounter.value = 0;
     this.updateDelegationFactors();
-    this.isDelinquent.value = true;
+    this.isDelinquent.value = true;  //Can there be a case where you can't be delegated to, but you can keep your stake? Just to see if two bools are redundant or not
   }
 
   private fixDelinquencyScore(): void {
@@ -478,11 +478,11 @@ export class CaelusValidatorPool extends Contract {
     }
     return 0;
   }
-
+  // Let's check the params, probably talk to either nullun or AF, before going live cause of probabilistic nature of ALGO.
   private getToleratedBlockDelta(): uint64 {
     return this.getExpectedProposalsDelta() * 5;
   }
-
+  
   private getExpectedProposalsDelta(): uint64 {
     const currentOnlineStake = onlineStake();
     const currentAccountStake = this.app.address.voterBalance;
