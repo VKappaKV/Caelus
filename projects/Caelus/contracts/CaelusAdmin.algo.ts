@@ -56,14 +56,25 @@ export class CaelusAdmin extends Contract {
   bid(validatorAppID: AppID): void {
     const [valueC, existsC] = validatorAppID.globalState('saturationBuffer') as uint64[];
     const [valueB, existsB] = this.highestBidder.value.globalState('saturationBuffer') as uint64[];
-    if ((existsC && valueC > valueB) || !existsB) {
+    if ((existsC !== 0 && valueC > valueB) || existsB === 0) {
       this.highestBidder.value = validatorAppID;
     }
   }
 
   // called to send the Algo used to mint bsALGO to the highest bidder
   delegateStake(amount: uint64, validatorAppID: AppID): void {
-    // check that the Validator can receive rewards: delinquency + delegatability
+    assert(validatorAppID === this.highestBidder.value, 'can only delegate to highest bidder account');
+    assert(amount <= this.idleAlgoToStake.value, 'cant withdraw more than the amount of idleAlgo in the contract');
+    sendMethodCall<typeof CaelusValidatorPool.prototype.addStake, void>({
+      applicationID: validatorAppID,
+      methodArgs: [
+        {
+          receiver: validatorAppID.address,
+          amount: amount,
+          fee: 0,
+        },
+      ],
+    });
   }
 
   // used to set new validator inside the burn queue
@@ -83,6 +94,7 @@ export class CaelusAdmin extends Contract {
     });
     this.idleAlgoToStake.value += restakeRewards;
   }
+  // TODO : CHECK FOR THE SUBSEQUENT APPID FL WITH FL HAPPENING AFTER THE CHECKBALANCE
 
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
     this.flashLoanCounter.value += appToInclude.length;
@@ -103,6 +115,21 @@ export class CaelusAdmin extends Contract {
         methodArgs: [amounts[i], this.txn.sender],
         fee: 0,
       });
+
+      for (let j = this.txn.groupIndex; j < this.txnGroup.length; j += 1) {
+        const txn = this.txnGroup[j];
+        let repaid = false;
+        if (
+          txn.typeEnum === TransactionType.ApplicationCall &&
+          txn.applicationID === appToInclude[i] &&
+          txn.onCompletion === 0 &&
+          txn.numAppArgs === 1 &&
+          txn.applicationArgs[0] === method('checkBalance():void')
+        ) {
+          repaid = true;
+        }
+        assert(repaid);
+      }
     }
   }
 }

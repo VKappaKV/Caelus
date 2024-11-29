@@ -65,7 +65,7 @@ export class CaelusValidatorPool extends Contract {
 
   // for Flash Loan
 
-  balanceBeforeLoan = GlobalStateKey<uint64>({ key: 'balanceBeforeLoan' });
+  balanceCheckpoint = GlobalStateKey<uint64>({ key: 'balanceCheckpoint' });
 
   repaid = GlobalStateKey<boolean>({ key: 'repaid' });
 
@@ -176,7 +176,6 @@ export class CaelusValidatorPool extends Contract {
     const deltaWithLatestProposal = globals.round - this.app.address.lastProposed;
     const isPerformingAsExpected = this.getExpectedProposalsDelta() > deltaWithLatestProposal;
     const isPerformingAsTolerated = this.getToleratedBlockDelta() > deltaWithLatestProposal;
-    // exit if account is performing as expected
     if (isPerformingAsExpected && isPerformingAsTolerated) {
       return;
     }
@@ -266,7 +265,7 @@ export class CaelusValidatorPool extends Contract {
     this.updateDelegationFactors();
   }
 
-  // make the checks required by the above snitch method
+  // make the checks required
   getSnitched(): void {}
 
   // used by CA contract to remove the delegated stake and send it back to the auction in case of snitch
@@ -280,34 +279,23 @@ export class CaelusValidatorPool extends Contract {
 
   flashloan(amount: uint64, receiver: Address): void {
     if (this.repaid.value) {
-      this.balanceBeforeLoan.value = this.app.address.balance;
+      this.balanceCheckpoint.value = this.app.address.balance;
       this.repaid.value = false;
     }
     assert(this.txn.sender === this.creatorContractAppID.value.address, 'Caller must be the Caelus Admin Contract');
 
-    for (let i = this.txn.groupIndex; i < this.txnGroup.length; i += 1) {
-      const txn = this.txnGroup[i];
-
-      if (
-        txn.typeEnum === TransactionType.ApplicationCall &&
-        txn.applicationID === this.app &&
-        txn.onCompletion === 0 &&
-        txn.numAppArgs === 1 &&
-        txn.applicationArgs[0] === method('checkBalance():void')
-      ) {
-        this.repaid.value = true;
-      }
-    }
-    assert(this.repaid.value, 'must repay the loan!');
     sendPayment({
       receiver: receiver,
       amount: amount,
       fee: 0,
     });
+
+    // top level Caelus Admin checks that checkBalance is called within the outer group
   }
 
   checkBalance(): void {
-    assert(this.balanceBeforeLoan.value === this.app.address.balance);
+    assert(this.balanceCheckpoint.value === this.app.address.balance);
+    this.repaid.value = true;
   }
 
   // used by CA to clean up remaining Algo
