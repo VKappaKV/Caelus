@@ -53,6 +53,7 @@ export class CaelusAdmin extends Contract {
   burnRequest(): void {}
 
   // called to bid new validator as highest bidder
+  // No assert call to avoid future P2P spam. Come back to this before final release.
   bid(validatorAppID: AppID): void {
     const [valueC, existsC] = validatorAppID.globalState('saturationBuffer') as uint64[];
     const [valueB, existsB] = this.highestBidder.value.globalState('saturationBuffer') as uint64[];
@@ -60,7 +61,7 @@ export class CaelusAdmin extends Contract {
       this.highestBidder.value = validatorAppID;
     }
   }
-
+  
   // called to send the Algo used to mint bsALGO to the highest bidder
   delegateStake(amount: uint64, validatorAppID: AppID): void {
     assert(validatorAppID === this.highestBidder.value, 'can only delegate to highest bidder account');
@@ -75,6 +76,7 @@ export class CaelusAdmin extends Contract {
         },
       ],
     });
+    // UPDATE idleAlgoToStake to cero. We could've lost money Kappa!!!!
   }
 
   // used to set new validator inside the burn queue
@@ -95,7 +97,7 @@ export class CaelusAdmin extends Contract {
     this.idleAlgoToStake.value += restakeRewards;
   }
   // TODO : CHECK FOR THE SUBSEQUENT APPID FL WITH FL HAPPENING AFTER THE CHECKBALANCE
-
+  // TODO : DOCUMENT ON THE EVENTUAL SDK HOW THE FEE STRUCTURE WORKS TO AVOID SOMEONE YEETING THEIR NETWORTH ON A FLASH LOAN FEE
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
     this.flashLoanCounter.value += appToInclude.length;
     const keepFee = this.flashLoanCounter.value + FLASH_LOAN_FEE;
@@ -108,7 +110,7 @@ export class CaelusAdmin extends Contract {
     this.idleAlgoToStake.value += keepFee;
 
     assert(amounts.length === appToInclude.length, 'array lenght [amount, appToInclude] mismatch');
-
+    //Ask Joe if this.pendingGroup creates a new txn group or appends it as an inner.
     for (let i = 0; i < appToInclude.length; i += 1) {
       this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.flashloan, void>({
         applicationID: appToInclude[i],
