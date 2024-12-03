@@ -19,18 +19,25 @@
           "type": "uint64"
         },
         {
-          "name": "xGovVotingAddress",
-          "type": "address"
-        },
-        {
           "name": "vestID",
           "type": "uint64"
         },
         {
           "name": "stVestID",
           "type": "uint64"
+        },
+        {
+          "name": "vALGO",
+          "type": "uint64"
         }
       ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "optIntoLST",
+      "args": [],
       "returns": {
         "type": "void"
       }
@@ -67,18 +74,11 @@
       "name": "performanceCheck",
       "args": [],
       "returns": {
-        "type": "void"
+        "type": "bool"
       }
     },
     {
       "name": "solveDelinquency",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "reportRewards",
       "args": [
         {
           "name": "block",
@@ -90,17 +90,10 @@
       }
     },
     {
-      "name": "issueBid",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "takeStakeRequest",
+      "name": "reportRewards",
       "args": [
         {
-          "name": "amount",
+          "name": "block",
           "type": "uint64"
         }
       ],
@@ -137,49 +130,63 @@
       }
     },
     {
-      "name": "snitchBurn",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "issueSnitch",
-      "args": [],
+      "name": "snitchValidator",
+      "args": [
+        {
+          "name": "appToSnitch",
+          "type": "uint64"
+        },
+        {
+          "name": "params",
+          "type": "(bool,bool,bool,uint64,bool,uint64)"
+        }
+      ],
       "returns": {
         "type": "void"
       }
     },
     {
       "name": "getSnitched",
-      "args": [],
+      "args": [
+        {
+          "name": "checks",
+          "type": "(bool,bool,bool,uint64,bool,uint64)"
+        }
+      ],
       "returns": {
-        "type": "void"
+        "type": "bool"
       }
     },
     {
-      "name": "clawbackStake",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "clawbackStakeToValidator",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "upgradeToNewValidatorVersion",
-      "args": [],
+      "name": "getClawbackedStake",
+      "args": [
+        {
+          "name": "receivedStake",
+          "type": "pay"
+        }
+      ],
       "returns": {
         "type": "void"
       }
     },
     {
       "name": "flashloan",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        },
+        {
+          "name": "receiver",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "checkBalance",
       "args": [],
       "returns": {
         "type": "void"
@@ -193,20 +200,22 @@
       }
     },
     {
-      "name": "operatorExit",
+      "name": "updateToNewVersionEmptyContract",
       "args": [],
       "returns": {
         "type": "void"
       }
     },
     {
-      "name": "closeOutOfApplication",
-      "args": [
-        {
-          "name": "args",
-          "type": "any[]"
-        }
-      ],
+      "name": "makeCloseTxn",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "deleteApplication",
+      "args": [],
       "returns": {
         "type": "void"
       }
@@ -257,7 +266,7 @@
     },
     {
       "name": "goOffline",
-      "desc": "Set the contract account to offline so that it doesn't participate in consensus anymore.\nNo force offline by the protocol. Lookup Delinquency status\nOnce the account is set offline the method ensures that it cannot be delegated to.",
+      "desc": "Set the contract account to offline so that it doesn't participate in consensus anymore.\nNo force offline by the protocol (might be changed to a very long time wait in case the node isn't proposing blocks at all). Lookup Delinquency status\nOnce the account is set offline the method ensures that it cannot be delegated to.",
       "args": [],
       "returns": {
         "type": "void"

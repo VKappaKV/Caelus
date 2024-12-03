@@ -32,6 +32,8 @@ export class CaelusValidatorPool extends Contract {
 
   stVestID = GlobalStateKey<AssetID>({ key: 'stVestID' });
 
+  vALGO = GlobalStateKey<AssetID>({ key: 'vALGO' });
+
   // Operator specific params
 
   operatorAddress = GlobalStateKey<Address>({ key: 'operator' });
@@ -83,13 +85,15 @@ export class CaelusValidatorPool extends Contract {
     operatorAddress: Address,
     contractVersion: uint64,
     vestID: AssetID,
-    stVestID: AssetID
+    stVestID: AssetID,
+    vALGO: AssetID
   ): void {
     this.creatorContractAppID.value = creatingContract;
     this.operatorAddress.value = operatorAddress;
     this.validatorPoolContractVersion.value = contractVersion;
     this.vestID.value = vestID;
     this.stVestID.value = stVestID;
+    this.vALGO.value = vALGO;
 
     // stake counters
     this.operatorCommit.value = 0;
@@ -298,7 +302,7 @@ export class CaelusValidatorPool extends Contract {
     let result = false;
     let amount = 0;
     if (checks.performanceCheck) {
-      result = result || this.performanceCheck();
+      result = this.performanceCheck();
     }
     // in this case a validator pool being delinquent has its delegation factor fixed to MAX = 0 & saturationBUFFER to 1000
     if (checks.delinquentCheck) {
@@ -316,9 +320,11 @@ export class CaelusValidatorPool extends Contract {
     if (checks.split && amount > checks.max && isDelegatable) {
       const toRecipient = amount - checks.max;
       amount -= toRecipient;
-      sendMethodCall<typeof CaelusValidatorPool.prototype.getClawbackedStake, void>({
+      sendMethodCall<typeof CaelusAdmin.prototype.reStakeFromSnitch, void>({
         applicationID: checks.recipient,
         methodArgs: [
+          this.app,
+          checks.recipient,
           {
             receiver: checks.recipient.address,
             amount: toRecipient,
@@ -331,6 +337,7 @@ export class CaelusValidatorPool extends Contract {
       applicationID: this.creatorContractAppID.value,
       methodArgs: [
         this.app,
+        this.creatorContractAppID.value,
         {
           receiver: this.creatorContractAppID.value.address,
           amount: amount,
@@ -346,6 +353,7 @@ export class CaelusValidatorPool extends Contract {
 
   // follow up callback from the snitch
   getClawbackedStake(receivedStake: PayTxn): void {
+    assert(this.txn.sender === this.creatorContractAppID.value.address);
     verifyPayTxn(receivedStake, {
       receiver: this.app.address,
     });
@@ -397,9 +405,40 @@ export class CaelusValidatorPool extends Contract {
     // make sendMethodCall
   }
 
-  // shut down contract account
-  // only for CA, funds must have been withdrawn first, clean up with optout and closeout the balance to the auction
-  closeOutOfApplication(): void {}
+  makeCloseTxn(): void {
+    assert(!this.isDelinquent.value);
+    assert(this.app.address.voterBalance === 0, 'Account must be set to offline');
+    assert(this.txn.sender === this.operatorAddress.value);
+    sendMethodCall<typeof CaelusAdmin.prototype.onOperatorExit, void>({
+      applicationID: this.creatorContractAppID.value,
+      methodArgs: [
+        this.app,
+        {
+          receiver: this.creatorContractAppID.value.address,
+          amount: this.operatorCommit.value + this.delegatedStake.value,
+          fee: 0,
+        },
+      ],
+    });
+    this.operatorCommit.value = 0;
+    this.delegatedStake.value = 0;
+  }
+
+  // called by CA; check delinquency, send ASA to operator and opt out, closeout to vestigeAddress
+  deleteApplication(): void {
+    assert(!this.isDelinquent.value);
+    assert(this.txn.sender === this.creatorContractAppID.value.address);
+    assert(this.operatorCommit.value === 0 && this.delegatedStake.value === 0, 'no stake left');
+    sendAssetTransfer({
+      xferAsset: this.vALGO.value,
+      assetReceiver: this.operatorAddress.value,
+      assetCloseTo: this.operatorAddress.value,
+      assetAmount: this.app.address.assetBalance(this.vALGO.value),
+      fee: 0,
+    });
+    this.claimLeftAlgo();
+    // MBR left?
+  }
 
   /**
    * Used to set the Contract account online for consensus. Always check that account is online and incentivesEligible before having delegatable stake

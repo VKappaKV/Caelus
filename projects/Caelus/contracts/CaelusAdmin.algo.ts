@@ -15,7 +15,7 @@ import { FLASH_LOAN_FEE, PROTOCOL_COMMISSION, SnitchInfo } from './constants.alg
 export class CaelusAdmin extends Contract {
   programVersion = 11;
 
-  // pegRatio = GlobalStateKey<ufixed<64, 2>>({ key: 'peg' })
+  pegRatio = GlobalStateKey<uint64>({ key: 'peg' });
 
   epochLen = GlobalStateKey<uint64>({ key: 'epochlen' }); // use to recalculate pegRatio?
 
@@ -37,6 +37,8 @@ export class CaelusAdmin extends Contract {
 
   vestigeAddress = GlobalStateKey<Address>({ key: 'vestigeAddress' });
 
+  // flashloan related Keys
+
   flashLoanCounter = GlobalStateKey<uint64>({ key: 'flashLoanCounter' });
 
   lastFlashloanBlock = GlobalStateKey<uint64>({ key: 'lastFlashloanBlock' });
@@ -47,9 +49,11 @@ export class CaelusAdmin extends Contract {
     this.init_vALGO.value = false;
     this.initializedPoolContract.value = false;
     this.validatorPoolContractVersion.value = 0;
-    // this.pegRatio.value = 1.0
+    this.pegRatio.value = 1;
+    // TODO FINISH UP CREATE APPLICATION METHOD
   }
 
+  // FOR CREATOR
   initLST(): void {}
 
   // to calculate use totalAlgoStaked/LSTcirculatingSupply
@@ -75,17 +79,19 @@ export class CaelusAdmin extends Contract {
 
   burnValidatorCommit(): void {}
 
+  // when operator is delinquent set up burn of his LST amount in the App Account
   burnToDelinquentValidator(): void {}
 
+  // when operator clears delinquency remint the LST burned
   reMintDeliquentCommit(): void {}
 
   // called to bid new validator as highest bidder
   // No assert call to avoid future P2P spam. Come back to this before final release.
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
-    const [valueC, existsC] = validatorAppID.globalState('saturationBuffer') as uint64[];
-    const [valueB, existsB] = this.highestBidder.value.globalState('saturationBuffer') as uint64[];
-    if ((existsC !== 0 && valueC > valueB) || existsB === 0) {
+    const valueC = validatorAppID.globalState('saturationBuffer') as uint64;
+    const [valueB, existsB] = this.highestBidder.value.globalState('saturationBuffer') as uint64[]; // Error framePointer?
+    if (valueC > valueB || existsB === 0) {
       this.highestBidder.value = validatorAppID;
     }
   }
@@ -111,15 +117,47 @@ export class CaelusAdmin extends Contract {
   // used to set new validator inside the burn queue
   snitch(): void {}
 
-  // used to take the stake from current top validator of the burn queue
-  burnStake(): void {}
-
-  reStakeFromSnitch(snitchedApp: AppID, restakeTxn: PayTxn): void {
+  // used to route txn both to restake into the auction or to another validator, depending on the receiver
+  reStakeFromSnitch(snitchedApp: AppID, receiverApp: AppID, restakeTxn: PayTxn): void {
     assert(this.isPool(snitchedApp));
+    assert(receiverApp.address === restakeTxn.receiver);
+    if (restakeTxn.receiver !== this.app.address) {
+      sendMethodCall<typeof CaelusValidatorPool.prototype.getClawbackedStake, void>({
+        applicationID: receiverApp,
+        methodArgs: [
+          {
+            receiver: restakeTxn.receiver,
+            amount: restakeTxn.amount,
+            fee: 0,
+          },
+        ],
+        fee: 0,
+      });
+      return;
+    }
     verifyPayTxn(restakeTxn, {
+      sender: snitchedApp.address,
       receiver: this.app.address,
     });
     this.idleAlgoToStake.value += restakeTxn.amount;
+  }
+
+  // operator calls for its own app *check*; clawback all delegated stake and ensure that the operator receives the ASA, he will proceed to burn
+  onOperatorExit(appToClose: AppID, closeTxn: PayTxn): void {
+    const operator = appToClose.globalState('operatorAddress') as Address;
+    const totalCheck =
+      (appToClose.globalState('operatorCommit') as uint64) + (appToClose.globalState('delegatedStake') as uint64);
+    assert(this.txn.sender === operator, 'Only the operator can close out the contract');
+    verifyPayTxn(closeTxn, {
+      receiver: this.app.address,
+      sender: appToClose.address,
+      amount: totalCheck,
+    });
+    this.idleAlgoToStake.value += closeTxn.amount;
+    sendMethodCall<typeof CaelusValidatorPool.prototype.deleteApplication, void>({
+      applicationID: appToClose,
+      methodArgs: [],
+    });
   }
 
   declareRewards(txn: PayTxn): void {
@@ -149,6 +187,7 @@ export class CaelusAdmin extends Contract {
   // TODO : CHECK FOR THE SUBSEQUENT APPID FL WITH FL HAPPENING AFTER THE CHECKBALANCE
   // TODO : DOCUMENT ON THE EVENTUAL SDK HOW THE FEE STRUCTURE WORKS TO AVOID SOMEONE YEETING THEIR NETWORTH ON A FLASH LOAN FEE
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
+    this.getFLcounter();
     this.flashLoanCounter.value += appToInclude.length;
     const keepFee = this.flashLoanCounter.value + FLASH_LOAN_FEE;
 
@@ -187,10 +226,24 @@ export class CaelusAdmin extends Contract {
   }
 
   // calculate flash loan demand. Grows linear, decrease exponentially
-  getFLcounter(): void {}
+  @abi.readonly
+  getFLcounter(): uint64 {
+    if (this.lastFlashloanBlock.value === globals.round) {
+      return this.flashLoanCounter.value;
+    }
+    const reduce = globals.round - this.lastFlashloanBlock.value;
+    if (reduce > this.flashLoanCounter.value) {
+      this.flashLoanCounter.value = 0;
+      return this.flashLoanCounter.value;
+    }
+    this.flashLoanCounter.value -= reduce * 2 > this.flashLoanCounter.value ? reduce * 2 : reduce;
+    return this.flashLoanCounter.value;
+  }
 
   // callable only by the creator address; possibility to change the vestige payout address
-  creatorChangeCreatorRelatedParams(): void {}
+  creatorChangeCreatorRelatedParams(): void {
+    // vestige address change
+  }
 
   private isPool(app: AppID): boolean {
     const isPool = (app.globalState('creator') as AppID) === this.app;

@@ -10,6 +10,20 @@
       }
     },
     {
+      "name": "initLST",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "calculateLSTRatio",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
       "name": "mintRequest",
       "args": [],
       "returns": {
@@ -24,13 +38,38 @@
       }
     },
     {
-      "name": "bid",
+      "name": "mintValidatorCommit",
       "args": [
         {
           "name": "validatorAppID",
           "type": "uint64"
+        },
+        {
+          "name": "stakeCommit",
+          "type": "pay"
         }
       ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "burnValidatorCommit",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "burnToDelinquentValidator",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "reMintDeliquentCommit",
+      "args": [],
       "returns": {
         "type": "void"
       }
@@ -40,6 +79,10 @@
       "args": [
         {
           "name": "amount",
+          "type": "uint64"
+        },
+        {
+          "name": "validatorAppID",
           "type": "uint64"
         }
       ],
@@ -55,7 +98,99 @@
       }
     },
     {
-      "name": "burnStake",
+      "name": "reStakeFromSnitch",
+      "args": [
+        {
+          "name": "snitchedApp",
+          "type": "uint64"
+        },
+        {
+          "name": "receiverApp",
+          "type": "uint64"
+        },
+        {
+          "name": "restakeTxn",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "onOperatorExit",
+      "args": [
+        {
+          "name": "appToClose",
+          "type": "uint64"
+        },
+        {
+          "name": "closeTxn",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "declareRewards",
+      "args": [
+        {
+          "name": "txn",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "snitchCheck",
+      "args": [
+        {
+          "name": "appToCheck",
+          "type": "uint64"
+        },
+        {
+          "name": "params",
+          "type": "(bool,bool,bool,uint64,bool,uint64)"
+        }
+      ],
+      "returns": {
+        "type": "bool"
+      }
+    },
+    {
+      "name": "makeFlashLoanRequest",
+      "args": [
+        {
+          "name": "payFeeTxn",
+          "type": "pay"
+        },
+        {
+          "name": "amounts",
+          "type": "uint64[]"
+        },
+        {
+          "name": "appToInclude",
+          "type": "uint64[]"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "getFLcounter",
+      "readonly": true,
+      "args": [],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
+      "name": "creatorChangeCreatorRelatedParams",
       "args": [],
       "returns": {
         "type": "void"
