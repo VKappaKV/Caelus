@@ -108,10 +108,13 @@ export class CaelusAdmin extends Contract {
   // to calculate use totalAlgoStaked/LSTcirculatingSupply
   calculateLSTRatio(): void {
     // wide ratio SCALE value is...?
-    this.pegRatio.value = wideRatio([this.totalAlgoStaked.value, 10000], [this.circulatingSupply.value]);
+    //The scale amount should probably be a const. Refer to how Tman does it in tealish
+    //https://github.com/tinymanorg/tinyman-consensus-staking/blob/main/contracts/talgo_staking/talgo_staking_approval.tl#L39
+    this.pegRatio.value = wideRatio([this.totalAlgoStaked.value, 100_00], [this.circulatingSupply.value]);
   }
 
   // user mint vALGO, sends Algo Payment txn and updates the balance for idle stake to claim
+  // Don't we need a MIN mint amt? MAX isn't really an issue cause ALGO is finite, but what happens if we mint 1 AUm (ie .000001A)
   mintRequest(mintTxn: PayTxn): void {
     verifyPayTxn(mintTxn, {
       receiver: this.app.address,
@@ -137,6 +140,7 @@ export class CaelusAdmin extends Contract {
   }
 
   // user burn vALGO, sends Asset Transfer each at the time depending on the burn queue
+  // MAYBE assert that the amount requested is < Algo balance as a sanity check, but assuming normal operations this shouldn't be a problem.
   burnRequest(): void {
     // totalAlgoStaked --
     // vALGO circ supply --
@@ -182,7 +186,7 @@ export class CaelusAdmin extends Contract {
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
     const valueC = validatorAppID.globalState('saturationBuffer') as uint64;
-    const [valueB, existsB] = this.highestBidder.value.globalState('saturationBuffer') as uint64[]; // Error framePointer?
+    const [valueB, existsB] = this.highestBidder.value.globalState('saturationBuffer') as uint64[]; // Error framePointer? Ask Joe
     if (valueC > valueB || existsB === 0) {
       this.highestBidder.value = validatorAppID;
     }
@@ -217,7 +221,7 @@ export class CaelusAdmin extends Contract {
 
   // used to route txn both to restake into the auction or to another validator, depending on the receiver
   reStakeFromSnitch(snitchedApp: AppID, receiverApp: AppID, restakeTxn: PayTxn): void {
-    assert(this.isPool(snitchedApp));
+    assert(this.isPool(snitchedApp)); //or is this.App can't do it cause Spanish keyboard ñ
     assert(receiverApp.address === restakeTxn.receiver);
     if (restakeTxn.receiver !== this.app.address) {
       sendMethodCall<typeof CaelusValidatorPool.prototype.getClawbackedStake, void>({
@@ -295,7 +299,7 @@ export class CaelusAdmin extends Contract {
 
     this.idleAlgoToStake.value += keepFee;
 
-    assert(amounts.length === appToInclude.length, 'array lenght [amount, appToInclude] mismatch');
+    assert(amounts.length === appToInclude.length, 'array length [amount, appToInclude] mismatch');
     // Ask Joe if this.pendingGroup creates a new txn group or appends it as an inner.
     for (let i = 0; i < appToInclude.length; i += 1) {
       this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.flashloan, void>({
