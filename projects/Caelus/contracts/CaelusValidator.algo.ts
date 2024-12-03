@@ -79,6 +79,7 @@ export class CaelusValidatorPool extends Contract {
    * @param {AppID} creatingContract - ApplicationID for the creator contract (CaelusAdminContract)
    * @param {Address} operatorAddress - Address of the node operator used to sign online/offline txns and participate in auctions
    * @param {uint64} contractVersion - Approval Program version for the node contract, stored in the CaelusAdminContract
+   * TODO UPDATE
    */
   createApplication(
     creatingContract: AppID,
@@ -306,6 +307,7 @@ export class CaelusValidatorPool extends Contract {
     }
     // in this case a validator pool being delinquent has its delegation factor fixed to MAX = 0 & saturationBUFFER to 1000
     if (checks.delinquentCheck) {
+      // check if delinquent & still has some ASA not burned, in that case procede to call burn
       amount += this.delegatedStake.value;
       this.delegatedStake.value -= amount;
       result = true;

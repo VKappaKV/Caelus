@@ -25,11 +25,13 @@ export class CaelusAdmin extends Contract {
 
   totalAlgoStaked = GlobalStateKey<uint64>({ key: 'totalstake' });
 
-  validatorPoolContractApprovalProgram = GlobalStateKey<bytes>({ key: 'validatorApprovalProgram' });
+  validatorPoolContractApprovalProgram = BoxKey<bytes>({ key: 'validatorApprovalProgram' });
 
   init_vALGO = GlobalStateKey<boolean>({ key: 'init_vALGO' });
 
   vALGOid = GlobalStateKey<AssetID>({ key: 'vALGOid' });
+
+  circulatingSupply = GlobalStateKey<uint64>({ key: 'circulatingSupply' });
 
   highestBidder = GlobalStateKey<AppID>({ key: 'highestBidder' });
 
@@ -43,6 +45,11 @@ export class CaelusAdmin extends Contract {
 
   lastFlashloanBlock = GlobalStateKey<uint64>({ key: 'lastFlashloanBlock' });
 
+  burnQueue = BoxKey<AppID[]>({
+    key: 'burnQueue',
+    dynamicSize: false,
+  });
+
   // ----------------------------------------------------------------------------------------------------
   createApplication(): void {
     this.totalAlgoStaked.value = 0;
@@ -53,17 +60,90 @@ export class CaelusAdmin extends Contract {
     // TODO FINISH UP CREATE APPLICATION METHOD
   }
 
-  // FOR CREATOR
-  initLST(): void {}
+  initPoolContract(programSize: uint64): void {
+    assert(this.txn.sender === this.app.creator);
+    this.validatorPoolContractApprovalProgram.create(programSize);
+  }
+
+  loadPoolContractProgram(offsett: uint64, data: bytes): void {
+    assert(!this.initializedPoolContract.value);
+    this.validatorPoolContractApprovalProgram.replace(offsett, data);
+  }
+
+  poolContractIsSet(): void {
+    assert(this.txn.sender === this.app.creator);
+    this.initializedPoolContract.value = true;
+  }
+
+  initLST(name: string, unitName: string, url: string): void {
+    assert(this.txn.sender === this.app.creator);
+    assert(!this.init_vALGO.value);
+    this.vALGOid.value = sendAssetCreation({
+      configAssetTotal: 10_000_000,
+      configAssetDecimals: 6,
+      configAssetReserve: this.app.address,
+      configAssetManager: globals.zeroAddress,
+      configAssetClawback: globals.zeroAddress,
+      configAssetFreeze: globals.zeroAddress,
+      configAssetDefaultFrozen: 0,
+      configAssetName: name,
+      configAssetUnitName: unitName,
+      configAssetURL: url,
+    });
+    this.init_vALGO.value = true;
+  }
+
+  // need to calculate the MBRs
+  addCaelusValidator(mbrPay: PayTxn): void {
+    verifyPayTxn(mbrPay, {
+      receiver: this.app.address,
+      // TODO CHECK AMOUNT
+    });
+
+    sendAppCall({
+      onCompletion: OnCompletion.NoOp,
+    });
+  }
 
   // to calculate use totalAlgoStaked/LSTcirculatingSupply
-  calculateLSTRatio(): void {}
+  calculateLSTRatio(): void {
+    // wide ratio SCALE value is...?
+    this.pegRatio.value = wideRatio([this.totalAlgoStaked.value, 10000], [this.circulatingSupply.value]);
+  }
 
   // user mint vALGO, sends Algo Payment txn and updates the balance for idle stake to claim
-  mintRequest(): void {}
+  mintRequest(mintTxn: PayTxn): void {
+    verifyPayTxn(mintTxn, {
+      receiver: this.app.address,
+    });
+    this.idleAlgoToStake.value += mintTxn.amount;
+    this.calculateLSTRatio();
+    const minted = this.getMintAmount(mintTxn.amount);
+    sendAssetTransfer({
+      xferAsset: this.vALGOid.value,
+      assetReceiver: this.txn.sender,
+      assetAmount: minted,
+    });
+    this.totalAlgoStaked.value += mintTxn.amount;
+    this.circulatingSupply.value += minted;
+  }
+
+  getMintAmount(amount: uint64): uint64 {
+    return wideRatio([amount], [this.pegRatio.value]); // TODO check math, SCALE?
+  }
+
+  getBurnAmount(amount: uint64): uint64 {
+    return amount * this.pegRatio.value;
+  }
 
   // user burn vALGO, sends Asset Transfer each at the time depending on the burn queue
-  burnRequest(): void {}
+  burnRequest(): void {
+    // totalAlgoStaked --
+    // vALGO circ supply --
+    // take burn queue
+    // iterate and subtract from the request the amount you can take, stop when order is filled
+    // if the order is not filled send back the remaining amount of vALGO
+  }
 
   mintValidatorCommit(validatorAppID: AppID, stakeCommit: PayTxn): void {
     assert(this.isPool(validatorAppID));
@@ -77,16 +157,28 @@ export class CaelusAdmin extends Contract {
     // Todo send ASA respective amount to the balance of the App
   }
 
-  burnValidatorCommit(): void {}
+  burnValidatorCommit(): void {
+    // just like a burn but start to take from the operator app
+  }
 
   // when operator is delinquent set up burn of his LST amount in the App Account
-  burnToDelinquentValidator(): void {}
+  burnToDelinquentValidator(): void {
+    // get AssetTransferTxn as burn type
+    // check that app is delinquent
+    // check that app is pool
+    // init burn request for the amount sent
+  }
 
   // when operator clears delinquency remint the LST burned
-  reMintDeliquentCommit(): void {}
+  reMintDeliquentCommit(): void {
+    // get PayTxn as Mint type
+    // check that app is not delinquent anymore & his vAlgo amount is 0
+    // send vAlgo amount corresponding to the current peg for the operatorCommit amount
+  }
 
   // called to bid new validator as highest bidder
   // No assert call to avoid future P2P spam. Come back to this before final release.
+  // TODO weird compilation error at for exist value
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
     const valueC = validatorAppID.globalState('saturationBuffer') as uint64;
@@ -115,7 +207,13 @@ export class CaelusAdmin extends Contract {
   }
 
   // used to set new validator inside the burn queue
-  snitch(): void {}
+  snitch(app: AppID): void {
+    assert(this.isPool(app));
+    // this.burnQueue.extract(); extract box
+    // for loop on the queue of addresses
+    // iterate and check values
+    // if higher -> replace and push new queue
+  }
 
   // used to route txn both to restake into the auction or to another validator, depending on the receiver
   reStakeFromSnitch(snitchedApp: AppID, receiverApp: AppID, restakeTxn: PayTxn): void {
@@ -174,7 +272,6 @@ export class CaelusAdmin extends Contract {
   }
 
   snitchCheck(appToCheck: AppID, params: SnitchInfo): boolean {
-    // check that recipient in params is pool or this app
     assert(this.isPool(appToCheck));
     assert(this.isPool(params.recipient) || params.recipient.address === this.app.address);
 
@@ -225,7 +322,6 @@ export class CaelusAdmin extends Contract {
     this.pendingGroup.submit();
   }
 
-  // calculate flash loan demand. Grows linear, decrease exponentially
   @abi.readonly
   getFLcounter(): uint64 {
     if (this.lastFlashloanBlock.value === globals.round) {
@@ -240,9 +336,9 @@ export class CaelusAdmin extends Contract {
     return this.flashLoanCounter.value;
   }
 
-  // callable only by the creator address; possibility to change the vestige payout address
-  creatorChangeCreatorRelatedParams(): void {
-    // vestige address change
+  creatorChangeCreatorRelatedParams(newVestigeAddress: Address): void {
+    assert(this.txn.sender === this.app.creator);
+    this.vestigeAddress.value = newVestigeAddress;
   }
 
   private isPool(app: AppID): boolean {
