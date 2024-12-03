@@ -276,6 +276,7 @@ export class CaelusValidatorPool extends Contract {
       'Only the Caelus Admin contract can call this method'
     );
     assert(amountRequested <= this.delegatedStake.value, 'Cannot withdraw more stake than the delegated amount'); // this or take only what you can and communicate back the remaining request
+    assert(this.app.address.balance.value - amountRequested >= this.operatorCommit.value, 'Cannot leave the Opperator with less than their own stake');//Something like this.
     sendPayment({
       amount: amountRequested,
       receiver: receiverBurn,
@@ -295,6 +296,7 @@ export class CaelusValidatorPool extends Contract {
     if (result) {
       this.performanceCounter.value += 1;
     }
+    this.updateDelegationFactors();
   }
 
   // make the checks required
