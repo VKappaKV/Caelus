@@ -5,6 +5,7 @@ import {
   MAX_STAKE_PER_ACCOUNT,
   PERFORMANCE_STAKE_INCREASE,
   PERFORMANCE_STEP,
+  SnitchInfo,
   VEST_TIER_4,
   VEST_TIER_5,
 } from './constants.algo';
@@ -27,8 +28,6 @@ export class CaelusValidatorPool extends Contract {
 
   validatorPoolContractVersion = GlobalStateKey<uint64>({ key: 'contractVersion' });
 
-  // xGovVotingAddress = GlobalStateKey<Address>({ key: 'xGovVoter' });
-
   vestID = GlobalStateKey<AssetID>({ key: 'vestID' });
 
   stVestID = GlobalStateKey<AssetID>({ key: 'stVestID' });
@@ -38,8 +37,6 @@ export class CaelusValidatorPool extends Contract {
   operatorAddress = GlobalStateKey<Address>({ key: 'operator' });
 
   operatorCommit = GlobalStateKey<uint64>({ key: 'operatorCommit' });
-
-  // operatorXGovLoan = GlobalStateKey<uint64>({ key: 'xGovFeePayout' });
 
   // Delegated Stake params
 
@@ -85,14 +82,12 @@ export class CaelusValidatorPool extends Contract {
     creatingContract: AppID,
     operatorAddress: Address,
     contractVersion: uint64,
-    // xGovVotingAddress: Address,
     vestID: AssetID,
     stVestID: AssetID
   ): void {
     this.creatorContractAppID.value = creatingContract;
     this.operatorAddress.value = operatorAddress;
     this.validatorPoolContractVersion.value = contractVersion;
-    // this.xGovVotingAddress.value = xGovVotingAddress;
     this.vestID.value = vestID;
     this.stVestID.value = stVestID;
 
@@ -109,6 +104,21 @@ export class CaelusValidatorPool extends Contract {
     this.isDelinquent.value = false;
 
     this.repaid.value = true;
+  }
+
+  optIntoLST(): void {
+    verifyTxn(this.txn, {
+      sender: this.operatorAddress.value,
+    });
+
+    const lst = this.creatorContractAppID.value.globalState('vALGOid') as AssetID;
+
+    sendAssetTransfer({
+      assetReceiver: this.app.address,
+      xferAsset: lst,
+      assetAmount: 0,
+      fee: 0,
+    });
   }
 
   /**
@@ -163,12 +173,12 @@ export class CaelusValidatorPool extends Contract {
     this.updateDelegationFactors();
   }
 
-  performanceCheck(): void {
+  performanceCheck(): boolean {
     if (!this.app.address.incentiveEligible) {
       this.setDelinquency();
-      return;
+      return true;
     }
-    // check to not make checks be stacked in close proximity calls
+    // check to not make performanceChecks be stacked in close proximity calls
     assert(
       globals.round - this.lastDelinquencyReport.value > this.getExpectedProposalsDelta() / 2,
       'Wait at least half the proposal expected time between Performance checks'
@@ -177,7 +187,7 @@ export class CaelusValidatorPool extends Contract {
     const isPerformingAsExpected = this.getExpectedProposalsDelta() > deltaWithLatestProposal;
     const isPerformingAsTolerated = this.getToleratedBlockDelta() > deltaWithLatestProposal;
     if (isPerformingAsExpected && isPerformingAsTolerated) {
-      return;
+      return false;
     }
     if (!isPerformingAsTolerated) {
       this.delinquencyScore.value += 5;
@@ -187,20 +197,24 @@ export class CaelusValidatorPool extends Contract {
     }
     this.setDelinquencyOnThresholdCheck();
     this.lastDelinquencyReport.value = globals.round;
+    return true;
   }
 
   // call this method if Account has been flagged as delinquent wait fixed amount of time before resetting it and expects payment if necessary (?)
-  solveDelinquency(): void {
+  solveDelinquency(block: uint64): void {
     assert(this.isDelinquent.value, 'Account is not delinquent');
     assert(this.txn.sender === this.operatorAddress.value, 'Only the Node Operator can clear up Delinquency');
     assert(
       this.delegatedStake.value === 0,
       'Before clearing up delinquency all the delegated stake must be redistributed'
     );
-    assert(this.lastDelinquencyReport.value < this.lastRewardReport.value); // validator has to win a proposal to clear up delinquency
+    assert(blocks[block].proposer === this.app.address, 'the solving block must be proposed by this account');
+    assert(this.lastDelinquencyReport.value < block); // validator has to win a proposal sooner than latest delinquency report to clear up delinquency
     assert(this.delinquencyThresholdCheck(), 'Delinquency score must be below threshold');
     this.isDelinquent.value = false;
     this.canBeDelegated.value = true;
+    this.updateDelegationFactors();
+    // TODO remint the operatorCommit as LST
   }
 
   reportRewards(block: uint64): void {
@@ -242,8 +256,8 @@ export class CaelusValidatorPool extends Contract {
 
   // called by the auction contract to assign stake to the node contract
   addStake(txnWithStake: PayTxn): void {
-    // should I check receiver? Is there a problem if not? Sender would just be gifting Algo would this fuck up calculation for the LST?
     verifyPayTxn(txnWithStake, {
+      sender: this.creatorContractAppID.value.address,
       receiver: this.app.address,
     });
     this.delegatedStake.value += txnWithStake.amount;
@@ -265,17 +279,79 @@ export class CaelusValidatorPool extends Contract {
     this.updateDelegationFactors();
   }
 
+  // calls to another Validator getSnitched method. If successfull it will increase performanceCounter
+  snitchValidator(appToSnitch: AppID, params: SnitchInfo): void {
+    assert(!this.isDelinquent.value);
+    const result = sendMethodCall<typeof CaelusAdmin.prototype.snitchCheck, boolean>({
+      applicationID: appToSnitch,
+      methodArgs: [appToSnitch, params],
+      fee: 0,
+    });
+    if (result) {
+      this.performanceCounter.value += 1;
+    }
+  }
+
   // make the checks required
-  getSnitched(): void {}
+  getSnitched(checks: SnitchInfo): boolean {
+    assert(this.txn.sender === this.creatorContractAppID.value.address);
+    let result = false;
+    let amount = 0;
+    if (checks.performanceCheck) {
+      result = result || this.performanceCheck();
+    }
+    // in this case a validator pool being delinquent has its delegation factor fixed to MAX = 0 & saturationBUFFER to 1000
+    if (checks.delinquentCheck) {
+      amount += this.delegatedStake.value;
+      this.delegatedStake.value -= amount;
+      result = true;
+    }
+    if (checks.stakeAmountCheck && this.saturationBUFFER.value > 1000) {
+      amount = this.delegatedStake.value - this.maxDelegatableStake.value;
+      this.delegatedStake.value -= amount;
+      result = true;
+    }
+    assert(amount <= this.delegatedStake.value);
+    const isDelegatable = checks.recipient.globalState('canBeDelegated') as boolean;
+    if (checks.split && amount > checks.max && isDelegatable) {
+      const toRecipient = amount - checks.max;
+      amount -= toRecipient;
+      sendMethodCall<typeof CaelusValidatorPool.prototype.getClawbackedStake, void>({
+        applicationID: checks.recipient,
+        methodArgs: [
+          {
+            receiver: checks.recipient.address,
+            amount: toRecipient,
+            fee: 0,
+          },
+        ],
+      });
+    }
+    sendMethodCall<typeof CaelusAdmin.prototype.reStakeFromSnitch, void>({
+      applicationID: this.creatorContractAppID.value,
+      methodArgs: [
+        this.app,
+        {
+          receiver: this.creatorContractAppID.value.address,
+          amount: amount,
+          fee: 0,
+        },
+      ],
+    });
+    if (!this.isDelinquent.value) {
+      this.updateDelegationFactors();
+    }
+    return result;
+  }
 
-  // used by CA contract to remove the delegated stake and send it back to the auction in case of snitch
-  clawbackStake(): void {}
-
-  // used by other CV contracts to claim stake in case of stake above limit or for penalty detected by a validator
-  clawbackStakeToValidator(): void {}
-
-  // use: callable by anyone through CA check contract version vs latest
-  upgradeToNewValidatorVersion(): void {}
+  // follow up callback from the snitch
+  getClawbackedStake(receivedStake: PayTxn): void {
+    verifyPayTxn(receivedStake, {
+      receiver: this.app.address,
+    });
+    this.delegatedStake.value += receivedStake.amount;
+    this.updateDelegationFactors();
+  }
 
   flashloan(amount: uint64, receiver: Address): void {
     if (this.repaid.value) {
@@ -290,7 +366,7 @@ export class CaelusValidatorPool extends Contract {
       fee: 0,
     });
 
-    // top level Caelus Admin checks that checkBalance is called within the outer group
+    // top level Caelus Admin checks that checkBalance is called within the outer group before sending the flashloan txn
   }
 
   checkBalance(): void {
@@ -298,18 +374,27 @@ export class CaelusValidatorPool extends Contract {
     this.repaid.value = true;
   }
 
-  // used by CA to clean up remaining Algo
+  // used by anyone to clear up remaining Algo outside of stake counters
   claimLeftAlgo(): void {
-    assert(this.app.address.voterBalance === 0, 'Account Stake must be offline'); // is there another flag to check online/offline status?
-    assert(this.delegatedStake.value === 0, 'All delegated Stake must have been removed');
-    assert(this.operatorCommit.value === 0, 'Node Operator must have withdrawn his commitment');
-    // TODO make app call to send remaining Algo back to auction contract
+    const dust =
+      this.app.address.balance - this.operatorCommit.value - this.delegatedStake.value - this.app.address.minBalance;
+    const vestige = this.creatorContractAppID.value.globalState('vestigeAddress') as Address;
+    // do I need an assert?
+    sendPayment({
+      receiver: vestige,
+      amount: dust,
+      fee: 0,
+    });
   }
 
-  // make sure there's no delegated stake, return the operator commit to the operatorAddress and remove all operator related GKeys
-  operatorExit(): void {
-    assert(this.app.address.voterBalance === 0, 'Account is online, sign it offline before exiting');
-    assert(this.txn.sender === this.operatorAddress.value, 'Only the Node Operator can issue this transaction');
+  // use this to update a ValidatorPool contract to the latest version without losing commit/stake and performance counter
+  updateToNewVersionEmptyContract(/* newApp: AppID */): void {
+    // check creator appID if is the same CaelusAdmin
+    // assert(existsAdmin && valueAdmin === this.creatorContractAppID.value, 'New App Must be a Caelus Validator');
+    // check if the approval Program hash is the same as the approval program hash in the Caelus Admin latest version
+    // check if the operatorAddress is the same as this.operatorAddress
+    // check if the amounts in operatorCommit & delegated stake === 0
+    // make sendMethodCall
   }
 
   // shut down contract account
@@ -355,6 +440,14 @@ export class CaelusValidatorPool extends Contract {
       this.operatorCommit.value >= globals.payoutsMinBalance,
       'Operator commit must be higher than minimum balance for rewards eligibility'
     );
+
+    if (this.isDelinquent.value) {
+      assert(
+        this.delegatedStake.value === 0,
+        'if Delinquent go Online only with your own stake to clear up delinquency'
+      );
+    }
+
     const extraFee = this.getGoOnlineFeeAmount();
 
     verifyPayTxn(feePayment, { receiver: this.app.address, amount: extraFee });
@@ -383,8 +476,8 @@ export class CaelusValidatorPool extends Contract {
       this.txn.sender === this.operatorAddress.value || this.txn.sender === this.creatorContractAppID.value.address,
       'Only Node Operator or Caelus Admin contract can set the contract offline'
     );
-    this.canBeDelegated.value = false;
     sendOfflineKeyRegistration({});
+    this.canBeDelegated.value = false;
   }
 
   //----------------------------------------------------------------------------------------------------------
@@ -421,7 +514,8 @@ export class CaelusValidatorPool extends Contract {
     this.canBeDelegated.value = false;
     this.performanceCounter.value = 0;
     this.updateDelegationFactors();
-    this.isDelinquent.value = true;  //Can there be a case where you can't be delegated to, but you can keep your stake? Just to see if two bools are redundant or not
+    this.isDelinquent.value = true;
+    // TODO turn operatorCommit stake into plain Algo, burn LST; otherwise delinquent operator would still earn yield from passive LST earnings
   }
 
   private fixDelinquencyScore(): void {
@@ -478,11 +572,12 @@ export class CaelusValidatorPool extends Contract {
     }
     return 0;
   }
+
   // Let's check the params, probably talk to either nullun or AF, before going live cause of probabilistic nature of ALGO.
   private getToleratedBlockDelta(): uint64 {
     return this.getExpectedProposalsDelta() * 5;
   }
-  
+
   private getExpectedProposalsDelta(): uint64 {
     const currentOnlineStake = onlineStake();
     const currentAccountStake = this.app.address.voterBalance;

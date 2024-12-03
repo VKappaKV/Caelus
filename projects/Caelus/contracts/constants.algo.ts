@@ -20,3 +20,12 @@ export const VEST_TIER_4 = 100_000_000_000;
 export const VEST_TIER_5 = 150_000_000_000;
 
 export const FLASH_LOAN_FEE = 10_000_000;
+
+export type SnitchInfo = {
+  performanceCheck: boolean;
+  stakeAmountCheck: boolean;
+  delinquentCheck: boolean;
+  recipient: AppID; // must be either this.app or a validator
+  split: boolean; // if clawback will be split between recipient and admin
+  max: uint64; // use if split is true and set to the max amount to send to the validator
+};
