@@ -1,7 +1,17 @@
 /* eslint-disable import/no-cycle */
 import { Contract } from '@algorandfoundation/tealscript';
 import { CaelusValidatorPool } from './CaelusValidator.algo';
-import { FLASH_LOAN_FEE, PROTOCOL_COMMISSION, SnitchInfo } from './constants.algo';
+import {
+  ALGORAND_ACCOUNT_MIN_BALANCE,
+  APPLICATION_BASE_FEE,
+  ASSET_HOLDING_FEE,
+  FLASH_LOAN_FEE,
+  PROTOCOL_COMMISSION,
+  SCALE,
+  SnitchInfo,
+  SSC_VALUE_BYTES,
+  SSC_VALUE_UINT,
+} from './constants.algo';
 
 /**
  * CaelusAdmin is the main contract handling the Caelus protocol.
@@ -30,6 +40,10 @@ export class CaelusAdmin extends Contract {
   init_vALGO = GlobalStateKey<boolean>({ key: 'init_vALGO' });
 
   vALGOid = GlobalStateKey<AssetID>({ key: 'vALGOid' });
+
+  vestID = GlobalStateKey<AssetID>({ key: 'vestID' });
+
+  stVestID = GlobalStateKey<AssetID>({ key: 'stVestID' });
 
   circulatingSupply = GlobalStateKey<uint64>({ key: 'circulatingSupply' });
 
@@ -66,13 +80,14 @@ export class CaelusAdmin extends Contract {
   }
 
   loadPoolContractProgram(offsett: uint64, data: bytes): void {
-    assert(!this.initializedPoolContract.value);
+    assert(!this.initializedPoolContract.value); // add new approval contract updated version
     this.validatorPoolContractApprovalProgram.replace(offsett, data);
   }
 
   poolContractIsSet(): void {
     assert(this.txn.sender === this.app.creator);
     this.initializedPoolContract.value = true;
+    this.validatorPoolContractVersion.value += 1;
   }
 
   initLST(name: string, unitName: string, url: string): void {
@@ -93,24 +108,46 @@ export class CaelusAdmin extends Contract {
     this.init_vALGO.value = true;
   }
 
-  // need to calculate the MBRs
+  initBurnQueue(): void {
+    assert(this.txn.sender === this.app.creator);
+    const addressLength = 32;
+    this.validatorPoolContractApprovalProgram.create(addressLength * 10);
+  }
+
   addCaelusValidator(mbrPay: PayTxn): void {
     verifyPayTxn(mbrPay, {
       receiver: this.app.address,
-      // TODO CHECK AMOUNT
+      // TODO CHECK AMOUNT to calculate the MBRs
     });
 
     sendAppCall({
       onCompletion: OnCompletion.NoOp,
+      approvalProgram: [
+        this.validatorPoolContractApprovalProgram.extract(0, 4096),
+        this.validatorPoolContractApprovalProgram.extract(4096, this.validatorPoolContractApprovalProgram.size - 4096),
+      ],
+      clearStateProgram: CaelusValidatorPool.clearProgram(),
+      globalNumUint: CaelusValidatorPool.schema.global.numUint,
+      globalNumByteSlice: CaelusValidatorPool.schema.global.numByteSlice,
+      extraProgramPages: 3,
+      applicationArgs: [
+        method('createApplication(uint64,bytes,uint64,uint64,uint64,uint64)void'),
+        itob(this.app.id),
+        this.txn.sender,
+        itob(this.validatorPoolContractVersion.value),
+        itob(this.vestID.value),
+        itob(this.stVestID.value),
+        itob(this.vALGOid.value),
+      ],
     });
   }
+
+  getMBR(): void {}
 
   // to calculate use totalAlgoStaked/LSTcirculatingSupply
   calculateLSTRatio(): void {
     // wide ratio SCALE value is...?
-    //The scale amount should probably be a const. Refer to how Tman does it in tealish
-    //https://github.com/tinymanorg/tinyman-consensus-staking/blob/main/contracts/talgo_staking/talgo_staking_approval.tl#L39
-    this.pegRatio.value = wideRatio([this.totalAlgoStaked.value, 100_00], [this.circulatingSupply.value]);
+    this.pegRatio.value = wideRatio([this.totalAlgoStaked.value, SCALE], [this.circulatingSupply.value]);
   }
 
   // user mint vALGO, sends Algo Payment txn and updates the balance for idle stake to claim
@@ -221,7 +258,7 @@ export class CaelusAdmin extends Contract {
 
   // used to route txn both to restake into the auction or to another validator, depending on the receiver
   reStakeFromSnitch(snitchedApp: AppID, receiverApp: AppID, restakeTxn: PayTxn): void {
-    assert(this.isPool(snitchedApp)); //or is this.App can't do it cause Spanish keyboard ñ
+    assert(this.isPool(snitchedApp)); // or is this.App can't do it cause Spanish keyboard ñ
     assert(receiverApp.address === restakeTxn.receiver);
     if (restakeTxn.receiver !== this.app.address) {
       sendMethodCall<typeof CaelusValidatorPool.prototype.getClawbackedStake, void>({
@@ -348,5 +385,32 @@ export class CaelusAdmin extends Contract {
   private isPool(app: AppID): boolean {
     const isPool = (app.globalState('creator') as AppID) === this.app;
     return isPool;
+  }
+
+  private minBalanceForAccount(
+    contracts: uint64,
+    extraPages: uint64,
+    assets: uint64,
+    localInts: uint64,
+    localBytes: uint64,
+    globalInts: uint64,
+    globalBytes: uint64
+  ): uint64 {
+    let minBal = ALGORAND_ACCOUNT_MIN_BALANCE;
+    minBal += contracts * APPLICATION_BASE_FEE;
+    minBal += extraPages * APPLICATION_BASE_FEE;
+    minBal += assets * ASSET_HOLDING_FEE;
+    minBal += localInts * SSC_VALUE_UINT;
+    minBal += globalInts * SSC_VALUE_UINT;
+    minBal += localBytes * SSC_VALUE_BYTES;
+    minBal += globalBytes * SSC_VALUE_BYTES;
+    return minBal;
+  }
+
+  private costForBoxStorage(totalNumBytes: uint64): uint64 {
+    const SCBOX_PERBOX = 2500;
+    const SCBOX_PERBYTE = 400;
+
+    return SCBOX_PERBOX + totalNumBytes * SCBOX_PERBYTE;
   }
 }
