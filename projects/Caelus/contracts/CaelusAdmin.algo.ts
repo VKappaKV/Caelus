@@ -307,15 +307,23 @@ export class CaelusAdmin extends Contract {
     const satSnitch = app.globalState('saturationBuffer') as uint64;
     const satPrio = this.burnPrio.value.globalState('saturationBuffer') as uint64;
     let minPrio = app;
+    let minSat = satSnitch;
     if (satSnitch > satPrio) {
       minPrio = this.burnPrio.value;
+      minSat = satPrio;
       this.burnPrio.value = app;
     }
-    const queueBytes = this.burnQueue.value;
-    const queue = queueBytes as AppID[]; // how to change bytes into AppID[] bytes -> uint64[]
+    const queue = this.burnQueue.value;
+    for (let i = 0; i < queue.length; i += 1) {
+      if ((queue[i].globalState('saturationBuffer') as uint64) < minSat) {
+        const exch = minPrio;
+        minPrio = queue[i];
+        queue[i] = exch;
+      }
+    }
     // for loop on the queue of addresses checking saturation vs minPrio
     // iterate and check values
-    // if higher -> replace and push new queue
+    // if higher -> replace
 
     // highet 700 <-> 680
     // [500, 640,350,750...] --> [....]
