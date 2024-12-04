@@ -163,6 +163,7 @@ export class CaelusValidatorPool extends Contract {
    */
   // TODO: CHANGE TO MANAGE OPERATOR COMMIT WITH LST
   removeFromOperatorCommit(claimRequest: uint64): void {
+    // read globalState from CaelusAdmin
     assert(
       !this.isDelinquent.value,
       'cannot withdraw funds if the account is flagged as delinquent, must solve delinquency first'
@@ -233,9 +234,11 @@ export class CaelusValidatorPool extends Contract {
   }
 
   reportRewards(block: uint64): void {
-    const isOperatorReportTime = globals.round - block < 700;
+    assert(blocks[block].proposer === this.app.address);
+    assert(block > this.lastRewardReport.value);
+    const isOperatorReportTime = globals.round - block < 700; // move to constant
     const report = blocks[block].proposerPayout;
-    const takeFee = (report * 6) / 100;
+    const takeFee = wideRatio([report, 6], [100]); // move to constant
 
     this.pendingGroup.addMethodCall<typeof CaelusAdmin.prototype.declareRewards, void>({
       applicationID: this.creatorContractAppID.value,
@@ -256,13 +259,10 @@ export class CaelusValidatorPool extends Contract {
     if (isOperatorReportTime) {
       this.operatorCommit.value += takeFee;
     } else {
-      // snitch rewards
-      const snitched = takeFee / 2;
-      const opKeeps = takeFee - snitched; // might there be some math float bs that just using both /2 it breaks
-      this.operatorCommit.value += opKeeps;
+      this.operatorCommit.value += takeFee;
       sendPayment({
         receiver: this.txn.sender,
-        amount: snitched,
+        amount: takeFee,
         fee: 0,
       });
     }
@@ -625,6 +625,7 @@ export class CaelusValidatorPool extends Contract {
       // check against globals.payoutsMaxBalance (50M)
       if (this.app.address.balance >= MAX_STAKE_PER_ACCOUNT) {
         this.maxDelegatableStake.value = 0;
+        this.setDelinquency();
       } else if (this.app.address.balance + this.maxDelegatableStake.value > MAX_STAKE_PER_ACCOUNT) {
         this.maxDelegatableStake.value = MAX_STAKE_PER_ACCOUNT - this.app.address.balance;
       }

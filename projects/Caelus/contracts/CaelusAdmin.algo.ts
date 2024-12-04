@@ -60,7 +60,7 @@ export class CaelusAdmin extends Contract {
 
   lastFlashloanBlock = GlobalStateKey<uint64>({ key: 'lastFlashloanBlock' });
 
-  burnQueue = BoxKey<AppID[]>({
+  burnQueue = BoxKey<StaticArray<AppID, 10>>({
     key: 'burnQueue',
     dynamicSize: false,
   });
@@ -73,7 +73,7 @@ export class CaelusAdmin extends Contract {
     this.init_vALGO.value = false;
     this.initializedPoolContract.value = false;
     this.validatorPoolContractVersion.value = 0;
-    this.pegRatio.value = 1;
+    this.pegRatio.value = 1 * SCALE;
     // TODO FINISH UP CREATE APPLICATION METHOD
   }
 
@@ -113,8 +113,8 @@ export class CaelusAdmin extends Contract {
 
   initBurnQueue(): void {
     assert(this.txn.sender === this.app.creator);
-    const addressLength = 32;
-    this.burnQueue.create(addressLength * 10);
+    const fixedQueueLength = 8 * 10; // 8 bytes for AppID * 10 : max length of the burnQueue
+    this.burnQueue.create(fixedQueueLength);
   }
 
   addCaelusValidator(mbrPay: PayTxn): void {
@@ -155,9 +155,21 @@ export class CaelusAdmin extends Contract {
   }
 
   // to calculate use totalAlgoStaked/LSTcirculatingSupply
+  // this can just be a private method or abi.readonly to be called by Mint and Burn methods
+  @abi.readonly
   calculateLSTRatio(): void {
-    // wide ratio SCALE value is...?
+    // SCALE value is...?
     this.pegRatio.value = wideRatio([this.totalAlgoStaked.value, SCALE], [this.circulatingSupply.value]);
+  }
+
+  getMintAmount(amount: uint64): uint64 {
+    this.calculateLSTRatio();
+    return wideRatio([amount, SCALE], [this.pegRatio.value]); // TODO check math, SCALE?
+  }
+
+  getBurnAmount(amount: uint64): uint64 {
+    this.calculateLSTRatio();
+    return wideRatio([amount, this.pegRatio.value], [SCALE]);
   }
 
   // user mint vALGO, sends Algo Payment txn and updates the balance for idle stake to claim
@@ -167,7 +179,6 @@ export class CaelusAdmin extends Contract {
       receiver: this.app.address,
     });
     this.idleAlgoToStake.value += mintTxn.amount;
-    this.calculateLSTRatio();
     const minted = this.getMintAmount(mintTxn.amount);
     sendAssetTransfer({
       xferAsset: this.vALGOid.value,
@@ -176,14 +187,6 @@ export class CaelusAdmin extends Contract {
     });
     this.totalAlgoStaked.value += mintTxn.amount;
     this.circulatingSupply.value += minted;
-  }
-
-  getMintAmount(amount: uint64): uint64 {
-    return wideRatio([amount], [this.pegRatio.value]); // TODO check math, SCALE?
-  }
-
-  getBurnAmount(amount: uint64): uint64 {
-    return amount * this.pegRatio.value;
   }
 
   // user burn vALGO, sends Asset Transfer each at the time depending on the burn queue
@@ -308,11 +311,14 @@ export class CaelusAdmin extends Contract {
       minPrio = this.burnPrio.value;
       this.burnPrio.value = app;
     }
-    const queueBytes = this.burnQueue.extract(0, this.burnQueue.size);
-    const queue = queueBytes as AppID[]; // how to change bytes into AppID[]
+    const queueBytes = this.burnQueue.value;
+    const queue = queueBytes as AppID[]; // how to change bytes into AppID[] bytes -> uint64[]
     // for loop on the queue of addresses checking saturation vs minPrio
     // iterate and check values
     // if higher -> replace and push new queue
+
+    // highet 700 <-> 680
+    // [500, 640,350,750...] --> [....]
   }
 
   // used to route txn both to restake into the auction or to another validator, depending on the receiver
