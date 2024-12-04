@@ -3,6 +3,7 @@ import { Contract } from '@algorandfoundation/tealscript';
 import { CaelusValidatorPool } from './CaelusValidator.algo';
 import {
   ALGORAND_ACCOUNT_MIN_BALANCE,
+  ALGORAND_BASE_FEE,
   APPLICATION_BASE_FEE,
   ASSET_HOLDING_FEE,
   FLASH_LOAN_FEE,
@@ -64,6 +65,8 @@ export class CaelusAdmin extends Contract {
     dynamicSize: false,
   });
 
+  burnPrio = GlobalStateKey<AppID>({ key: 'burnPrio' });
+
   // ----------------------------------------------------------------------------------------------------
   createApplication(): void {
     this.totalAlgoStaked.value = 0;
@@ -111,13 +114,22 @@ export class CaelusAdmin extends Contract {
   initBurnQueue(): void {
     assert(this.txn.sender === this.app.creator);
     const addressLength = 32;
-    this.validatorPoolContractApprovalProgram.create(addressLength * 10);
+    this.burnQueue.create(addressLength * 10);
   }
 
   addCaelusValidator(mbrPay: PayTxn): void {
+    const mbr = this.minBalanceForAccount(
+      1,
+      3,
+      1,
+      0,
+      0,
+      CaelusValidatorPool.schema.global.numUint,
+      CaelusValidatorPool.schema.global.numByteSlice
+    );
     verifyPayTxn(mbrPay, {
       receiver: this.app.address,
-      // TODO CHECK AMOUNT to calculate the MBRs
+      amount: mbr,
     });
 
     sendAppCall({
@@ -139,10 +151,8 @@ export class CaelusAdmin extends Contract {
         itob(this.stVestID.value),
         itob(this.vALGOid.value),
       ],
-    });
+    }); // TODO IS THIS ALL?
   }
-
-  getMBR(): void {}
 
   // to calculate use totalAlgoStaked/LSTcirculatingSupply
   calculateLSTRatio(): void {
@@ -151,8 +161,8 @@ export class CaelusAdmin extends Contract {
   }
 
   // user mint vALGO, sends Algo Payment txn and updates the balance for idle stake to claim
-  // Don't we need a MIN mint amt? MAX isn't really an issue cause ALGO is finite, but what happens if we mint 1 AUm (ie .000001A)
   mintRequest(mintTxn: PayTxn): void {
+    assert(mintTxn.amount >= ALGORAND_BASE_FEE, 'minimum amount to stake is 0.001 Algo');
     verifyPayTxn(mintTxn, {
       receiver: this.app.address,
     });
@@ -178,7 +188,7 @@ export class CaelusAdmin extends Contract {
 
   // user burn vALGO, sends Asset Transfer each at the time depending on the burn queue
   // MAYBE assert that the amount requested is < Algo balance as a sanity check, but assuming normal operations this shouldn't be a problem.
-  burnRequest(): void {
+  burnRequest(amount: AssetTransferTxn): void {
     // totalAlgoStaked --
     // vALGO circ supply --
     // take burn queue
@@ -188,22 +198,45 @@ export class CaelusAdmin extends Contract {
 
   mintValidatorCommit(validatorAppID: AppID, stakeCommit: PayTxn): void {
     assert(this.isPool(validatorAppID));
-    const validatorAddress = validatorAppID.globalState('operatorAddress') as Address;
+    const operatorAddress = validatorAppID.globalState('operatorAddress') as Address;
     verifyPayTxn(stakeCommit, {
-      sender: validatorAddress,
-      receiver: validatorAppID.address,
+      sender: operatorAddress,
+      receiver: this.app.address,
     });
-    assert(validatorAppID.address === this.txn.sender);
 
-    // Todo send ASA respective amount to the balance of the App
+    // ask again if when you embed a Txn you need to make a group or does this also submit the txn as part of the methodCall
+    sendMethodCall<typeof CaelusValidatorPool.prototype.addToOperatorCommit>({
+      applicationID: validatorAppID,
+      methodArgs: [
+        {
+          sender: this.app.address,
+          receiver: validatorAppID.address,
+          amount: stakeCommit.amount,
+          fee: 0,
+        },
+      ],
+    });
+
+    const amountToMint = this.getMintAmount(stakeCommit.amount);
+    this.calculateLSTRatio();
+    sendAssetTransfer({
+      xferAsset: this.vALGOid.value,
+      assetReceiver: validatorAppID.address,
+      assetAmount: amountToMint,
+      fee: 0,
+    });
+    this.totalAlgoStaked.value += stakeCommit.amount;
+    this.circulatingSupply.value += amountToMint;
   }
 
+  // burn & send to operator
   burnValidatorCommit(): void {
     // just like a burn but start to take from the operator app
   }
 
   // when operator is delinquent set up burn of his LST amount in the App Account
-  burnToDelinquentValidator(): void {
+  // burn & send to validator app
+  burnToDelinquentValidator(burnTxn: AssetTransferTxn, validatorAppID: AppID): void {
     // get AssetTransferTxn as burn type
     // check that app is delinquent
     // check that app is pool
@@ -211,15 +244,33 @@ export class CaelusAdmin extends Contract {
   }
 
   // when operator clears delinquency remint the LST burned
-  reMintDeliquentCommit(): void {
-    // get PayTxn as Mint type
+  reMintDeliquentCommit(amount: uint64, app: AppID): void {
+    // get amount and check with operator commit
     // check that app is not delinquent anymore & his vAlgo amount is 0
     // send vAlgo amount corresponding to the current peg for the operatorCommit amount
+    this.isPool(app);
+    const opAmount = app.globalState('operatorCommit') as uint64;
+    const op = app.globalState('operatorAddress') as Address;
+    const delnQ = app.globalState('isDelinquent') as boolean;
+    const isRightAmount = amount === opAmount;
+    const isRightOp = op === this.txn.sender;
+    const isNotDelinquent = !delnQ;
+    const hasNovAlgo = app.address.assetBalance(this.vALGOid.value) === 0;
+    const amountToMint = this.getMintAmount(amount);
+    assert(isNotDelinquent && hasNovAlgo && isRightOp && isRightAmount);
+    this.calculateLSTRatio();
+    sendAssetTransfer({
+      xferAsset: this.vALGOid.value,
+      assetReceiver: app.address,
+      assetAmount: amountToMint,
+      fee: 0,
+    });
+    this.circulatingSupply.value += amountToMint;
   }
 
   // called to bid new validator as highest bidder
   // No assert call to avoid future P2P spam. Come back to this before final release.
-  // TODO weird compilation error at for exist value
+  // TODO weird compilation error for exist value
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
     const valueC = validatorAppID.globalState('saturationBuffer') as uint64;
@@ -250,8 +301,16 @@ export class CaelusAdmin extends Contract {
   // used to set new validator inside the burn queue
   snitch(app: AppID): void {
     assert(this.isPool(app));
-    // this.burnQueue.extract(); extract box
-    // for loop on the queue of addresses
+    const satSnitch = app.globalState('saturationBuffer') as uint64;
+    const satPrio = this.burnPrio.value.globalState('saturationBuffer') as uint64;
+    let minPrio = app;
+    if (satSnitch > satPrio) {
+      minPrio = this.burnPrio.value;
+      this.burnPrio.value = app;
+    }
+    const queueBytes = this.burnQueue.extract(0, this.burnQueue.size);
+    const queue = queueBytes as AppID[]; // how to change bytes into AppID[]
+    // for loop on the queue of addresses checking saturation vs minPrio
     // iterate and check values
     // if higher -> replace and push new queue
   }

@@ -3,6 +3,7 @@ export const APPLICATION_BASE_FEE = 100000; // base fee for creating or opt-in t
 export const ASSET_HOLDING_FEE = 100000; // creation/holding fee for asset
 export const SSC_VALUE_UINT = 28500; // cost for value as uint64
 export const SSC_VALUE_BYTES = 50000; // cost for value as bytes
+export const ALGORAND_BASE_FEE = 1000;
 
 export const PROTOCOL_COMMISSION = 4;
 export const PERFORMANCE_STEP = 5;

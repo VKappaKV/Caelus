@@ -126,24 +126,33 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
-  /**
-   *  Used by the node operator to add to his stake amount for the node
-   *
-   * @param {PayTxn} commit - node operator stake commitment
-   * @throws {Error} if the sender isn't the node operator, the receiver isn't the app address or if the total balance is above 30M Algo
-   */
-  // TODO: CHANGE TO MANAGE OPERATOR COMMIT WITH LST
-  addToOperatorCommit(commit: PayTxn): void {
-    const totalBalanceUpdated = this.operatorCommit.value + commit.amount;
-    assert(totalBalanceUpdated < globals.payoutsMaxBalance, 'Contract max balance cannot be over 30M Algo');
+  // do I need both methods?
+  addToOperatorCommit(opStake: PayTxn): void {
+    assert(this.txn.sender === this.creatorContractAppID.value.address, 'only Caelus admin can route operator stake');
 
-    verifyPayTxn(commit, {
-      sender: this.operatorAddress.value,
+    verifyPayTxn(opStake, {
+      sender: this.creatorContractAppID.value.address,
       receiver: this.app.address,
-      amount: commit.amount,
     });
-    this.operatorCommit.value += commit.amount;
+    this.operatorCommit.value += opStake.amount;
     this.updateDelegationFactors();
+  }
+
+  /**
+   *  Used by the Caelus Admin to send the correct amount into the operator commit on delinquent burn of his vALGO
+   *
+   * @param {PayTxn} opStake - node operator stake commitment
+   */
+  addToOperatorCommitOnDelinquency(opStake: PayTxn): void {
+    assert(
+      this.txn.sender === this.creatorContractAppID.value.address,
+      'only Caelus admin can route operator stake without LST'
+    );
+    verifyPayTxn(opStake, {
+      receiver: this.app.address,
+      amount: opStake.amount,
+    });
+    this.operatorCommit.value += opStake.amount;
   }
 
   /**
@@ -168,13 +177,14 @@ export class CaelusValidatorPool extends Contract {
 
     assert(this.operatorCommit.value > claimRequest, 'Node Operator cannot claim more than he has');
 
-    sendPayment({
+    /* sendPayment({
       sender: this.app.address,
       receiver: this.operatorAddress.value,
       amount: claimRequest,
       fee: 0,
-    });
+    }); */
 
+    // send burn request with LST
     this.updateDelegationFactors();
   }
 
@@ -276,7 +286,10 @@ export class CaelusValidatorPool extends Contract {
       'Only the Caelus Admin contract can call this method'
     );
     assert(amountRequested <= this.delegatedStake.value, 'Cannot withdraw more stake than the delegated amount'); // this or take only what you can and communicate back the remaining request
-    assert(this.app.address.balance.value - amountRequested >= this.operatorCommit.value, 'Cannot leave the Opperator with less than their own stake');//Something like this.
+    assert(
+      this.app.address.balance - amountRequested >= this.operatorCommit.value,
+      'Cannot leave the Opperator with less than their own stake'
+    );
     sendPayment({
       amount: amountRequested,
       receiver: receiverBurn,
@@ -308,11 +321,25 @@ export class CaelusValidatorPool extends Contract {
       result = this.performanceCheck();
     }
     // in this case a validator pool being delinquent has its delegation factor fixed to MAX = 0 & saturationBUFFER to 1000
-    if (checks.delinquentCheck) {
+    if (checks.delinquentCheck && this.isDelinquent.value) {
       // check if delinquent & still has some ASA not burned, in that case procede to call burn
+      result = this.delegatedStake.value && this.app.address.assetBalance(this.vALGO.value) > 0;
+      if (this.app.address.assetBalance(this.vALGO.value) > 0) {
+        sendMethodCall<typeof CaelusAdmin.prototype.burnToDelinquentValidator>({
+          applicationID: this.creatorContractAppID.value,
+          methodArgs: [
+            {
+              xferAsset: this.vALGO.value,
+              assetReceiver: this.creatorContractAppID.value.address,
+              assetAmount: this.app.address.assetBalance(this.vALGO.value),
+              fee: 0,
+            },
+            this.app,
+          ],
+        });
+      }
       amount += this.delegatedStake.value;
       this.delegatedStake.value -= amount;
-      result = true;
     }
     if (checks.stakeAmountCheck && this.saturationBUFFER.value > 1000) {
       amount = this.delegatedStake.value - this.maxDelegatableStake.value;
@@ -558,7 +585,18 @@ export class CaelusValidatorPool extends Contract {
     this.performanceCounter.value = 0;
     this.updateDelegationFactors();
     this.isDelinquent.value = true;
-    // TODO turn operatorCommit stake into plain Algo, burn LST; otherwise delinquent operator would still earn yield from passive LST earnings
+    sendMethodCall<typeof CaelusAdmin.prototype.burnToDelinquentValidator>({
+      applicationID: this.creatorContractAppID.value,
+      methodArgs: [
+        {
+          xferAsset: this.vALGO.value,
+          assetReceiver: this.creatorContractAppID.value.address,
+          assetAmount: this.app.address.assetBalance(this.vALGO.value),
+          fee: 0,
+        },
+        this.app,
+      ],
+    });
   }
 
   private fixDelinquencyScore(): void {
