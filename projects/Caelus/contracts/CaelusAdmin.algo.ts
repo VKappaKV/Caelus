@@ -62,7 +62,6 @@ export class CaelusAdmin extends Contract {
 
   burnQueue = BoxKey<StaticArray<AppID, 10>>({
     key: 'burnQueue',
-    dynamicSize: false,
   });
 
   burnPrio = GlobalStateKey<AppID>({ key: 'burnPrio' });
@@ -75,6 +74,11 @@ export class CaelusAdmin extends Contract {
     this.validatorPoolContractVersion.value = 0;
     this.pegRatio.value = 1 * SCALE;
     // TODO FINISH UP CREATE APPLICATION METHOD
+  }
+
+  creatorChangeCreatorRelatedParams(newVestigeAddress: Address): void {
+    assert(this.txn.sender === this.app.creator);
+    this.vestigeAddress.value = newVestigeAddress;
   }
 
   initPoolContract(programSize: uint64): void {
@@ -191,7 +195,60 @@ export class CaelusAdmin extends Contract {
 
   // user burn vALGO, sends Asset Transfer each at the time depending on the burn queue
   // MAYBE assert that the amount requested is < Algo balance as a sanity check, but assuming normal operations this shouldn't be a problem.
-  burnRequest(amount: AssetTransferTxn): void {
+  burnRequest(burnTxn: AssetTransferTxn): void {
+    assert(burnTxn.assetAmount >= ALGORAND_BASE_FEE);
+    const amtToBurn = this.getBurnAmount(burnTxn.assetAmount);
+    const dlgToPrio = this.burnPrio.value.globalState('delegatedStake') as uint64;
+    if (dlgToPrio >= amtToBurn) {
+      sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+        applicationID: this.burnPrio.value,
+        methodArgs: [amtToBurn, this.txn.sender],
+        fee: 0,
+      });
+      this.snitch(this.burnQueue.value[0]); // is there a problem if the queue is empty?
+      return;
+    }
+    let burning = this.burnPrio.value.globalState('delegatedSTake') as uint64;
+    this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+      applicationID: this.burnPrio.value,
+      methodArgs: [dlgToPrio, this.txn.sender],
+      fee: 0,
+    });
+    for (let i = 0; i < this.burnQueue.value.length; i += 1) {
+      const v = this.burnQueue.value[i];
+      const dlgToV = v.globalState('delegatedSTake') as uint64;
+      if (dlgToV < amtToBurn - burning) {
+        this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+          applicationID: v,
+          methodArgs: [dlgToV, this.txn.sender],
+          fee: 0,
+        });
+        burning += dlgToV;
+      } else {
+        this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+          applicationID: v,
+          methodArgs: [amtToBurn - burning, this.txn.sender],
+          fee: 0,
+        });
+        burning = amtToBurn;
+        break;
+      }
+    }
+
+    const amtLeft = this.getBurnAmount(amtToBurn - burning);
+    if (amtLeft > 0) {
+      this.pendingGroup.addAssetTransfer({
+        xferAsset: this.vALGOid.value,
+        assetAmount: amtLeft,
+        assetReceiver: this.txn.sender,
+        fee: 0,
+      });
+      this.circulatingSupply.value -= burnTxn.assetAmount - amtLeft;
+      this.totalAlgoStaked.value -= burning;
+      return;
+    }
+    this.totalAlgoStaked.value -= burning;
+    this.circulatingSupply.value -= burnTxn.assetAmount;
     // totalAlgoStaked --
     // vALGO circ supply --
     // take burn queue
@@ -235,6 +292,8 @@ export class CaelusAdmin extends Contract {
   // burn & send to operator
   burnValidatorCommit(): void {
     // just like a burn but start to take from the operator app
+    // reduce tot circ supply of vALGO
+    // reduce tot Algo staked
   }
 
   // when operator is delinquent set up burn of his LST amount in the App Account
@@ -244,6 +303,7 @@ export class CaelusAdmin extends Contract {
     // check that app is delinquent
     // check that app is pool
     // init burn request for the amount sent
+    // reduce tot circ supply of vALGO
   }
 
   // when operator clears delinquency remint the LST burned
@@ -277,7 +337,9 @@ export class CaelusAdmin extends Contract {
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
     const valueC = validatorAppID.globalState('saturationBuffer') as uint64;
+    const isDelegatable = validatorAppID.globalState('canBeDelegated') as boolean;
     const [valueB, existsB] = this.highestBidder.value.globalState('saturationBuffer') as uint64[]; // Error framePointer? Ask Joe
+    assert(isDelegatable, 'only bid delegatable Apps');
     if (valueC > valueB || existsB === 0) {
       this.highestBidder.value = validatorAppID;
     }
@@ -301,7 +363,7 @@ export class CaelusAdmin extends Contract {
     this.idleAlgoToStake.value -= amount;
   }
 
-  // used to set new validator inside the burn queue
+  // used to set new validator inside the burn queue || burn Prio
   snitch(app: AppID): void {
     assert(this.isPool(app));
     const satSnitch = app.globalState('saturationBuffer') as uint64;
@@ -316,17 +378,14 @@ export class CaelusAdmin extends Contract {
     const queue = this.burnQueue.value;
     for (let i = 0; i < queue.length; i += 1) {
       if ((queue[i].globalState('saturationBuffer') as uint64) < minSat) {
-        const exch = minPrio;
+        const temp = minPrio;
         minPrio = queue[i];
-        queue[i] = exch;
+        queue[i] = temp;
       }
     }
     // for loop on the queue of addresses checking saturation vs minPrio
     // iterate and check values
     // if higher -> replace
-
-    // highet 700 <-> 680
-    // [500, 640,350,750...] --> [....]
   }
 
   // used to route txn both to restake into the auction or to another validator, depending on the receiver
@@ -450,11 +509,6 @@ export class CaelusAdmin extends Contract {
     return this.flashLoanCounter.value;
   }
 
-  creatorChangeCreatorRelatedParams(newVestigeAddress: Address): void {
-    assert(this.txn.sender === this.app.creator);
-    this.vestigeAddress.value = newVestigeAddress;
-  }
-
   private isPool(app: AppID): boolean {
     const isPool = (app.globalState('creator') as AppID) === this.app;
     return isPool;
@@ -480,6 +534,7 @@ export class CaelusAdmin extends Contract {
     return minBal;
   }
 
+  //  REMOVE IF USELESS
   private costForBoxStorage(totalNumBytes: uint64): uint64 {
     const SCBOX_PERBOX = 2500;
     const SCBOX_PERBYTE = 400;

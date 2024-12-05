@@ -164,12 +164,11 @@ export class CaelusValidatorPool extends Contract {
   // TODO: CHANGE TO MANAGE OPERATOR COMMIT WITH LST
   removeFromOperatorCommit(claimRequest: uint64): void {
     // read globalState from CaelusAdmin
+    assert(this.txn.sender === this.creatorContractAppID.value.address);
     assert(
       !this.isDelinquent.value,
       'cannot withdraw funds if the account is flagged as delinquent, must solve delinquency first'
     );
-
-    assert(this.txn.sender === this.operatorAddress.value, 'Only the Node Operator can claim his stake');
 
     assert(
       this.operatorCommit.value - claimRequest > globals.payoutsMinBalance,
@@ -320,6 +319,10 @@ export class CaelusValidatorPool extends Contract {
     if (checks.performanceCheck) {
       result = this.performanceCheck();
     }
+    if (checks.stakeAmountCheck && this.app.address.balance > MAX_STAKE_PER_ACCOUNT) {
+      this.setDelinquency();
+      result = true;
+    }
     // in this case a validator pool being delinquent has its delegation factor fixed to MAX = 0 & saturationBUFFER to 1000
     if (checks.delinquentCheck && this.isDelinquent.value) {
       // check if delinquent & still has some ASA not burned, in that case procede to call burn
@@ -468,7 +471,6 @@ export class CaelusValidatorPool extends Contract {
       fee: 0,
     });
     this.claimLeftAlgo();
-    // MBR left?
   }
 
   /**
