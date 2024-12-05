@@ -338,11 +338,12 @@ export class CaelusAdmin extends Contract {
   // TODO weird compilation error for exist value
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
+    const doesExist = this.highestBidder.value.creator;
     const valueC = validatorAppID.globalState('saturationBuffer') as uint64;
     const isDelegatable = validatorAppID.globalState('canBeDelegated') as boolean;
     const valueB = this.highestBidder.value.globalState('saturationBuffer') as uint64; // Error framePointer? Ask Joe
     assert(isDelegatable, 'only bid delegatable Apps');
-    if (valueC > valueB) {
+    if (valueC > valueB && doesExist !== globals.zeroAddress) {
       this.highestBidder.value = validatorAppID;
     }
   }
