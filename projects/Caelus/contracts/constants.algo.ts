@@ -8,6 +8,7 @@ export const ALGORAND_BASE_FEE = 1000;
 export const PROTOCOL_COMMISSION = 4;
 export const PERFORMANCE_STEP = 5;
 export const MAX_DELINQUENCY_TOLERATED = 10;
+export const BURN_COOLDOW = 10;
 
 export const EPOCH_LENGTH = 30857; // TBD if epochs are needed
 export const ALGORAND_STAKING_BLOCK_DELAY = 320; // # of blocks until algorand sees online balance changes in staking

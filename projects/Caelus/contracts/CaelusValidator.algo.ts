@@ -126,33 +126,24 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
-  // do I need both methods?
-  addToOperatorCommit(opStake: PayTxn): void {
-    assert(this.txn.sender === this.creatorContractAppID.value.address, 'only Caelus admin can route operator stake');
-
-    verifyPayTxn(opStake, {
-      sender: this.creatorContractAppID.value.address,
-      receiver: this.app.address,
-    });
-    this.operatorCommit.value += opStake.amount;
-    this.updateDelegationFactors();
-  }
-
   /**
    *  Used by the Caelus Admin to send the correct amount into the operator commit on delinquent burn of his vALGO
    *
    * @param {PayTxn} opStake - node operator stake commitment
    */
-  addToOperatorCommitOnDelinquency(opStake: PayTxn): void {
+  addToOperatorCommit(opStake: PayTxn): void {
     assert(
       this.txn.sender === this.creatorContractAppID.value.address,
       'only Caelus admin can route operator stake without LST'
     );
     verifyPayTxn(opStake, {
       receiver: this.app.address,
-      amount: opStake.amount,
     });
     this.operatorCommit.value += opStake.amount;
+    if (this.isDelinquent.value) {
+      return;
+    }
+    this.updateDelegationFactors();
   }
 
   /**
@@ -161,9 +152,7 @@ export class CaelusValidatorPool extends Contract {
    * @throws {Error} if the sender isn't the node operator or if the total commit by the node operator goes below the min threshold for rewards eligibility
    * @throws {Error} if isDelinquent is True
    */
-  // TODO: CHANGE TO MANAGE OPERATOR COMMIT WITH LST
-  removeFromOperatorCommit(claimRequest: uint64): void {
-    // read globalState from CaelusAdmin
+  removeFromOperatorCommit(claimRequest: uint64, claimRequestLST: uint64): void {
     assert(this.txn.sender === this.creatorContractAppID.value.address);
     assert(
       !this.isDelinquent.value,
@@ -177,14 +166,25 @@ export class CaelusValidatorPool extends Contract {
 
     assert(this.operatorCommit.value > claimRequest, 'Node Operator cannot claim more than he has');
 
-    /* sendPayment({
+    sendPayment({
       sender: this.app.address,
       receiver: this.operatorAddress.value,
       amount: claimRequest,
       fee: 0,
-    }); */
+    });
 
-    // send burn request with LST
+    sendMethodCall<typeof CaelusAdmin.prototype.burnRequest, void>({
+      applicationID: this.creatorContractAppID.value,
+      methodArgs: [
+        {
+          xferAsset: this.vALGO.value,
+          assetReceiver: this.creatorContractAppID.value.address,
+          assetAmount: claimRequestLST,
+          fee: 0,
+        },
+        this.app.address,
+      ],
+    });
     this.updateDelegationFactors();
   }
 
@@ -314,6 +314,7 @@ export class CaelusValidatorPool extends Contract {
   // make the checks required
   getSnitched(checks: SnitchInfo): boolean {
     assert(this.txn.sender === this.creatorContractAppID.value.address);
+    // maybe its better to check that checks.delinquency and checks.stakeAmount are mutually exclusive
     let result = false;
     let amount = 0;
     if (checks.performanceCheck) {
@@ -326,7 +327,7 @@ export class CaelusValidatorPool extends Contract {
     // in this case a validator pool being delinquent has its delegation factor fixed to MAX = 0 & saturationBUFFER to 1000
     if (checks.delinquentCheck && this.isDelinquent.value) {
       // check if delinquent & still has some ASA not burned, in that case procede to call burn
-      result = this.delegatedStake.value && this.app.address.assetBalance(this.vALGO.value) > 0;
+      result = this.delegatedStake.value > 0 || this.app.address.assetBalance(this.vALGO.value) > 0;
       if (this.app.address.assetBalance(this.vALGO.value) > 0) {
         sendMethodCall<typeof CaelusAdmin.prototype.burnToDelinquentValidator>({
           applicationID: this.creatorContractAppID.value,
@@ -341,7 +342,7 @@ export class CaelusValidatorPool extends Contract {
           ],
         });
       }
-      amount += this.delegatedStake.value;
+      amount += this.delegatedStake.value > 0 ? this.delegatedStake.value : 0;
       this.delegatedStake.value -= amount;
     }
     if (checks.stakeAmountCheck && this.saturationBUFFER.value > 1000) {

@@ -129,7 +129,7 @@ createApplication:
 	intc 0 // 0
 	app_global_put
 
-	// contracts\CaelusValidator.algo.ts:103
+	// contracts\CaelusValidator.algo.ts:105
 	// this.canBeDelegated.value = false
 	bytec 9 //  "canBeDelegated"
 	intc 0 // 0

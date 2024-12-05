@@ -6,6 +6,7 @@ import {
   ALGORAND_BASE_FEE,
   APPLICATION_BASE_FEE,
   ASSET_HOLDING_FEE,
+  BURN_COOLDOW,
   FLASH_LOAN_FEE,
   PROTOCOL_COMMISSION,
   SCALE,
@@ -58,11 +59,17 @@ export class CaelusAdmin extends Contract {
 
   lastFlashloanBlock = GlobalStateKey<uint64>({ key: 'lastFlashloanBlock' });
 
+  // burn related
+
   burnQueue = BoxKey<StaticArray<AppID, 10>>({
     key: 'burnQueue',
   });
 
   burnPrio = GlobalStateKey<AppID>({ key: 'burnPrio' });
+
+  burnExhaust = GlobalStateKey<boolean>({ key: 'burnExhaust' });
+
+  burnCooldownFromBlock = GlobalStateKey<uint64>({ key: 'burnCooldown' });
 
   // ----------------------------------------------------------------------------------------------------
   createApplication(): void {
@@ -197,14 +204,22 @@ export class CaelusAdmin extends Contract {
 
   // user burn vALGO, sends Asset Transfer each at the time depending on the burn queue
   // MAYBE assert that the amount requested is < Algo balance as a sanity check, but assuming normal operations this shouldn't be a problem.
-  burnRequest(burnTxn: AssetTransferTxn): void {
+  // TODO HANDLE IF THE CURRENT PRIO OR QUEUE ID DONT EXIST
+  burnRequest(burnTxn: AssetTransferTxn, burnTo: Address): void {
     assert(burnTxn.assetAmount >= ALGORAND_BASE_FEE);
+    if (this.burnExhaust.value) {
+      assert(
+        globals.round - this.burnCooldownFromBlock.value > BURN_COOLDOW,
+        'wait at least 10 blocks since Exhaust Block'
+      );
+      this.burnExhaust.value = false;
+    }
     const amtToBurn = this.getBurnAmount(burnTxn.assetAmount);
     const dlgToPrio = this.burnPrio.value.globalState('delegatedStake') as uint64;
     if (dlgToPrio >= amtToBurn) {
       sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
         applicationID: this.burnPrio.value,
-        methodArgs: [amtToBurn, this.txn.sender],
+        methodArgs: [amtToBurn, burnTo],
         fee: 0,
       });
       this.snitch(this.burnQueue.value[0]); // is there a problem if the queue is empty?
@@ -213,7 +228,7 @@ export class CaelusAdmin extends Contract {
     let burning = this.burnPrio.value.globalState('delegatedSTake') as uint64;
     this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
       applicationID: this.burnPrio.value,
-      methodArgs: [dlgToPrio, this.txn.sender],
+      methodArgs: [dlgToPrio, burnTo],
       fee: 0,
     });
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
@@ -222,14 +237,14 @@ export class CaelusAdmin extends Contract {
       if (dlgToV < amtToBurn - burning) {
         this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
           applicationID: v,
-          methodArgs: [dlgToV, this.txn.sender],
+          methodArgs: [dlgToV, burnTo],
           fee: 0,
         });
         burning += dlgToV;
       } else {
         this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
           applicationID: v,
-          methodArgs: [amtToBurn - burning, this.txn.sender],
+          methodArgs: [amtToBurn - burning, burnTo],
           fee: 0,
         });
         burning = amtToBurn;
@@ -242,11 +257,13 @@ export class CaelusAdmin extends Contract {
       this.pendingGroup.addAssetTransfer({
         xferAsset: this.vALGOid.value,
         assetAmount: amtLeft,
-        assetReceiver: this.txn.sender,
+        assetReceiver: burnTxn.sender, // the sender needs to be the burnTxn sender, so when operator burns vALGO from the app it returns the amount left to burn
         fee: 0,
       });
       this.circulatingSupply.value -= burnTxn.assetAmount - amtLeft;
       this.totalAlgoStaked.value -= burning;
+      this.burnExhaust.value = true;
+      this.burnCooldownFromBlock.value = globals.round;
       return;
     }
     this.totalAlgoStaked.value -= burning;
@@ -292,10 +309,22 @@ export class CaelusAdmin extends Contract {
   }
 
   // burn & send to operator
-  burnValidatorCommit(): void {
-    // just like a burn but start to take from the operator app
+  burnValidatorCommit(appToBurnFrom: AppID, amount: uint64): void {
+    // just like a burn but take from the operator app
     // reduce tot circ supply of vALGO
     // reduce tot Algo staked
+    this.isPool(appToBurnFrom);
+    verifyTxn(this.txn, {
+      sender: appToBurnFrom.globalState('operatorCommit') as Address,
+    });
+    const opCmt = appToBurnFrom.globalState('operatorCommit') as uint64;
+    assert(!(appToBurnFrom.globalState('isDelinquent') as boolean), 'con only burn when delinquency is solved');
+    const toBurn = this.getBurnAmount(amount);
+    assert(opCmt < toBurn && opCmt - toBurn > globals.payoutsMinBalance, 'cannot burn more than the committed amount');
+    sendMethodCall<typeof CaelusValidatorPool.prototype.removeFromOperatorCommit, void>({
+      applicationID: appToBurnFrom,
+      methodArgs: [toBurn, amount],
+    });
   }
 
   // when operator is delinquent set up burn of his LST amount in the App Account
@@ -306,6 +335,57 @@ export class CaelusAdmin extends Contract {
     // check that app is pool
     // init burn request for the amount sent
     // reduce tot circ supply of vALGO
+    this.isPool(validatorAppID);
+    assert(burnTxn.sender === validatorAppID.address);
+    assert(validatorAppID.globalState('isDelinquent') as boolean);
+    let amountToUpdate = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
+    let toBurn = this.getBurnAmount(burnTxn.assetAmount);
+    let amtBurned = 0; // need this to subtract from totalAlgoSupply
+    if (this.poolExist(this.burnPrio.value)) {
+      const prioStake = this.burnPrio.value.globalState('delegatedStake') as uint64;
+      amtBurned = prioStake >= toBurn ? prioStake : toBurn - prioStake;
+      sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+        applicationID: this.burnPrio.value,
+        methodArgs: [amtBurned, this.app.address],
+        fee: 0,
+      });
+      toBurn -= amtBurned;
+    }
+    if (toBurn > 0) {
+      for (let i = 0; i < this.burnQueue.value.length; i += 1) {
+        const v = this.burnQueue.value[i];
+        const dlgToV = v.globalState('delinquentStake') as uint64;
+        if (dlgToV >= toBurn) {
+          sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+            applicationID: v,
+            methodArgs: [toBurn, this.app.address],
+            fee: 0,
+          });
+          amtBurned += toBurn;
+          toBurn = 0;
+          break;
+        } else {
+          sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+            applicationID: v,
+            methodArgs: [dlgToV, this.app.address],
+            fee: 0,
+          });
+          amtBurned += dlgToV;
+          toBurn -= dlgToV;
+        }
+      }
+    }
+    amountToUpdate = this.getBurnAmount(toBurn - amtBurned);
+    this.circulatingSupply.value -= burnTxn.assetAmount - amountToUpdate;
+    this.totalAlgoStaked.value -= amtBurned;
+    if (amountToUpdate > 0) {
+      sendAssetTransfer({
+        xferAsset: this.vALGOid.value,
+        assetReceiver: burnTxn.sender,
+        assetAmount: amountToUpdate,
+        fee: 0,
+      });
+    }
   }
 
   // when operator clears delinquency remint the LST burned
@@ -335,15 +415,17 @@ export class CaelusAdmin extends Contract {
 
   // called to bid new validator as highest bidder
   // No assert call to avoid future P2P spam. Come back to this before final release.
-  // TODO weird compilation error for exist value
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
-    const doesExist = this.highestBidder.value.creator;
-    const valueC = validatorAppID.globalState('saturationBuffer') as uint64;
     const isDelegatable = validatorAppID.globalState('canBeDelegated') as boolean;
-    const valueB = this.highestBidder.value.globalState('saturationBuffer') as uint64; // Error framePointer? Ask Joe
+    if (this.poolExist(this.highestBidder.value)) {
+      this.highestBidder.value = validatorAppID;
+      return;
+    }
+    const valueC = validatorAppID.globalState('saturationBuffer') as uint64;
+    const valueB = this.highestBidder.value.globalState('saturationBuffer') as uint64;
     assert(isDelegatable, 'only bid delegatable Apps');
-    if (valueC > valueB && doesExist !== globals.zeroAddress) {
+    if (valueC > valueB) {
       this.highestBidder.value = validatorAppID;
     }
   }
@@ -367,6 +449,7 @@ export class CaelusAdmin extends Contract {
   }
 
   // used to set new validator inside the burn queue || burn Prio
+  // TODO use poolExist on the AppID kept in globalState
   snitch(app: AppID): void {
     assert(this.isPool(app));
     const satSnitch = app.globalState('saturationBuffer') as uint64;
@@ -418,14 +501,9 @@ export class CaelusAdmin extends Contract {
 
   // operator calls for its own app *check*; clawback all delegated stake and ensure that the operator receives the ASA, he will proceed to burn
   onOperatorExit(appToClose: AppID, closeTxn: PayTxn): void {
-    const operator = appToClose.globalState('operatorAddress') as Address;
-    const totalCheck =
-      (appToClose.globalState('operatorCommit') as uint64) + (appToClose.globalState('delegatedStake') as uint64);
-    assert(this.txn.sender === operator, 'Only the operator can close out the contract');
-    verifyPayTxn(closeTxn, {
-      receiver: this.app.address,
+    verifyTxn(this.txn, {
       sender: appToClose.address,
-      amount: totalCheck,
+      receiver: this.app.address,
     });
     this.idleAlgoToStake.value += closeTxn.amount;
     sendMethodCall<typeof CaelusValidatorPool.prototype.deleteApplication, void>({
@@ -515,6 +593,10 @@ export class CaelusAdmin extends Contract {
   private isPool(app: AppID): boolean {
     const isPool = (app.globalState('creator') as AppID) === this.app;
     return isPool;
+  }
+
+  private poolExist(app: AppID): boolean {
+    return app.creator !== globals.zeroAddress;
   }
 
   private minBalanceForAccount(
