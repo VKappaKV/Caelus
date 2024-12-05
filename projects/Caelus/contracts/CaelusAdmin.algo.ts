@@ -28,8 +28,6 @@ export class CaelusAdmin extends Contract {
 
   pegRatio = GlobalStateKey<uint64>({ key: 'peg' });
 
-  epochLen = GlobalStateKey<uint64>({ key: 'epochlen' }); // use to recalculate pegRatio?
-
   initializedPoolContract = GlobalStateKey<boolean>({ key: 'initPoolContract' }); // is box instantiated for Validator Approval Program?
 
   validatorPoolContractVersion = GlobalStateKey<uint64>({ key: 'validatorPoolVersion' }); // manager should be able to update this value
@@ -73,12 +71,16 @@ export class CaelusAdmin extends Contract {
     this.initializedPoolContract.value = false;
     this.validatorPoolContractVersion.value = 0;
     this.pegRatio.value = 1 * SCALE;
-    // TODO FINISH UP CREATE APPLICATION METHOD
+    this.circulatingSupply.value = 0;
+    this.idleAlgoToStake.value = 0;
+    this.flashLoanCounter.value = 0;
   }
 
-  creatorChangeCreatorRelatedParams(newVestigeAddress: Address): void {
+  creatorChangeCreatorRelatedParams(newVestigeAddress: Address, vestID: AssetID, stVestID: AssetID): void {
     assert(this.txn.sender === this.app.creator);
     this.vestigeAddress.value = newVestigeAddress;
+    this.vestID.value = vestID;
+    this.stVestID.value = stVestID;
   }
 
   initPoolContract(programSize: uint64): void {

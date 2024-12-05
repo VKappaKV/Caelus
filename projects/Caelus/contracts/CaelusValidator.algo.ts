@@ -100,9 +100,9 @@ export class CaelusValidatorPool extends Contract {
     this.operatorCommit.value = 0;
     this.delegatedStake.value = 0;
     this.maxDelegatableStake.value = 0;
-    this.canBeDelegated.value = false;
 
     // init buffer, flags & counters
+    this.canBeDelegated.value = false;
     this.saturationBUFFER.value = 0;
     this.performanceCounter.value = 0;
     this.delinquencyScore.value = 0;
