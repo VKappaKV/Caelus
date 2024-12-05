@@ -44,10 +44,22 @@
     },
     {
       "name": "addToOperatorCommit",
-      "desc": "Used by the node operator to add to his stake amount for the node",
       "args": [
         {
-          "name": "commit",
+          "name": "opStake",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "addToOperatorCommitOnDelinquency",
+      "desc": "Used by the Caelus Admin to send the correct amount into the operator commit on delinquent burn of his vALGO",
+      "args": [
+        {
+          "name": "opStake",
           "type": "pay",
           "desc": "node operator stake commitment"
         }

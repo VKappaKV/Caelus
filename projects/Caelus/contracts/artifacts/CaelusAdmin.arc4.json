@@ -10,29 +10,143 @@
       }
     },
     {
-      "name": "initLST",
+      "name": "creatorChangeCreatorRelatedParams",
+      "args": [
+        {
+          "name": "newVestigeAddress",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "initPoolContract",
+      "args": [
+        {
+          "name": "programSize",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "loadPoolContractProgram",
+      "args": [
+        {
+          "name": "offsett",
+          "type": "uint64"
+        },
+        {
+          "name": "data",
+          "type": "byte[]"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "poolContractIsSet",
       "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "initLST",
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "unitName",
+          "type": "string"
+        },
+        {
+          "name": "url",
+          "type": "string"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "initBurnQueue",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "addCaelusValidator",
+      "args": [
+        {
+          "name": "mbrPay",
+          "type": "pay"
+        }
+      ],
       "returns": {
         "type": "void"
       }
     },
     {
       "name": "calculateLSTRatio",
+      "readonly": true,
       "args": [],
       "returns": {
         "type": "void"
       }
     },
     {
+      "name": "getMintAmount",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
+      "name": "getBurnAmount",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
       "name": "mintRequest",
-      "args": [],
+      "args": [
+        {
+          "name": "mintTxn",
+          "type": "pay"
+        }
+      ],
       "returns": {
         "type": "void"
       }
     },
     {
       "name": "burnRequest",
-      "args": [],
+      "args": [
+        {
+          "name": "burnTxn",
+          "type": "axfer"
+        }
+      ],
       "returns": {
         "type": "void"
       }
@@ -62,14 +176,44 @@
     },
     {
       "name": "burnToDelinquentValidator",
-      "args": [],
+      "args": [
+        {
+          "name": "burnTxn",
+          "type": "axfer"
+        },
+        {
+          "name": "validatorAppID",
+          "type": "uint64"
+        }
+      ],
       "returns": {
         "type": "void"
       }
     },
     {
       "name": "reMintDeliquentCommit",
-      "args": [],
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        },
+        {
+          "name": "app",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "bid",
+      "args": [
+        {
+          "name": "validatorAppID",
+          "type": "uint64"
+        }
+      ],
       "returns": {
         "type": "void"
       }
@@ -92,7 +236,12 @@
     },
     {
       "name": "snitch",
-      "args": [],
+      "args": [
+        {
+          "name": "app",
+          "type": "uint64"
+        }
+      ],
       "returns": {
         "type": "void"
       }
@@ -187,13 +336,6 @@
       "args": [],
       "returns": {
         "type": "uint64"
-      }
-    },
-    {
-      "name": "creatorChangeCreatorRelatedParams",
-      "args": [],
-      "returns": {
-        "type": "void"
       }
     }
   ]

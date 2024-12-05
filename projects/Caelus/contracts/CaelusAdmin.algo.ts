@@ -338,9 +338,9 @@ export class CaelusAdmin extends Contract {
     assert(this.isPool(validatorAppID));
     const valueC = validatorAppID.globalState('saturationBuffer') as uint64;
     const isDelegatable = validatorAppID.globalState('canBeDelegated') as boolean;
-    const [valueB, existsB] = this.highestBidder.value.globalState('saturationBuffer') as uint64[]; // Error framePointer? Ask Joe
+    const valueB = this.highestBidder.value.globalState('saturationBuffer') as uint64; // Error framePointer? Ask Joe
     assert(isDelegatable, 'only bid delegatable Apps');
-    if (valueC > valueB || existsB === 0) {
+    if (valueC > valueB) {
       this.highestBidder.value = validatorAppID;
     }
   }
