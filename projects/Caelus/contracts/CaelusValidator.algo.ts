@@ -237,6 +237,8 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
+  //In a hypothetical where a block proposer proposed two blocks s/he should always report the blocks from the oldest block first. We should do this in the SDK.
+  //No loss of funds if this doesn't happen, but they don't end up recorded as rewards, instead going to the dust fund. 
   reportRewards(block: uint64): void {
     assert(blocks[block].proposer === this.app.address);
     assert(block > this.lastRewardReport.value);
