@@ -341,6 +341,7 @@ export class CaelusAdmin extends Contract {
     // init burn request for the amount sent
     // reduce tot circ supply of vALGO
     this.isPool(validatorAppID);
+    assert(globals.round - this.burnCooldownFromBlock.value > BURN_COOLDOW, "can only burn if we're not exhausted")
     assert(burnTxn.sender === validatorAppID.address);
     assert(validatorAppID.globalState('isDelinquent') as boolean);
     let amountToUpdate = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
@@ -406,7 +407,7 @@ export class CaelusAdmin extends Contract {
     const delnQ = app.globalState('isDelinquent') as boolean;
     const isRightAmount = amount === opAmount;
     const isRightOp = op === this.txn.sender;
-    const isNotDelinquent = !delnQ;
+    const isNotDelinquent = !delnQ; //aight
     const hasNovAlgo = app.address.assetBalance(this.vALGOid.value) === 0;
     const amountToMint = this.getMintAmount(amount);
     assert(isNotDelinquent && hasNovAlgo && isRightOp && isRightAmount);
