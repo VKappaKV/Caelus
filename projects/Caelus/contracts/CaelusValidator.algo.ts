@@ -165,7 +165,8 @@ export class CaelusValidatorPool extends Contract {
     );
 
     assert(this.operatorCommit.value > claimRequest, 'Node Operator cannot claim more than he has');
-
+    assert(this.app.address.assetBalance(this.vAlgo.value) >= claimRequestLST, 'Node Operator cannot claim more vALGO than he has');
+    
     sendPayment({
       sender: this.app.address,
       receiver: this.operatorAddress.value,
