@@ -215,40 +215,45 @@ export class CaelusAdmin extends Contract {
       this.burnExhaust.value = false;
     }
     const amtToBurn = this.getBurnAmount(burnTxn.assetAmount);
-    const dlgToPrio = this.burnPrio.value.globalState('delegatedStake') as uint64;
-    if (dlgToPrio >= amtToBurn) {
-      sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+    let burning = 0;
+    if (this.poolExist(this.burnPrio.value)) {
+      const dlgToPrio = this.burnPrio.value.globalState('delegatedStake') as uint64;
+      if (dlgToPrio >= amtToBurn) {
+        sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+          applicationID: this.burnPrio.value,
+          methodArgs: [amtToBurn, burnTo],
+          fee: 0,
+        });
+        this.snitch(this.burnQueue.value[0]); // is there a problem if the queue is empty?
+        return;
+      }
+      burning = this.burnPrio.value.globalState('delegatedSTake') as uint64;
+      this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
         applicationID: this.burnPrio.value,
-        methodArgs: [amtToBurn, burnTo],
+        methodArgs: [dlgToPrio, burnTo],
         fee: 0,
       });
-      this.snitch(this.burnQueue.value[0]); // is there a problem if the queue is empty?
-      return;
     }
-    let burning = this.burnPrio.value.globalState('delegatedSTake') as uint64;
-    this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
-      applicationID: this.burnPrio.value,
-      methodArgs: [dlgToPrio, burnTo],
-      fee: 0,
-    });
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
       const v = this.burnQueue.value[i];
-      const dlgToV = v.globalState('delegatedSTake') as uint64;
-      if (dlgToV < amtToBurn - burning) {
-        this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
-          applicationID: v,
-          methodArgs: [dlgToV, burnTo],
-          fee: 0,
-        });
-        burning += dlgToV;
-      } else {
-        this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
-          applicationID: v,
-          methodArgs: [amtToBurn - burning, burnTo],
-          fee: 0,
-        });
-        burning = amtToBurn;
-        break;
+      if (this.poolExist(v)) {
+        const dlgToV = v.globalState('delegatedSTake') as uint64;
+        if (dlgToV < amtToBurn - burning) {
+          this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+            applicationID: v,
+            methodArgs: [dlgToV, burnTo],
+            fee: 0,
+          });
+          burning += dlgToV;
+        } else {
+          this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+            applicationID: v,
+            methodArgs: [amtToBurn - burning, burnTo],
+            fee: 0,
+          });
+          burning = amtToBurn;
+          break;
+        }
       }
     }
 
@@ -354,24 +359,26 @@ export class CaelusAdmin extends Contract {
     if (toBurn > 0) {
       for (let i = 0; i < this.burnQueue.value.length; i += 1) {
         const v = this.burnQueue.value[i];
-        const dlgToV = v.globalState('delinquentStake') as uint64;
-        if (dlgToV >= toBurn) {
-          sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
-            applicationID: v,
-            methodArgs: [toBurn, this.app.address],
-            fee: 0,
-          });
-          amtBurned += toBurn;
-          toBurn = 0;
-          break;
-        } else {
-          sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
-            applicationID: v,
-            methodArgs: [dlgToV, this.app.address],
-            fee: 0,
-          });
-          amtBurned += dlgToV;
-          toBurn -= dlgToV;
+        if (this.poolExist(v)) {
+          const dlgToV = v.globalState('delinquentStake') as uint64;
+          if (dlgToV >= toBurn) {
+            sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+              applicationID: v,
+              methodArgs: [toBurn, this.app.address],
+              fee: 0,
+            });
+            amtBurned += toBurn;
+            toBurn = 0;
+            break;
+          } else {
+            sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+              applicationID: v,
+              methodArgs: [dlgToV, this.app.address],
+              fee: 0,
+            });
+            amtBurned += dlgToV;
+            toBurn -= dlgToV;
+          }
         }
       }
     }
@@ -449,20 +456,25 @@ export class CaelusAdmin extends Contract {
   }
 
   // used to set new validator inside the burn queue || burn Prio
-  // TODO use poolExist on the AppID kept in globalState
   snitch(app: AppID): void {
     assert(this.isPool(app));
     const satSnitch = app.globalState('saturationBuffer') as uint64;
-    const satPrio = this.burnPrio.value.globalState('saturationBuffer') as uint64;
     let minPrio = app;
     let minSat = satSnitch;
-    if (satSnitch > satPrio) {
-      minPrio = this.burnPrio.value;
-      minSat = satPrio;
-      this.burnPrio.value = app;
+    if (this.poolExist(this.burnPrio.value)) {
+      const satPrio = this.burnPrio.value.globalState('saturationBuffer') as uint64;
+      if (satSnitch > satPrio) {
+        minPrio = this.burnPrio.value;
+        minSat = satPrio;
+        this.burnPrio.value = app;
+      }
     }
     const queue = this.burnQueue.value;
     for (let i = 0; i < queue.length; i += 1) {
+      if (!this.poolExist(queue[i])) {
+        queue[i] = minPrio;
+        break;
+      }
       if ((queue[i].globalState('saturationBuffer') as uint64) < minSat) {
         const temp = minPrio;
         minPrio = queue[i];
