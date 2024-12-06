@@ -230,6 +230,10 @@ export class CaelusValidatorPool extends Contract {
     this.canBeDelegated.value = true;
     this.updateDelegationFactors();
     // TODO remint the operatorCommit as LST
+    sendMethodCall<typeof CaelusAdmin.prototype.reMintDeliquentCommit, void>({
+      applicationID: this.creatorContractAppID.value,
+      methodArgs: [this.operatorCommit.value, this.app],
+    });
   }
 
   reportRewards(block: uint64): void {
