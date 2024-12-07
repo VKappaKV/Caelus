@@ -341,7 +341,7 @@ export class CaelusAdmin extends Contract {
     // init burn request for the amount sent
     // reduce tot circ supply of vALGO
     this.isPool(validatorAppID);
-    assert(globals.round - this.burnCooldownFromBlock.value > BURN_COOLDOW, "can only burn if we're not exhausted")
+    assert(globals.round - this.burnCooldownFromBlock.value > BURN_COOLDOW, "can only burn if we're not exhausted");
     assert(burnTxn.sender === validatorAppID.address);
     assert(validatorAppID.globalState('isDelinquent') as boolean);
     let amountToUpdate = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
@@ -402,15 +402,17 @@ export class CaelusAdmin extends Contract {
     // check that app is not delinquent anymore & his vAlgo amount is 0
     // send vAlgo amount corresponding to the current peg for the operatorCommit amount
     this.isPool(app);
-    const opAmount = app.globalState('operatorCommit') as uint64;
-    const op = app.globalState('operatorAddress') as Address;
-    const delnQ = app.globalState('isDelinquent') as boolean;
-    const isRightAmount = amount === opAmount;
-    const isRightOp = op === this.txn.sender;
-    const isNotDelinquent = !delnQ; //aight
-    const hasNovAlgo = app.address.assetBalance(this.vALGOid.value) === 0;
+    assert(!(app.globalState('isDelinquent') as boolean), 'must solve delinquency first');
+    assert(
+      amount === (app.globalState('operatorCommit') as uint64),
+      'amount need to be the full amount of operatorCommit'
+    );
+    assert((app.globalState('operatorAddress') as Address) === this.txn.sender);
+    assert(
+      app.address.assetBalance(this.vALGOid.value) === 0,
+      'If the app already has vALGO it cannot mint with this method'
+    );
     const amountToMint = this.getMintAmount(amount);
-    assert(isNotDelinquent && hasNovAlgo && isRightOp && isRightAmount);
     this.calculateLSTRatio();
     sendAssetTransfer({
       xferAsset: this.vALGOid.value,

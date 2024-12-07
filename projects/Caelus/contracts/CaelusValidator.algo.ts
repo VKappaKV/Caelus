@@ -165,8 +165,11 @@ export class CaelusValidatorPool extends Contract {
     );
 
     assert(this.operatorCommit.value > claimRequest, 'Node Operator cannot claim more than he has');
-    assert(this.app.address.assetBalance(this.vAlgo.value) >= claimRequestLST, 'Node Operator cannot claim more vALGO than he has');
-    
+    assert(
+      this.app.address.assetBalance(this.vALGO.value) >= claimRequestLST,
+      'Node Operator cannot claim more vALGO than he has'
+    );
+
     sendPayment({
       sender: this.app.address,
       receiver: this.operatorAddress.value,
@@ -237,8 +240,8 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
-  //In a hypothetical where a block proposer proposed two blocks s/he should always report the blocks from the oldest block first. We should do this in the SDK.
-  //No loss of funds if this doesn't happen, but they don't end up recorded as rewards, instead going to the dust fund. 
+  // In a hypothetical where a block proposer proposed two blocks s/he should always report the blocks from the oldest block first. We should do this in the SDK.
+  // No loss of funds if this doesn't happen, but they don't end up recorded as rewards, instead going to the dust fund.
   reportRewards(block: uint64): void {
     assert(blocks[block].proposer === this.app.address);
     assert(block > this.lastRewardReport.value);
