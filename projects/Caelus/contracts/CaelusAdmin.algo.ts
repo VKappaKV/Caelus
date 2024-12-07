@@ -630,7 +630,7 @@ export class CaelusAdmin extends Contract {
     const prioIsSet = this.poolExist(this.burnPrio.value);
     let queueIsFull = true;
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
-      queueIsFull = this.poolExist(v);
+      queueIsFull = this.poolExist(this.burnQueue.value[i]);
       if (!queueIsFull) {
         break;
       }
