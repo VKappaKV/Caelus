@@ -207,7 +207,8 @@ export class CaelusAdmin extends Contract {
   // TODO HANDLE IF THE CURRENT PRIO OR QUEUE ID DONT EXIST
   burnRequest(burnTxn: AssetTransferTxn, burnTo: Address): void {
     assert(burnTxn.assetAmount >= ALGORAND_BASE_FEE);
-    if (this.burnExhaust.value) {
+    // After exhaust flag there needs to be at least 1 block cooldown, if the queue is full, otherwise 10 rounds
+    if (this.burnExhaust.value && !this.queueIsFull() && globals.round - this.burnCooldownFromBlock.value > 1) {
       assert(
         globals.round - this.burnCooldownFromBlock.value > BURN_COOLDOW,
         'wait at least 10 blocks since Exhaust Block'
@@ -224,7 +225,9 @@ export class CaelusAdmin extends Contract {
           methodArgs: [amtToBurn, burnTo],
           fee: 0,
         });
-        this.snitch(this.burnQueue.value[0]); // is there a problem if the queue is empty?
+        if (this.poolExist(this.burnQueue.value[0])) {
+          this.snitchToBurn(this.burnQueue.value[0]); // is there a problem if the queue is empty?
+        }
         return;
       }
       burning = this.burnPrio.value.globalState('delegatedSTake') as uint64;
@@ -459,7 +462,7 @@ export class CaelusAdmin extends Contract {
   }
 
   // used to set new validator inside the burn queue || burn Prio
-  snitch(app: AppID): void {
+  snitchToBurn(app: AppID): void {
     assert(this.isPool(app));
     const satSnitch = app.globalState('saturationBuffer') as uint64;
     let minPrio = app;
@@ -487,6 +490,15 @@ export class CaelusAdmin extends Contract {
     // for loop on the queue of addresses checking saturation vs minPrio
     // iterate and check values
     // if higher -> replace
+  }
+
+  multiSnitchToBurn(apps: AppID[]): void {
+    for (let i = 0; i < apps.length; i += 1) {
+      const v = apps[i];
+      assert(this.isPool(v));
+      assert(this.poolExist(v));
+      this.snitchToBurn(v);
+    }
   }
 
   // used to route txn both to restake into the auction or to another validator, depending on the receiver
@@ -612,6 +624,18 @@ export class CaelusAdmin extends Contract {
 
   private poolExist(app: AppID): boolean {
     return app.creator !== globals.zeroAddress;
+  }
+
+  private queueIsFull(): boolean {
+    const prioIsSet = this.poolExist(this.burnPrio.value);
+    let queueIsFull = true;
+    for (let i = 0; i < this.burnQueue.value.length; i += 1) {
+      queueIsFull = this.poolExist(v);
+      if (!queueIsFull) {
+        break;
+      }
+    }
+    return prioIsSet && queueIsFull;
   }
 
   private minBalanceForAccount(
