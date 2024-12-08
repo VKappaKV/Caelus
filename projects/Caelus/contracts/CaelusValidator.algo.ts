@@ -257,6 +257,7 @@ export class CaelusValidatorPool extends Contract {
           amount: report - takeFee,
           fee: 0,
         },
+        this.app.id,
       ],
     });
 
