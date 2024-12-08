@@ -539,10 +539,19 @@ export class CaelusAdmin extends Contract {
     });
   }
 
-  declareRewards(txn: PayTxn): void {
+  declareRewards(txn: PayTxn, ifValidator: uint64): void {
     assert(txn.receiver === this.app.address, 'payment must be done to this app address');
-    const protocolCut = (PROTOCOL_COMMISSION * txn.amount) / 100;
-    const restakeRewards = txn.amount - protocolCut;
+    let restakeRewards = txn.amount;
+    assert(
+      (this.isPool(AppID.fromUint64(ifValidator)) && AppID.fromUint64(ifValidator).address === this.txn.sender) ||
+        ifValidator === 0,
+      'either the caller is a Caelus Pool App or set the second param to 0 '
+    );
+    const protocolCut = wideRatio([PROTOCOL_COMMISSION, txn.amount], [100]);
+    if (this.isPool(AppID.fromUint64(ifValidator))) {
+      restakeRewards -= protocolCut;
+    }
+
     sendPayment({
       receiver: this.vestigeAddress.value,
       amount: protocolCut,
