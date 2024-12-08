@@ -627,7 +627,7 @@ export class CaelusAdmin extends Contract {
   }
 
   private isPool(app: AppID): boolean {
-    const isPool = (app.globalState('creator') as AppID) === this.app;
+    const isPool = app.creator === this.app.address;
     return isPool;
   }
 
