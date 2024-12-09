@@ -124,6 +124,7 @@ export class CaelusAdmin extends Contract {
     this.init_vALGO.value = true;
   }
 
+  // TODO: IS THIS NEEDED?
   initBurnQueue(): void {
     assert(this.txn.sender === this.app.creator);
     const fixedQueueLength = 8 * 10; // 8 bytes for AppID * 10 : max length of the burnQueue
@@ -167,8 +168,6 @@ export class CaelusAdmin extends Contract {
     }); // TODO IS THIS ALL?
   }
 
-  // to calculate use totalAlgoStaked/LSTcirculatingSupply
-  // this can just be a private method or abi.readonly to be called by Mint and Burn methods
   @abi.readonly
   calculateLSTRatio(): void {
     // SCALE value is...?
@@ -177,7 +176,7 @@ export class CaelusAdmin extends Contract {
 
   getMintAmount(amount: uint64): uint64 {
     this.calculateLSTRatio();
-    return wideRatio([amount, SCALE], [this.pegRatio.value]); // TODO check math, SCALE?
+    return wideRatio([amount, SCALE], [this.pegRatio.value]);
   }
 
   getBurnAmount(amount: uint64): uint64 {
@@ -217,7 +216,7 @@ export class CaelusAdmin extends Contract {
     }
     const amtToBurn = this.getBurnAmount(burnTxn.assetAmount);
     let burning = 0;
-    if (this.poolExist(this.burnPrio.value)) {
+    if (this.isPool(this.burnPrio.value)) {
       const dlgToPrio = this.burnPrio.value.globalState('delegatedStake') as uint64;
       if (dlgToPrio >= amtToBurn) {
         sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
@@ -225,7 +224,7 @@ export class CaelusAdmin extends Contract {
           methodArgs: [amtToBurn, burnTo],
           fee: 0,
         });
-        if (this.poolExist(this.burnQueue.value[0])) {
+        if (this.isPool(this.burnQueue.value[0])) {
           this.snitchToBurn(this.burnQueue.value[0]); // is there a problem if the queue is empty?
         }
         return;
@@ -239,7 +238,7 @@ export class CaelusAdmin extends Contract {
     }
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
       const v = this.burnQueue.value[i];
-      if (this.poolExist(v)) {
+      if (this.isPool(v)) {
         const dlgToV = v.globalState('delegatedSTake') as uint64;
         if (dlgToV < amtToBurn - burning) {
           this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
@@ -350,7 +349,7 @@ export class CaelusAdmin extends Contract {
     let amountToUpdate = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
     let toBurn = this.getBurnAmount(burnTxn.assetAmount);
     let amtBurned = 0; // need this to subtract from totalAlgoSupply
-    if (this.poolExist(this.burnPrio.value)) {
+    if (this.isPool(this.burnPrio.value)) {
       const prioStake = this.burnPrio.value.globalState('delegatedStake') as uint64;
       amtBurned = prioStake >= toBurn ? prioStake : toBurn - prioStake;
       sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
@@ -363,7 +362,7 @@ export class CaelusAdmin extends Contract {
     if (toBurn > 0) {
       for (let i = 0; i < this.burnQueue.value.length; i += 1) {
         const v = this.burnQueue.value[i];
-        if (this.poolExist(v)) {
+        if (this.isPool(v)) {
           const dlgToV = v.globalState('delinquentStake') as uint64;
           if (dlgToV >= toBurn) {
             sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
@@ -431,7 +430,7 @@ export class CaelusAdmin extends Contract {
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
     const isDelegatable = validatorAppID.globalState('canBeDelegated') as boolean;
-    if (this.poolExist(this.highestBidder.value)) {
+    if (this.isPool(this.highestBidder.value)) {
       this.highestBidder.value = validatorAppID;
       return;
     }
@@ -467,7 +466,7 @@ export class CaelusAdmin extends Contract {
     const satSnitch = app.globalState('saturationBuffer') as uint64;
     let minPrio = app;
     let minSat = satSnitch;
-    if (this.poolExist(this.burnPrio.value)) {
+    if (this.isPool(this.burnPrio.value)) {
       const satPrio = this.burnPrio.value.globalState('saturationBuffer') as uint64;
       if (satSnitch > satPrio) {
         minPrio = this.burnPrio.value;
@@ -477,7 +476,7 @@ export class CaelusAdmin extends Contract {
     }
     const queue = this.burnQueue.value;
     for (let i = 0; i < queue.length; i += 1) {
-      if (!this.poolExist(queue[i])) {
+      if (!this.isPool(queue[i])) {
         queue[i] = minPrio;
         break;
       }
@@ -496,7 +495,6 @@ export class CaelusAdmin extends Contract {
     for (let i = 0; i < apps.length; i += 1) {
       const v = apps[i];
       assert(this.isPool(v));
-      assert(this.poolExist(v));
       this.snitchToBurn(v);
     }
   }
@@ -627,19 +625,14 @@ export class CaelusAdmin extends Contract {
   }
 
   private isPool(app: AppID): boolean {
-    const isPool = app.creator === this.app.address;
-    return isPool;
-  }
-
-  private poolExist(app: AppID): boolean {
-    return app.creator !== globals.zeroAddress;
+    return app.creator === this.app.address;
   }
 
   private queueIsFull(): boolean {
-    const prioIsSet = this.poolExist(this.burnPrio.value);
+    const prioIsSet = this.isPool(this.burnPrio.value);
     let queueIsFull = true;
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
-      queueIsFull = this.poolExist(this.burnQueue.value[i]);
+      queueIsFull = this.isPool(this.burnQueue.value[i]);
       if (!queueIsFull) {
         break;
       }
