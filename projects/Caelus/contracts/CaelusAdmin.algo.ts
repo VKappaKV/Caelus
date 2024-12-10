@@ -83,6 +83,8 @@ export class CaelusAdmin extends Contract {
     this.circulatingSupply.value = 0;
     this.idleAlgoToStake.value = 0;
     this.flashLoanCounter.value = 0;
+    this.initBurnQueue();
+    this.highestBidder.value = AppID.fromUint64(0);
   }
 
   creatorChangeCreatorRelatedParams(newVestigeAddress: Address, vestID: AssetID, stVestID: AssetID): void {
@@ -92,18 +94,10 @@ export class CaelusAdmin extends Contract {
     this.stVestID.value = stVestID;
   }
 
-  initPoolContract(programSize: uint64): void {
+  initPoolContract(programSize: uint64, offsett: uint64, data: bytes): void {
     assert(this.txn.sender === this.app.creator);
     this.validatorPoolContractApprovalProgram.create(programSize);
-  }
-
-  loadPoolContractProgram(offsett: uint64, data: bytes): void {
-    assert(!this.initializedPoolContract.value); // add new approval contract updated version
     this.validatorPoolContractApprovalProgram.replace(offsett, data);
-  }
-
-  poolContractIsSet(): void {
-    assert(this.txn.sender === this.app.creator);
     this.initializedPoolContract.value = true;
     this.validatorPoolContractVersion.value += 1;
   }
@@ -126,11 +120,15 @@ export class CaelusAdmin extends Contract {
     this.init_vALGO.value = true;
   }
 
-  // TODO: IS THIS NEEDED?
+  //
   initBurnQueue(): void {
     assert(this.txn.sender === this.app.creator);
-    const fixedQueueLength = 8 * 10; // 8 bytes for AppID * 10 : max length of the burnQueue
-    this.burnQueue.create(fixedQueueLength);
+    if (!this.burnQueue.exists) {
+      this.burnQueue.value = [AppID.fromUint64(0)];
+    }
+    if (!this.burnPrio.exists) {
+      this.burnPrio.value = AppID.fromUint64(0);
+    }
   }
 
   addCaelusValidator(mbrPay: PayTxn): void {
@@ -292,7 +290,6 @@ export class CaelusAdmin extends Contract {
       receiver: this.app.address,
     });
 
-    // ask again if when you embed a Txn you need to make a group or does this also submit the txn as part of the methodCall
     sendMethodCall<typeof CaelusValidatorPool.prototype.addToOperatorCommit>({
       applicationID: validatorAppID,
       methodArgs: [
@@ -571,7 +568,6 @@ export class CaelusAdmin extends Contract {
     });
   }
 
-  // TODO : CHECK FOR THE SUBSEQUENT APPID FL WITH FL HAPPENING AFTER THE CHECKBALANCE
   // TODO : DOCUMENT ON THE EVENTUAL SDK HOW THE FEE STRUCTURE WORKS TO AVOID SOMEONE YEETING THEIR NETWORTH ON A FLASH LOAN FEE
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
     if (this.txn.sender === this.fytApp.value.address) {
