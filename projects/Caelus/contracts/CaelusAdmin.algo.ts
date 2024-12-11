@@ -7,7 +7,9 @@ import {
   APPLICATION_BASE_FEE,
   ASSET_HOLDING_FEE,
   BURN_COOLDOW,
+  CLAIM_DELAY,
   FLASH_LOAN_FEE,
+  MintClaim,
   PROTOCOL_COMMISSION,
   SCALE,
   SnitchInfo,
@@ -47,11 +49,14 @@ export class CaelusAdmin extends Contract {
 
   circulatingSupply = GlobalStateKey<uint64>({ key: 'circulatingSupply' });
 
-  highestBidder = GlobalStateKey<AppID>({ key: 'highestBidder' });
-
   idleAlgoToStake = GlobalStateKey<uint64>({ key: 'idleAlgo' });
 
   vestigeAddress = GlobalStateKey<Address>({ key: 'vestigeAddress' });
+
+  highestBidder = GlobalStateKey<AppID>({ key: 'highestBidder' });
+  // mint related
+
+  mintOrders = BoxMap<Address, MintClaim>({ dynamicSize: true, prefix: 'order', allowPotentialCollisions: false });
 
   // flashloan related Keys
 
@@ -163,7 +168,8 @@ export class CaelusAdmin extends Contract {
         itob(this.stVestID.value),
         itob(this.vALGOid.value),
       ],
-    }); // TODO IS THIS ALL?
+      fee: 0,
+    });
   }
 
   @abi.readonly
@@ -183,20 +189,65 @@ export class CaelusAdmin extends Contract {
   }
 
   // user mint vALGO, sends Algo Payment txn and updates the balance for idle stake to claim
-  mintRequest(mintTxn: PayTxn): void {
+  delayedMintRequest(mintTxn: PayTxn): void {
     assert(mintTxn.amount >= ALGORAND_BASE_FEE, 'minimum amount to stake is 0.001 Algo');
     verifyPayTxn(mintTxn, {
       receiver: this.app.address,
     });
     this.idleAlgoToStake.value += mintTxn.amount;
     const minted = this.getMintAmount(mintTxn.amount);
+
+    const mintOrder: MintClaim = {
+      amount: minted,
+      block: globals.round,
+    };
+
+    this.mintOrders(mintTxn.sender).value = mintOrder;
+    this.totalAlgoStaked.value += mintTxn.amount;
+  }
+
+  claimMint(): void {
+    assert(
+      this.mintOrders(this.txn.sender).value.block < globals.round - CLAIM_DELAY,
+      'must wait 330 blocks after initial mint to claim the token'
+    );
+    const minted = this.mintOrders(this.txn.sender).value.amount;
     sendAssetTransfer({
       xferAsset: this.vALGOid.value,
       assetReceiver: this.txn.sender,
       assetAmount: minted,
+      fee: 0,
     });
-    this.totalAlgoStaked.value += mintTxn.amount;
     this.circulatingSupply.value += minted;
+  }
+
+  instantMintRequest(mintTxn: PayTxn): void {
+    assert(mintTxn.amount >= ALGORAND_BASE_FEE, 'minimum amount to stake is 0.001 Algo');
+    verifyPayTxn(mintTxn, {
+      receiver: this.app.address,
+    });
+    const premium = this.getPremiumAmount(mintTxn.amount);
+    const minted = this.getMintAmount(mintTxn.amount - premium);
+    sendAssetTransfer({
+      xferAsset: this.vALGOid.value,
+      assetReceiver: this.txn.sender,
+      assetAmount: minted,
+      fee: 0,
+    });
+    this.idleAlgoToStake.value += mintTxn.amount;
+    this.circulatingSupply.value += minted;
+    this.totalAlgoStaked.value += mintTxn.amount;
+  }
+
+  getPremiumAmount(amount: uint64): uint64 {
+    assert(this.txn.firstValid === globals.round - 330); // it will fail if it's not included
+    let lookupRound = globals.round - 2 - 320; // -2 because of the delay for blocks[block] & 320 is the premium lookback for the average
+    let accumulatedRewards = 0;
+    for (let i = 0; i < 320; i += 1) {
+      accumulatedRewards += blocks[lookupRound].proposerPayout;
+      lookupRound += 1;
+    }
+    return wideRatio([amount, accumulatedRewards], [this.totalAlgoStaked.value]);
   }
 
   // user burn vALGO, sends Asset Transfer each at the time depending on the burn queue
@@ -531,6 +582,7 @@ export class CaelusAdmin extends Contract {
     sendMethodCall<typeof CaelusValidatorPool.prototype.deleteApplication, void>({
       applicationID: appToClose,
       methodArgs: [],
+      fee: 0,
     });
   }
 
@@ -545,13 +597,13 @@ export class CaelusAdmin extends Contract {
     const protocolCut = wideRatio([PROTOCOL_COMMISSION, txn.amount], [100]);
     if (this.isPool(AppID.fromUint64(ifValidator))) {
       restakeRewards -= protocolCut;
+      sendPayment({
+        receiver: this.vestigeAddress.value,
+        amount: protocolCut,
+        fee: 0,
+      });
     }
 
-    sendPayment({
-      receiver: this.vestigeAddress.value,
-      amount: protocolCut,
-      fee: 0,
-    });
     this.idleAlgoToStake.value += restakeRewards;
     this.totalAlgoStaked.value += restakeRewards;
   }
@@ -563,6 +615,7 @@ export class CaelusAdmin extends Contract {
     return sendMethodCall<typeof CaelusValidatorPool.prototype.getSnitched, boolean>({
       applicationID: appToCheck,
       methodArgs: [params],
+      fee: 0,
     });
   }
 
@@ -654,13 +707,5 @@ export class CaelusAdmin extends Contract {
     minBal += localBytes * SSC_VALUE_BYTES;
     minBal += globalBytes * SSC_VALUE_BYTES;
     return minBal;
-  }
-
-  //  REMOVE IF USELESS
-  private costForBoxStorage(totalNumBytes: uint64): uint64 {
-    const SCBOX_PERBOX = 2500;
-    const SCBOX_PERBYTE = 400;
-
-    return SCBOX_PERBOX + totalNumBytes * SCBOX_PERBYTE;
   }
 }
