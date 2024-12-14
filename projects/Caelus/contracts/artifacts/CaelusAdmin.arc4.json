@@ -35,15 +35,7 @@
         {
           "name": "programSize",
           "type": "uint64"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "loadPoolContractProgram",
-      "args": [
+        },
         {
           "name": "offsett",
           "type": "uint64"
@@ -53,13 +45,6 @@
           "type": "byte[]"
         }
       ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "poolContractIsSet",
-      "args": [],
       "returns": {
         "type": "void"
       }
@@ -136,7 +121,7 @@
       }
     },
     {
-      "name": "mintRequest",
+      "name": "delayedMintRequest",
       "args": [
         {
           "name": "mintTxn",
@@ -148,11 +133,46 @@
       }
     },
     {
+      "name": "claimMint",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "instantMintRequest",
+      "args": [
+        {
+          "name": "mintTxn",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "getPremiumAmount",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
       "name": "burnRequest",
       "args": [
         {
           "name": "burnTxn",
           "type": "axfer"
+        },
+        {
+          "name": "burnTo",
+          "type": "address"
         }
       ],
       "returns": {
@@ -177,7 +197,16 @@
     },
     {
       "name": "burnValidatorCommit",
-      "args": [],
+      "args": [
+        {
+          "name": "appToBurnFrom",
+          "type": "uint64"
+        },
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
       "returns": {
         "type": "void"
       }
@@ -243,11 +272,23 @@
       }
     },
     {
-      "name": "snitch",
+      "name": "snitchToBurn",
       "args": [
         {
           "name": "app",
           "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "multiSnitchToBurn",
+      "args": [
+        {
+          "name": "apps",
+          "type": "uint64[]"
         }
       ],
       "returns": {
@@ -296,6 +337,10 @@
         {
           "name": "txn",
           "type": "pay"
+        },
+        {
+          "name": "ifValidator",
+          "type": "uint64"
         }
       ],
       "returns": {

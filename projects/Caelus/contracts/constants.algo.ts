@@ -23,7 +23,14 @@ export const VEST_TIER_5 = 150_000_000_000;
 
 export const FLASH_LOAN_FEE = 10_000_000;
 
-export const SCALE = 10_000;
+export const SCALE = 100_000;
+
+export const CLAIM_DELAY = 330;
+
+export type MintClaim = {
+  block: uint64;
+  amount: uint64;
+};
 
 export type SnitchInfo = {
   performanceCheck: boolean;

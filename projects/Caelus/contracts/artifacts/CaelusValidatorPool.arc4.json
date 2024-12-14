@@ -44,18 +44,6 @@
     },
     {
       "name": "addToOperatorCommit",
-      "args": [
-        {
-          "name": "opStake",
-          "type": "pay"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "addToOperatorCommitOnDelinquency",
       "desc": "Used by the Caelus Admin to send the correct amount into the operator commit on delinquent burn of his vALGO",
       "args": [
         {
@@ -76,6 +64,10 @@
           "name": "claimRequest",
           "type": "uint64",
           "desc": "amount claimed by the node operator to be removed from the contract balance and subtracted from the operator_commit counter"
+        },
+        {
+          "name": "claimRequestLST",
+          "type": "uint64"
         }
       ],
       "returns": {
