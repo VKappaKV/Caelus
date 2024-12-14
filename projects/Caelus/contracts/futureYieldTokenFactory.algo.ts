@@ -32,8 +32,9 @@ export class FutureYieldTokenFactory extends Contract {
   /**
    * TokenInfo = {
    *  creation: timestamp,
+   *  pegAtCreation: uint64,
    *  maturity: timestamp,
-   *  pegAtCreation: timestamp
+   *  pegAtMaturity: uint64
    * }
    */
 
