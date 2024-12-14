@@ -64,8 +64,6 @@ export class CaelusAdmin extends Contract {
 
   lastFlashloanBlock = GlobalStateKey<uint64>({ key: 'lastFlashloanBlock' });
 
-  fytApp = GlobalStateKey<AppID>({ key: 'fyt' });
-
   // burn related
 
   burnQueue = BoxKey<StaticArray<AppID, 10>>({
