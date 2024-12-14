@@ -56,7 +56,7 @@ export class CaelusAdmin extends Contract {
   highestBidder = GlobalStateKey<AppID>({ key: 'highestBidder' });
   // mint related
 
-  mintOrders = BoxMap<Address, MintClaim>({ dynamicSize: true, prefix: 'order', allowPotentialCollisions: false });
+  mintOrders = BoxMap<Address, MintClaim>({ prefix: 'order', allowPotentialCollisions: false });
 
   // flashloan related Keys
 
