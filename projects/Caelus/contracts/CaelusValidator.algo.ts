@@ -287,7 +287,7 @@ export class CaelusValidatorPool extends Contract {
     this.solvedDelinquencyEvent.log({
       app: this.app,
       operator: this.operatorAddress.value,
-      stake: this.app.address.voterBalance,
+      stake: this.operatorCommit.value,
     });
   }
 

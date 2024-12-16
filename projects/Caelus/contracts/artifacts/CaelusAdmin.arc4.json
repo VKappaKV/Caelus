@@ -35,14 +35,34 @@
         {
           "name": "programSize",
           "type": "uint64"
-        },
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "writePoolContractProgram",
+      "args": [
         {
-          "name": "offsett",
+          "name": "offset",
           "type": "uint64"
         },
         {
           "name": "data",
           "type": "byte[]"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "updatePoolContract",
+      "args": [
+        {
+          "name": "programSize",
+          "type": "uint64"
         }
       ],
       "returns": {
@@ -86,7 +106,23 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "validatorAddedEvent",
+          "args": [
+            {
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "name": "version",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "calculateLSTRatio",
@@ -130,7 +166,27 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "mintEvent",
+          "args": [
+            {
+              "name": "instant",
+              "type": "bool"
+            },
+            {
+              "name": "amount",
+              "type": "uint64"
+            },
+            {
+              "name": "output",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "claimMint",
@@ -149,7 +205,27 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "mintEvent",
+          "args": [
+            {
+              "name": "instant",
+              "type": "bool"
+            },
+            {
+              "name": "amount",
+              "type": "uint64"
+            },
+            {
+              "name": "output",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "getPremiumAmount",
@@ -177,7 +253,27 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "burnEvent",
+          "args": [
+            {
+              "name": "filled",
+              "type": "bool"
+            },
+            {
+              "name": "amount",
+              "type": "uint64"
+            },
+            {
+              "name": "output",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "mintValidatorCommit",
@@ -203,8 +299,8 @@
           "type": "uint64"
         },
         {
-          "name": "amount",
-          "type": "uint64"
+          "name": "burnTxn",
+          "type": "axfer"
         }
       ],
       "returns": {
@@ -225,7 +321,27 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "burnEvent",
+          "args": [
+            {
+              "name": "filled",
+              "type": "bool"
+            },
+            {
+              "name": "amount",
+              "type": "uint64"
+            },
+            {
+              "name": "output",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "reMintDeliquentCommit",
@@ -241,7 +357,27 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "mintEvent",
+          "args": [
+            {
+              "name": "instant",
+              "type": "bool"
+            },
+            {
+              "name": "amount",
+              "type": "uint64"
+            },
+            {
+              "name": "output",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "bid",
@@ -253,7 +389,23 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "bidEvent",
+          "args": [
+            {
+              "name": "app",
+              "type": "uint64"
+            },
+            {
+              "name": "isHeighest",
+              "type": "bool"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "delegateStake",
@@ -281,7 +433,23 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "snitchQueueEvent",
+          "args": [
+            {
+              "name": "prio",
+              "type": "uint64"
+            },
+            {
+              "name": "queue",
+              "type": "uint64[10]"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "multiSnitchToBurn",
@@ -361,7 +529,23 @@
       ],
       "returns": {
         "type": "bool"
-      }
+      },
+      "events": [
+        {
+          "name": "snitchValidatorEvent",
+          "args": [
+            {
+              "name": "request",
+              "type": "(bool,bool,bool,uint64,bool,uint64)"
+            },
+            {
+              "name": "result",
+              "type": "bool"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "makeFlashLoanRequest",
@@ -381,7 +565,23 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "flashLoanEvent",
+          "args": [
+            {
+              "name": "apps",
+              "type": "uint64[]"
+            },
+            {
+              "name": "amounts",
+              "type": "uint64[]"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "getFLcounter",
@@ -390,6 +590,114 @@
       "returns": {
         "type": "uint64"
       }
+    }
+  ],
+  "events": [
+    {
+      "name": "validatorAddedEvent",
+      "args": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "version",
+          "type": "uint64"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "mintEvent",
+      "args": [
+        {
+          "name": "instant",
+          "type": "bool"
+        },
+        {
+          "name": "amount",
+          "type": "uint64"
+        },
+        {
+          "name": "output",
+          "type": "uint64"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "burnEvent",
+      "args": [
+        {
+          "name": "filled",
+          "type": "bool"
+        },
+        {
+          "name": "amount",
+          "type": "uint64"
+        },
+        {
+          "name": "output",
+          "type": "uint64"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "bidEvent",
+      "args": [
+        {
+          "name": "app",
+          "type": "uint64"
+        },
+        {
+          "name": "isHeighest",
+          "type": "bool"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "snitchQueueEvent",
+      "args": [
+        {
+          "name": "prio",
+          "type": "uint64"
+        },
+        {
+          "name": "queue",
+          "type": "uint64[10]"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "snitchValidatorEvent",
+      "args": [
+        {
+          "name": "request",
+          "type": "(bool,bool,bool,uint64,bool,uint64)"
+        },
+        {
+          "name": "result",
+          "type": "bool"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "flashLoanEvent",
+      "args": [
+        {
+          "name": "apps",
+          "type": "uint64[]"
+        },
+        {
+          "name": "amounts",
+          "type": "uint64[]"
+        }
+      ],
+      "desc": ""
     }
   ]
 }

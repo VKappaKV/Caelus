@@ -827,7 +827,7 @@ export class CaelusAdmin extends Contract {
 
   snitchQueueEvent = new EventLogger<{
     prio: AppID;
-    queue: AppID[];
+    queue: StaticArray<AppID, 10>;
   }>();
 
   snitchValidatorEvent = new EventLogger<{

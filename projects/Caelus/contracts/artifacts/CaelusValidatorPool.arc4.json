@@ -54,17 +54,35 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "operatorCommitUpdateEvent",
+          "args": [
+            {
+              "name": "app",
+              "type": "uint64"
+            },
+            {
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "name": "amountAdded",
+              "type": "uint64"
+            },
+            {
+              "name": "amountRemoved",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
-      "name": "removeFromOperatorCommit",
-      "desc": "Used by the node operator to remove from his stake amount for the node",
+      "name": "initBurnOperatorCommit",
       "args": [
-        {
-          "name": "claimRequest",
-          "type": "uint64",
-          "desc": "amount claimed by the node operator to be removed from the contract balance and subtracted from the operator_commit counter"
-        },
         {
           "name": "claimRequestLST",
           "type": "uint64"
@@ -75,11 +93,77 @@
       }
     },
     {
+      "name": "removeFromOperatorCommit",
+      "desc": "Used by the node operator to remove from his stake amount for the node",
+      "args": [
+        {
+          "name": "claimRequest",
+          "type": "uint64",
+          "desc": "amount claimed by the node operator to be removed from the contract balance and subtracted from the operator_commit counter"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      },
+      "events": [
+        {
+          "name": "operatorCommitUpdateEvent",
+          "args": [
+            {
+              "name": "app",
+              "type": "uint64"
+            },
+            {
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "name": "amountAdded",
+              "type": "uint64"
+            },
+            {
+              "name": "amountRemoved",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
+    },
+    {
       "name": "performanceCheck",
       "args": [],
       "returns": {
         "type": "bool"
-      }
+      },
+      "events": [
+        {
+          "name": "delinquencyEvent",
+          "args": [
+            {
+              "name": "app",
+              "type": "uint64"
+            },
+            {
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "name": "stakeAtRisk",
+              "type": "uint64"
+            },
+            {
+              "name": "delinquencyScore",
+              "type": "uint64"
+            },
+            {
+              "name": "delinquencyStatus",
+              "type": "bool"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "solveDelinquency",
@@ -91,7 +175,27 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "solvedDelinquencyEvent",
+          "args": [
+            {
+              "name": "app",
+              "type": "uint64"
+            },
+            {
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "name": "stake",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "reportRewards",
@@ -103,7 +207,27 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "rewardsEvent",
+          "args": [
+            {
+              "name": "app",
+              "type": "uint64"
+            },
+            {
+              "name": "block",
+              "type": "uint64"
+            },
+            {
+              "name": "payout",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "addStake",
@@ -215,7 +339,31 @@
       "args": [],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "validatorCloseEvent",
+          "args": [
+            {
+              "name": "app",
+              "type": "uint64"
+            },
+            {
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "name": "returnedStake",
+              "type": "uint64"
+            },
+            {
+              "name": "operatorStake",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "deleteApplication",
@@ -266,7 +414,31 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "goOnlineEvent",
+          "args": [
+            {
+              "name": "app",
+              "type": "uint64"
+            },
+            {
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "name": "operatorStake",
+              "type": "uint64"
+            },
+            {
+              "name": "delegatedStake",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "goOffline",
@@ -274,7 +446,31 @@
       "args": [],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "goOfflineEvent",
+          "args": [
+            {
+              "name": "app",
+              "type": "uint64"
+            },
+            {
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "name": "operatorStake",
+              "type": "uint64"
+            },
+            {
+              "name": "delegatedStake",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "getEligibilityFlag",
@@ -283,6 +479,158 @@
       "returns": {
         "type": "bool"
       }
+    }
+  ],
+  "events": [
+    {
+      "name": "validatorCloseEvent",
+      "args": [
+        {
+          "name": "app",
+          "type": "uint64"
+        },
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "returnedStake",
+          "type": "uint64"
+        },
+        {
+          "name": "operatorStake",
+          "type": "uint64"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "goOnlineEvent",
+      "args": [
+        {
+          "name": "app",
+          "type": "uint64"
+        },
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "operatorStake",
+          "type": "uint64"
+        },
+        {
+          "name": "delegatedStake",
+          "type": "uint64"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "goOfflineEvent",
+      "args": [
+        {
+          "name": "app",
+          "type": "uint64"
+        },
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "operatorStake",
+          "type": "uint64"
+        },
+        {
+          "name": "delegatedStake",
+          "type": "uint64"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "operatorCommitUpdateEvent",
+      "args": [
+        {
+          "name": "app",
+          "type": "uint64"
+        },
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "amountAdded",
+          "type": "uint64"
+        },
+        {
+          "name": "amountRemoved",
+          "type": "uint64"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "delinquencyEvent",
+      "args": [
+        {
+          "name": "app",
+          "type": "uint64"
+        },
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "stakeAtRisk",
+          "type": "uint64"
+        },
+        {
+          "name": "delinquencyScore",
+          "type": "uint64"
+        },
+        {
+          "name": "delinquencyStatus",
+          "type": "bool"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "solvedDelinquencyEvent",
+      "args": [
+        {
+          "name": "app",
+          "type": "uint64"
+        },
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "stake",
+          "type": "uint64"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "rewardsEvent",
+      "args": [
+        {
+          "name": "app",
+          "type": "uint64"
+        },
+        {
+          "name": "block",
+          "type": "uint64"
+        },
+        {
+          "name": "payout",
+          "type": "uint64"
+        }
+      ],
+      "desc": ""
     }
   ]
 }
