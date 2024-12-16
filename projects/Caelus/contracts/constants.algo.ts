@@ -10,7 +10,6 @@ export const PERFORMANCE_STEP = 5;
 export const MAX_DELINQUENCY_TOLERATED = 10;
 export const BURN_COOLDOW = 10;
 
-export const EPOCH_LENGTH = 30857; // TBD if epochs are needed
 export const ALGORAND_STAKING_BLOCK_DELAY = 320; // # of blocks until algorand sees online balance changes in staking
 export const APPROX_AVG_ROUNDS_PER_DAY = 30857; // approx 'daily' rounds for APR bins (60*60*24/2.8)
 

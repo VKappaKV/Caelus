@@ -1,6 +1,7 @@
 /* eslint-disable import/no-cycle */
 import { Contract } from '@algorandfoundation/tealscript';
 import {
+  CLAIM_DELAY,
   MAX_DELINQUENCY_TOLERATED,
   MAX_STAKE_PER_ACCOUNT,
   PERFORMANCE_STAKE_INCREASE,
@@ -39,6 +40,8 @@ export class CaelusValidatorPool extends Contract {
   operatorAddress = GlobalStateKey<Address>({ key: 'operator' });
 
   operatorCommit = GlobalStateKey<uint64>({ key: 'operatorCommit' });
+
+  lastOperatorCommitMint = GlobalStateKey<uint64>({ key: 'lastOpCommitMint' });
 
   // Delegated Stake params
 
@@ -143,7 +146,41 @@ export class CaelusValidatorPool extends Contract {
     if (this.isDelinquent.value) {
       return;
     }
+    this.lastOperatorCommitMint.value = globals.round;
     this.updateDelegationFactors();
+
+    this.operatorCommitUpdateEvent.log({
+      app: this.app,
+      operator: this.operatorAddress.value,
+      amountAdded: opStake.amount,
+      amountRemoved: 0,
+    });
+  }
+
+  // initiated by the operator Address
+  initBurnOperatorCommit(claimRequestLST: uint64): void {
+    verifyTxn(this.txn, {
+      sender: this.operatorAddress.value,
+    });
+    assert(
+      this.app.address.assetBalance(this.vALGO.value) >= claimRequestLST,
+      'Node Operator cannot claim more vALGO than he has'
+    );
+    assert(
+      globals.round - this.lastOperatorCommitMint.value > CLAIM_DELAY,
+      'you need to wait min of 320 rounds since last mint to burn commit'
+    );
+    sendMethodCall<typeof CaelusAdmin.prototype.burnValidatorCommit>({
+      applicationID: this.creatorContractAppID.value,
+      methodArgs: [
+        this.app,
+        {
+          xferAsset: this.vALGO.value,
+          assetAmount: claimRequestLST,
+          assetReceiver: this.creatorContractAppID.value.address,
+        },
+      ],
+    });
   }
 
   /**
@@ -152,7 +189,7 @@ export class CaelusValidatorPool extends Contract {
    * @throws {Error} if the sender isn't the node operator or if the total commit by the node operator goes below the min threshold for rewards eligibility
    * @throws {Error} if isDelinquent is True
    */
-  removeFromOperatorCommit(claimRequest: uint64, claimRequestLST: uint64): void {
+  removeFromOperatorCommit(claimRequest: uint64): void {
     assert(this.txn.sender === this.creatorContractAppID.value.address);
     assert(
       !this.isDelinquent.value,
@@ -165,36 +202,37 @@ export class CaelusValidatorPool extends Contract {
     );
 
     assert(this.operatorCommit.value > claimRequest, 'Node Operator cannot claim more than he has');
-    assert(
-      this.app.address.assetBalance(this.vALGO.value) >= claimRequestLST,
-      'Node Operator cannot claim more vALGO than he has'
-    );
 
+    // take the amount to burn directly from the operator commit
     sendPayment({
       sender: this.app.address,
       receiver: this.operatorAddress.value,
       amount: claimRequest,
       fee: 0,
     });
-
-    sendMethodCall<typeof CaelusAdmin.prototype.burnRequest, void>({
-      applicationID: this.creatorContractAppID.value,
-      methodArgs: [
-        {
-          xferAsset: this.vALGO.value,
-          assetReceiver: this.creatorContractAppID.value.address,
-          assetAmount: claimRequestLST,
-          fee: 0,
-        },
-        this.app.address,
-      ],
-    });
+    this.operatorCommit.value -= claimRequest;
     this.updateDelegationFactors();
+
+    this.operatorCommitUpdateEvent.log({
+      app: this.app,
+      operator: this.operatorAddress.value,
+      amountAdded: 0,
+      amountRemoved: claimRequest,
+    });
   }
 
   performanceCheck(): boolean {
     if (!this.app.address.incentiveEligible) {
       this.setDelinquency();
+
+      this.delinquencyEvent.log({
+        app: this.app,
+        operator: this.operatorAddress.value,
+        stakeAtRisk: this.delegatedStake.value,
+        delinquencyScore: this.delinquencyScore.value,
+        delinquencyStatus: this.isDelinquent.value,
+      });
+
       return true;
     }
     // check to not make performanceChecks be stacked in close proximity calls
@@ -216,6 +254,14 @@ export class CaelusValidatorPool extends Contract {
     }
     this.setDelinquencyOnThresholdCheck();
     this.lastDelinquencyReport.value = globals.round;
+
+    this.delinquencyEvent.log({
+      app: this.app,
+      operator: this.operatorAddress.value,
+      stakeAtRisk: this.delegatedStake.value,
+      delinquencyScore: this.delinquencyScore.value,
+      delinquencyStatus: this.isDelinquent.value,
+    });
     return true;
   }
 
@@ -233,10 +279,15 @@ export class CaelusValidatorPool extends Contract {
     this.isDelinquent.value = false;
     this.canBeDelegated.value = true;
     this.updateDelegationFactors();
-    // TODO remint the operatorCommit as LST
     sendMethodCall<typeof CaelusAdmin.prototype.reMintDeliquentCommit, void>({
       applicationID: this.creatorContractAppID.value,
       methodArgs: [this.operatorCommit.value, this.app],
+    });
+
+    this.solvedDelinquencyEvent.log({
+      app: this.app,
+      operator: this.operatorAddress.value,
+      stake: this.app.address.voterBalance,
     });
   }
 
@@ -277,6 +328,12 @@ export class CaelusValidatorPool extends Contract {
       });
     }
     this.updateDelegationFactors();
+
+    this.rewardsEvent.log({
+      app: this.app,
+      block: block,
+      payout: report,
+    });
   }
 
   // called by the auction contract to assign stake to the node contract
@@ -466,6 +523,14 @@ export class CaelusValidatorPool extends Contract {
         },
       ],
     });
+
+    this.validatorCloseEvent.log({
+      app: this.app,
+      operator: this.operatorAddress.value,
+      returnedStake: this.delegatedStake.value,
+      operatorStake: this.operatorCommit.value,
+    });
+
     this.operatorCommit.value = 0;
     this.delegatedStake.value = 0;
   }
@@ -546,6 +611,13 @@ export class CaelusValidatorPool extends Contract {
       fee: extraFee,
     });
     this.canBeDelegated.value = true;
+
+    this.goOnlineEvent.log({
+      app: this.app,
+      operator: this.operatorAddress.value,
+      operatorStake: this.operatorCommit.value,
+      delegatedStake: this.delegatedStake.value,
+    });
   }
 
   /**
@@ -562,6 +634,13 @@ export class CaelusValidatorPool extends Contract {
     );
     sendOfflineKeyRegistration({});
     this.canBeDelegated.value = false;
+
+    this.goOfflineEvent.log({
+      app: this.app,
+      operator: this.operatorAddress.value,
+      operatorStake: this.operatorCommit.value,
+      delegatedStake: this.delegatedStake.value,
+    });
   }
 
   //----------------------------------------------------------------------------------------------------------
@@ -680,4 +759,52 @@ export class CaelusValidatorPool extends Contract {
     const roundDelta = currentOnlineStake / currentAccountStake;
     return roundDelta * 10;
   }
+
+  validatorCloseEvent = new EventLogger<{
+    app: AppID;
+    operator: Address;
+    returnedStake: uint64;
+    operatorStake: uint64;
+  }>();
+
+  goOnlineEvent = new EventLogger<{
+    app: AppID;
+    operator: Address;
+    operatorStake: uint64;
+    delegatedStake: uint64;
+  }>();
+
+  goOfflineEvent = new EventLogger<{
+    app: AppID;
+    operator: Address;
+    operatorStake: uint64;
+    delegatedStake: uint64;
+  }>();
+
+  operatorCommitUpdateEvent = new EventLogger<{
+    app: AppID;
+    operator: Address;
+    amountAdded: uint64;
+    amountRemoved: uint64;
+  }>();
+
+  delinquencyEvent = new EventLogger<{
+    app: AppID;
+    operator: Address;
+    stakeAtRisk: uint64;
+    delinquencyScore: uint64;
+    delinquencyStatus: boolean;
+  }>();
+
+  solvedDelinquencyEvent = new EventLogger<{
+    app: AppID;
+    operator: Address;
+    stake: uint64;
+  }>();
+
+  rewardsEvent = new EventLogger<{
+    app: AppID;
+    block: uint64;
+    payout: uint64;
+  }>();
 }
