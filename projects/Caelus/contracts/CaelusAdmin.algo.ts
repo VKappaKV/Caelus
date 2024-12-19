@@ -103,11 +103,17 @@ export class CaelusAdmin extends Contract {
     this.highestBidder.value = AppID.fromUint64(0);
   }
 
-  creatorChangeCreatorRelatedParams(newVestigeAddress: Address, vestID: AssetID, stVestID: AssetID): void {
+  creatorChangeCreatorRelatedParams(
+    newVestigeAddress: Address,
+    managerAddress: Address,
+    vestID: AssetID,
+    stVestID: AssetID
+  ): void {
     assert(this.txn.sender === this.app.creator || this.txn.sender === this.vestigeAddress.value);
     this.vestigeAddress.value = newVestigeAddress;
     this.vestID.value = vestID;
     this.stVestID.value = stVestID;
+    this.manager.value = managerAddress;
   }
 
   initPoolContract(programSize: uint64): void {
