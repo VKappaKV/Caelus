@@ -1,5 +1,4 @@
 import * as algokit from '@algorandfoundation/algokit-utils';
-import { Address } from 'algosdk';
 import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
 import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
 
