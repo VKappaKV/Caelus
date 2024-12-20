@@ -1,0 +1,12 @@
+import * as algokit from '@algorandfoundation/algokit-utils';
+import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
+
+export function optIntoLST(
+    caelusValidator: CaelusValidatorPoolClient
+) {
+    return async () => {
+        await caelusValidator.optIntoLst({})
+    }
+}
+
+export function burnForValidator
