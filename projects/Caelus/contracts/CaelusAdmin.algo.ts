@@ -99,7 +99,6 @@ export class CaelusAdmin extends Contract {
     this.flashLoanCounter.value = 0;
     this.vestigeAddress.value = this.app.creator;
     this.manager.value = this.app.creator;
-    this.initBurnQueue();
     this.highestBidder.value = AppID.fromUint64(0);
   }
 
