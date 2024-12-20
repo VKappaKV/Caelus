@@ -7,6 +7,7 @@ import {
   APPLICATION_BASE_FEE,
   ASSET_HOLDING_FEE,
   BURN_COOLDOW,
+  BURN_QUEUE_LENGTH,
   CLAIM_DELAY,
   FLASH_LOAN_FEE,
   MintClaim,
@@ -157,7 +158,8 @@ export class CaelusAdmin extends Contract {
   initBurnQueue(): void {
     assert(this.txn.sender === this.app.creator);
     if (!this.burnQueue.exists) {
-      this.burnQueue.value = [AppID.fromUint64(0)];
+      const appIdArray = BoxKey<StaticArray<AppID, 10>>();
+      appIdArray.value = [AppID.fromUint64(0)];
     }
     if (!this.burnPrio.exists) {
       this.burnPrio.value = AppID.fromUint64(0);
