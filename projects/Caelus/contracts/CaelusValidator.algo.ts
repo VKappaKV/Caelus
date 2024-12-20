@@ -119,6 +119,8 @@ export class CaelusValidatorPool extends Contract {
       sender: this.operatorAddress.value,
     });
 
+    assert(!this.app.address.isOptedInToAsset(this.vALGO.value), 'already opted in vALGO');
+
     const lst = this.creatorContractAppID.value.globalState('vALGOid') as AssetID;
 
     sendAssetTransfer({
