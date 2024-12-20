@@ -17,6 +17,10 @@
           "type": "address"
         },
         {
+          "name": "managerAddress",
+          "type": "address"
+        },
+        {
           "name": "vestID",
           "type": "uint64"
         },

@@ -1,10 +1,9 @@
 import * as algokit from '@algorandfoundation/algokit-utils';
 import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
-import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
 
 export function addValidator(
   algorand: algokit.AlgorandClient,
-  caelusAdmin: CaelusAdminClient,
+  caelus: CaelusAdminClient,
   sender: string,
   receiver: string
 ) {
@@ -15,13 +14,13 @@ export function addValidator(
       amount: algokit.algos(0.1 + 0.3 + 0.25 + 0.3705),
     });
 
-    await caelusAdmin.addCaelusValidator({ mbrPay });
+    await caelus.addCaelusValidator({ mbrPay });
   };
 }
 
 export function delayedMintRequest(
   algorand: algokit.AlgorandClient,
-  caelusAdmin: CaelusAdminClient,
+  caelus: CaelusAdminClient,
   sender: string,
   receiver: string,
   amount: number
@@ -33,13 +32,13 @@ export function delayedMintRequest(
       amount: algokit.microAlgos(amount),
     });
 
-    await caelusAdmin.delayedMintRequest({ mintTxn });
+    await caelus.delayedMintRequest({ mintTxn });
   };
 }
 
-export function claimMint(caelusAdmin: CaelusAdminClient) {
+export function claimMint(caelus: CaelusAdminClient) {
   return async () => {
-    await caelusAdmin.claimMint({});
+    await caelus.claimMint({});
   };
 }
 
@@ -47,7 +46,7 @@ export function claimMint(caelusAdmin: CaelusAdminClient) {
 
 export function instantMint(
   algorand: algokit.AlgorandClient,
-  caelusAdmin: CaelusAdminClient,
+  caelus: CaelusAdminClient,
   sender: string,
   receiver: string,
   amount: number
@@ -59,13 +58,13 @@ export function instantMint(
       amount: algokit.microAlgos(amount),
     });
 
-    await caelusAdmin.instantMintRequest({ mintTxn });
+    await caelus.instantMintRequest({ mintTxn });
   };
 }
 
 export function burn(
   algorand: algokit.AlgorandClient,
-  caelusAdmin: CaelusAdminClient,
+  caelus: CaelusAdminClient,
   sender: string,
   receiver: string,
   amount: number,
@@ -78,13 +77,13 @@ export function burn(
       amount: algokit.microAlgos(amount),
     });
 
-    await caelusAdmin.burnRequest({ burnTxn, burnTo });
+    await caelus.burnRequest({ burnTxn, burnTo });
   };
 }
 
 export function mintForValidator(
   algorand: algokit.AlgorandClient,
-  caelusAdmin: CaelusAdminClient,
+  caelus: CaelusAdminClient,
   sender: string,
   receiver: string,
   amount: number,
@@ -96,14 +95,13 @@ export function mintForValidator(
       receiver,
       amount: algokit.microAlgos(amount),
     });
-    const validatorAppID = app;
-    await caelusAdmin.mintValidatorCommit({ validatorAppID, stakeCommit });
+    await caelus.mintValidatorCommit({ validatorAppID: app, stakeCommit });
   };
 }
 
 export function burnForValidator(
   algorand: algokit.AlgorandClient,
-  caelusAdmin: CaelusAdminClient,
+  caelus: CaelusAdminClient,
   sender: string,
   receiver: string,
   amount: bigint,
@@ -117,14 +115,13 @@ export function burnForValidator(
       receiver,
       amount,
     });
-    const appToBurnFrom = app;
-    await caelusAdmin.burnValidatorCommit({ appToBurnFrom, burnTxn });
+    await caelus.burnValidatorCommit({ appToBurnFrom: app, burnTxn });
   };
 }
 
 export function burnValidatorCommitOnDelinquency(
   algorand: algokit.AlgorandClient,
-  caelusAdmin: CaelusAdminClient,
+  caelus: CaelusAdminClient,
   sender: string,
   receiver: string,
   amount: bigint,
@@ -139,33 +136,75 @@ export function burnValidatorCommitOnDelinquency(
       amount,
     });
 
-    const validatorAppID = app;
-    await caelusAdmin.burnToDelinquentValidator({ burnTxn, validatorAppID });
+    await caelus.burnToDelinquentValidator({ burnTxn, validatorAppID: app });
   };
 }
 
-export function reMintDeliquentCommit(caelusAdmin: CaelusAdminClient, amount: bigint, app: bigint) {
+export function reMintDeliquentCommit(caelus: CaelusAdminClient, amount: bigint, app: bigint) {
   return async () => {
-    await caelusAdmin.reMintDeliquentCommit({ amount, app });
+    await caelus.reMintDeliquentCommit({ amount, app });
   };
 }
 
-export function bid(caelusAdmin: CaelusAdminClient, validatorAppID: bigint) {
+export function bid(caelus: CaelusAdminClient, validatorAppID: bigint) {
   return async () => {
-    await caelusAdmin.bid({ validatorAppID });
+    await caelus.bid({ validatorAppID });
   };
 }
 
-export function snitchToBurn(caelusAdmin: CaelusAdminClient, app: bigint) {
+export function snitchToBurn(caelus: CaelusAdminClient, app: bigint) {
   return async () => {
-    await caelusAdmin.snitchToBurn({ app });
+    await caelus.snitchToBurn({ app });
   };
 }
 
-export function multiSnitchToBurn(caelusAdmin: CaelusAdminClient, apps: number[]) {
+export function multiSnitchToBurn(caelus: CaelusAdminClient, apps: number[]) {
   return async () => {
-    await caelusAdmin.multiSnitchToBurn({ apps });
+    await caelus.multiSnitchToBurn({ apps });
   };
 }
 
-export function declareRewards() {}
+export function declareRewards(
+  algorand: algokit.AlgorandClient,
+  caelus: CaelusAdminClient,
+  sender: string,
+  receiver: string,
+  amount: number,
+  app: bigint
+) {
+  return async () => {
+    const txn = await algorand.transactions.payment({
+      sender,
+      receiver,
+      amount: algokit.microAlgos(amount),
+    });
+
+    await caelus.declareRewards({ txn, ifValidator: app });
+  };
+}
+
+export type SnitchInfoClient = {
+  performanceCheck: boolean;
+  stakeAmount: boolean;
+  delinquentCheck: boolean;
+  recipient: bigint | number;
+  split: boolean;
+  max: bigint | number;
+};
+
+export function snitch(caelus: CaelusAdminClient, paramsObj: SnitchInfoClient, app: bigint) {
+  const params: [boolean, boolean, boolean, bigint | number, boolean, bigint | number] = [
+    paramsObj.performanceCheck,
+    paramsObj.stakeAmount,
+    paramsObj.delinquentCheck,
+    paramsObj.recipient,
+    paramsObj.split,
+    paramsObj.max,
+  ];
+
+  return async () => {
+    await caelus.snitchCheck({ appToCheck: app, params });
+  };
+}
+
+// TODO FLASHLOAN REQUEST + extraFees
