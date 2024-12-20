@@ -2,19 +2,6 @@ import * as algokit from '@algorandfoundation/algokit-utils';
 import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
 import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
 
-export const create = (
-  algorand: algokit.AlgorandClient,
-  caelusAdmin: CaelusAdminClient,
-  setAppID: (id: number) => void
-) => {
-  return async () => {
-    const result = await caelusAdmin.create.createApplication({});
-    setAppID(Number(result.appId));
-
-    // does it need to include a funding transaction?
-  };
-};
-
 export function addValidator(
   algorand: algokit.AlgorandClient,
   caelusAdmin: CaelusAdminClient,
@@ -134,3 +121,51 @@ export function burnForValidator(
     await caelusAdmin.burnValidatorCommit({ appToBurnFrom, burnTxn });
   };
 }
+
+export function burnValidatorCommitOnDelinquency(
+  algorand: algokit.AlgorandClient,
+  caelusAdmin: CaelusAdminClient,
+  sender: string,
+  receiver: string,
+  amount: bigint,
+  assetId: bigint,
+  app: bigint
+) {
+  return async () => {
+    const burnTxn = await algorand.transactions.assetTransfer({
+      assetId,
+      sender,
+      receiver,
+      amount,
+    });
+
+    const validatorAppID = app;
+    await caelusAdmin.burnToDelinquentValidator({ burnTxn, validatorAppID });
+  };
+}
+
+export function reMintDeliquentCommit(caelusAdmin: CaelusAdminClient, amount: bigint, app: bigint) {
+  return async () => {
+    await caelusAdmin.reMintDeliquentCommit({ amount, app });
+  };
+}
+
+export function bid(caelusAdmin: CaelusAdminClient, validatorAppID: bigint) {
+  return async () => {
+    await caelusAdmin.bid({ validatorAppID });
+  };
+}
+
+export function snitchToBurn(caelusAdmin: CaelusAdminClient, app: bigint) {
+  return async () => {
+    await caelusAdmin.snitchToBurn({ app });
+  };
+}
+
+export function multiSnitchToBurn(caelusAdmin: CaelusAdminClient, apps: number[]) {
+  return async () => {
+    await caelusAdmin.multiSnitchToBurn({ apps });
+  };
+}
+
+export function declareRewards() {}
