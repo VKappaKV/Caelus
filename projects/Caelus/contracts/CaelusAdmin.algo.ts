@@ -621,18 +621,16 @@ export class CaelusAdmin extends Contract {
 
   // TODO : DOCUMENT ON THE EVENTUAL SDK HOW THE FEE STRUCTURE WORKS TO AVOID SOMEONE YEETING THEIR NETWORTH ON A FLASH LOAN FEE
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
-    if (this.txn.sender === this.fytApp.value.address) {
-      this.getFLcounter();
-      this.flashLoanCounter.value += appToInclude.length;
-      const keepFee = this.flashLoanCounter.value + FLASH_LOAN_FEE;
+    this.getFLcounter();
+    this.flashLoanCounter.value += appToInclude.length;
+    const keepFee = this.flashLoanCounter.value + FLASH_LOAN_FEE;
 
-      verifyPayTxn(payFeeTxn, {
-        receiver: this.app.address,
-        amount: keepFee,
-      });
+    verifyPayTxn(payFeeTxn, {
+      receiver: this.app.address,
+      amount: keepFee,
+    });
 
-      this.idleAlgoToStake.value += keepFee;
-    }
+    this.idleAlgoToStake.value += keepFee;
 
     assert(amounts.length === appToInclude.length, 'array length [amount, appToInclude] mismatch');
     // Ask Joe if this.pendingGroup creates a new txn group or appends it as an inner.

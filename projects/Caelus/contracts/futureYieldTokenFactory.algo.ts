@@ -8,6 +8,7 @@ export class FutureYieldTokenFactory extends Contract {
 
   vAlgo = GlobalStateKey<AssetID>({ key: 'vAlgo' });
 
+  @allow.bareCall('NoOp')
   createApplication(caelusAdmin: AppID, vAlgo: AssetID): void {
     this.caelusAdmin.value = caelusAdmin;
     this.vAlgo.value = vAlgo;
