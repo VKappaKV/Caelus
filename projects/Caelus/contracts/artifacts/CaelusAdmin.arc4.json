@@ -10,22 +10,14 @@
       }
     },
     {
-      "name": "creatorChangeCreatorRelatedParams",
+      "name": "MANAGER_config",
       "args": [
         {
-          "name": "newVestigeAddress",
+          "name": "manager",
           "type": "address"
         },
         {
-          "name": "managerAddress",
-          "type": "address"
-        },
-        {
-          "name": "vestID",
-          "type": "uint64"
-        },
-        {
-          "name": "stVestID",
+          "name": "validatorPoolContractCost",
           "type": "uint64"
         }
       ],
@@ -34,7 +26,7 @@
       }
     },
     {
-      "name": "initPoolContract",
+      "name": "MANAGER_updatePoolContractProgram",
       "args": [
         {
           "name": "programSize",
@@ -46,7 +38,7 @@
       }
     },
     {
-      "name": "writePoolContractProgram",
+      "name": "MANAGER_writePoolContractProgram",
       "args": [
         {
           "name": "offset",
@@ -62,46 +54,7 @@
       }
     },
     {
-      "name": "updatePoolContract",
-      "args": [
-        {
-          "name": "programSize",
-          "type": "uint64"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "initLST",
-      "args": [
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "unitName",
-          "type": "string"
-        },
-        {
-          "name": "url",
-          "type": "string"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "initBurnQueue",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "addCaelusValidator",
+      "name": "addValidator",
       "args": [
         {
           "name": "mbrPay",
@@ -129,42 +82,14 @@
       ]
     },
     {
-      "name": "calculateLSTRatio",
-      "readonly": true,
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "getMintAmount",
-      "args": [
-        {
-          "name": "amount",
-          "type": "uint64"
-        }
-      ],
-      "returns": {
-        "type": "uint64"
-      }
-    },
-    {
-      "name": "getBurnAmount",
-      "args": [
-        {
-          "name": "amount",
-          "type": "uint64"
-        }
-      ],
-      "returns": {
-        "type": "uint64"
-      }
-    },
-    {
       "name": "delayedMintRequest",
       "args": [
         {
           "name": "mintTxn",
+          "type": "pay"
+        },
+        {
+          "name": "coverMBR",
           "type": "pay"
         }
       ],
@@ -200,6 +125,18 @@
       }
     },
     {
+      "name": "getPremiumAmount",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
       "name": "instantMintRequest",
       "args": [
         {
@@ -230,18 +167,6 @@
           "desc": ""
         }
       ]
-    },
-    {
-      "name": "getPremiumAmount",
-      "args": [
-        {
-          "name": "amount",
-          "type": "uint64"
-        }
-      ],
-      "returns": {
-        "type": "uint64"
-      }
     },
     {
       "name": "burnRequest",
@@ -348,12 +273,8 @@
       ]
     },
     {
-      "name": "reMintDeliquentCommit",
+      "name": "reMintDelinquentCommit",
       "args": [
-        {
-          "name": "amount",
-          "type": "uint64"
-        },
         {
           "name": "app",
           "type": "uint64"
@@ -468,58 +389,6 @@
       }
     },
     {
-      "name": "reStakeFromSnitch",
-      "args": [
-        {
-          "name": "snitchedApp",
-          "type": "uint64"
-        },
-        {
-          "name": "receiverApp",
-          "type": "uint64"
-        },
-        {
-          "name": "restakeTxn",
-          "type": "pay"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "onOperatorExit",
-      "args": [
-        {
-          "name": "appToClose",
-          "type": "uint64"
-        },
-        {
-          "name": "closeTxn",
-          "type": "pay"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "declareRewards",
-      "args": [
-        {
-          "name": "txn",
-          "type": "pay"
-        },
-        {
-          "name": "ifValidator",
-          "type": "uint64"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
       "name": "snitchCheck",
       "args": [
         {
@@ -550,6 +419,58 @@
           "desc": ""
         }
       ]
+    },
+    {
+      "name": "reStakeFromSnitch",
+      "args": [
+        {
+          "name": "snitchedApp",
+          "type": "uint64"
+        },
+        {
+          "name": "receiverApp",
+          "type": "uint64"
+        },
+        {
+          "name": "restakeTxn",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "declareRewards",
+      "args": [
+        {
+          "name": "txn",
+          "type": "pay"
+        },
+        {
+          "name": "ifValidator",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "onOperatorExit",
+      "args": [
+        {
+          "name": "appToClose",
+          "type": "uint64"
+        },
+        {
+          "name": "closeTxn",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
     },
     {
       "name": "makeFlashLoanRequest",
@@ -591,6 +512,19 @@
       "name": "getFLcounter",
       "readonly": true,
       "args": [],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
+      "name": "arc62_get_circulating_supply",
+      "readonly": true,
+      "args": [
+        {
+          "name": "assetId",
+          "type": "uint64"
+        }
+      ],
       "returns": {
         "type": "uint64"
       }
