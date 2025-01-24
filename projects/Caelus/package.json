@@ -12,11 +12,11 @@
     "fix": "eslint . --ext .ts --fix"
   },
   "dependencies": {
-    "@algorandfoundation/algokit-utils": "^6.2.1",
+    "@algorandfoundation/algokit-utils": "^7.0.1",
     "algosdk": "^2.7.0"
   },
   "devDependencies": {
-    "@algorandfoundation/algokit-client-generator": "^2.3.1",
+    "@algorandfoundation/algokit-client-generator": "4.0.6",
     "@algorandfoundation/tealscript": "^0.105.5",
     "@jest/globals": "^29.5.0",
     "@joe-p/algokit-generate-component": "^0.2.0",
