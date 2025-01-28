@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable import/no-cycle */
 import { Contract } from '@algorandfoundation/tealscript';
@@ -146,7 +147,7 @@ export class CaelusAdmin extends Contract {
       globalNumByteSlice: CaelusValidatorPool.schema.global.numByteSlice,
       extraProgramPages: 3,
       applicationArgs: [
-        method('createApplication(uint64,bytes,uint64,uint64,uint64,uint64)void'),
+        method('createApplication(uint64,address,uint64,uint64)void'),
         itob(this.app.id),
         this.txn.sender,
         itob(this.validatorPoolContractVersion.value),
