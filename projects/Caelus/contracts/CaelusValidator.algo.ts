@@ -86,6 +86,8 @@ export class CaelusValidatorPool extends Contract {
    * @param {uint64} contractVersion - Approval Program version for the node contract, stored in the CaelusAdminContract
    * TODO UPDATE
    */
+
+  @allow.create('NoOp')
   createApplication(
     creatingContract: AppID,
     operatorAddress: Address,
@@ -94,11 +96,14 @@ export class CaelusValidatorPool extends Contract {
     stVestID: AssetID, */
     tokenId: AssetID
   ): void {
+    assert(creatingContract === globals.callerApplicationID);
     this.creatorContractAppID.value = creatingContract;
     this.operatorAddress.value = operatorAddress;
     this.validatorPoolContractVersion.value = contractVersion;
-    /*     this.vestID.value = vestID;
-    this.stVestID.value = stVestID; */
+    /*     
+    this.vestID.value = vestID;
+    this.stVestID.value = stVestID; 
+    */
     this.tokenId.value = tokenId;
 
     // stake counters

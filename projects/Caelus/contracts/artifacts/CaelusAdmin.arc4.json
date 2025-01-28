@@ -521,7 +521,7 @@
       "readonly": true,
       "args": [
         {
-          "name": "assetId",
+          "name": "asset_id",
           "type": "uint64"
         }
       ],
