@@ -4,19 +4,22 @@
   "methods": [
     {
       "name": "createApplication",
-      "desc": "******************\nPublic Methods    *\n******************",
+      "desc": "createApplication method called at creation, initializes some globalKey values",
       "args": [
         {
           "name": "creatingContract",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "ApplicationID for the creator contract (CaelusAdminContract)"
         },
         {
           "name": "operatorAddress",
-          "type": "address"
+          "type": "address",
+          "desc": "Address of the node operator used to sign online/offline txns and participate in auctions"
         },
         {
           "name": "contractVersion",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "Approval Program version for the node contract, stored in the CaelusAdminContract\nTODO UPDATE"
         },
         {
           "name": "tokenId",
@@ -36,7 +39,7 @@
     },
     {
       "name": "addToOperatorCommit",
-      "desc": "Used by the Caelus Admin to send the correct amount into the operator commit on delinquent burn of his tokenId",
+      "desc": "Used by the Caelus Admin to send the correct amount into the operator commit",
       "args": [
         {
           "name": "opStake",
@@ -73,18 +76,6 @@
       ]
     },
     {
-      "name": "initBurnOperatorCommit",
-      "args": [
-        {
-          "name": "claimRequestLST",
-          "type": "uint64"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
       "name": "removeFromOperatorCommit",
       "desc": "Used by the node operator to remove from his stake amount for the node",
       "args": [
@@ -92,6 +83,10 @@
           "name": "claimRequest",
           "type": "uint64",
           "desc": "amount claimed by the node operator to be removed from the contract balance and subtracted from the operator_commit counter"
+        },
+        {
+          "name": "claimRequestLST",
+          "type": "uint64"
         }
       ],
       "returns": {
@@ -149,8 +144,8 @@
               "type": "uint64"
             },
             {
-              "name": "delinquencyStatus",
-              "type": "bool"
+              "name": "status",
+              "type": "uint64"
             }
           ],
           "desc": ""
@@ -320,7 +315,7 @@
       }
     },
     {
-      "name": "makeCloseTxn",
+      "name": "deleteApplication",
       "args": [],
       "returns": {
         "type": "void"
@@ -349,13 +344,6 @@
           "desc": ""
         }
       ]
-    },
-    {
-      "name": "deleteApplication",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
     },
     {
       "name": "goOnline",
@@ -575,8 +563,8 @@
           "type": "uint64"
         },
         {
-          "name": "delinquencyStatus",
-          "type": "bool"
+          "name": "status",
+          "type": "uint64"
         }
       ],
       "desc": ""

@@ -10,12 +10,50 @@
       }
     },
     {
-      "name": "MANAGER_config",
+      "name": "updateApplication",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "MANAGER_createToken",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "MANAGER_updateVestTokensID",
+      "args": [
+        {
+          "name": "vestID",
+          "type": "uint64"
+        },
+        {
+          "name": "stVestID",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "MANAGER_changeManager",
       "args": [
         {
           "name": "manager",
           "type": "address"
-        },
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "MANAGER_updatePoolContractCost",
+      "args": [
         {
           "name": "validatorPoolContractCost",
           "type": "uint64"
@@ -82,62 +120,7 @@
       ]
     },
     {
-      "name": "delayedMintRequest",
-      "args": [
-        {
-          "name": "mintTxn",
-          "type": "pay"
-        },
-        {
-          "name": "coverMBR",
-          "type": "pay"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      },
-      "events": [
-        {
-          "name": "mintEvent",
-          "args": [
-            {
-              "name": "instant",
-              "type": "bool"
-            },
-            {
-              "name": "amount",
-              "type": "uint64"
-            },
-            {
-              "name": "output",
-              "type": "uint64"
-            }
-          ],
-          "desc": ""
-        }
-      ]
-    },
-    {
-      "name": "claimMint",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "getPremiumAmount",
-      "args": [
-        {
-          "name": "amount",
-          "type": "uint64"
-        }
-      ],
-      "returns": {
-        "type": "uint64"
-      }
-    },
-    {
-      "name": "instantMintRequest",
+      "name": "mintRequest",
       "args": [
         {
           "name": "mintTxn",
@@ -228,8 +211,8 @@
           "type": "uint64"
         },
         {
-          "name": "burnTxn",
-          "type": "axfer"
+          "name": "amount",
+          "type": "uint64"
         }
       ],
       "returns": {
@@ -441,31 +424,11 @@
       }
     },
     {
-      "name": "declareRewards",
-      "args": [
-        {
-          "name": "txn",
-          "type": "pay"
-        },
-        {
-          "name": "ifValidator",
-          "type": "uint64"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
       "name": "onOperatorExit",
       "args": [
         {
           "name": "appToClose",
           "type": "uint64"
-        },
-        {
-          "name": "closeTxn",
-          "type": "pay"
         }
       ],
       "returns": {
@@ -521,7 +484,7 @@
       "readonly": true,
       "args": [
         {
-          "name": "asset_id",
+          "name": "assetId",
           "type": "uint64"
         }
       ],

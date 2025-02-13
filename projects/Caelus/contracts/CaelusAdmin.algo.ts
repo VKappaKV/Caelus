@@ -1,15 +1,9 @@
-/* eslint-disable camelcase */
-/* eslint-disable no-underscore-dangle */
 /* eslint-disable import/no-cycle */
 import { Contract } from '@algorandfoundation/tealscript';
 import { CaelusValidatorPool } from './CaelusValidator.algo';
 import {
   ALGORAND_BASE_FEE,
   BURN_COOLDOWN,
-  CLAIM_DELAY,
-  MintClaim,
-  MINTCLAIM_ORDER_BOX_MBR,
-  PROTOCOL_COMMISSION,
   SCALE,
   SnitchInfo,
   VALIDATOR_POOL_CONTRACT_MBR,
@@ -48,11 +42,13 @@ export class CaelusAdmin extends Contract {
 
   totalStake = GlobalStateKey<uint64>({ key: 'total_stake' });
 
-  idleStake = GlobalStateKey<uint64>({ key: 'idle_stake' }); // Algo deposited on Mint Request and yet to be distributed to the highest bidder
-
   pegRatio = GlobalStateKey<uint64>({ key: 'peg_ratio' });
 
   tokenId = GlobalStateKey<AssetID>({ key: 'token_id' });
+
+  vestId = GlobalStateKey<AssetID>({ key: 'vest_id' });
+
+  stVestId = GlobalStateKey<AssetID>({ key: 'staked_vest_id' });
 
   tokenCirculatingSupply = GlobalStateKey<uint64>({
     key: 'token_circulating_supply',
@@ -70,8 +66,6 @@ export class CaelusAdmin extends Contract {
 
   flashLoanCounter = GlobalStateKey<uint64>({ key: 'flashloan_counter' });
 
-  mintOrders = BoxMap<Address, MintClaim>({ allowPotentialCollisions: true });
-
   @allow.bareCreate('NoOp')
   createApplication(): void {
     this.manager.value = this.app.creator;
@@ -79,7 +73,6 @@ export class CaelusAdmin extends Contract {
     this.validatorPoolContractCost.value = VALIDATOR_POOL_CONTRACT_MBR;
 
     this.totalStake.value = 0;
-    this.idleStake.value = 0;
     this.pegRatio.value = 1 * SCALE;
 
     this.tokenId.value = AssetID.zeroIndex;
@@ -93,7 +86,11 @@ export class CaelusAdmin extends Contract {
     this.lastExhaustBlock.value = 0;
   }
 
-  MANAGER_config(manager: Address, validatorPoolContractCost: uint64): void {
+  updateApplication(): void {
+    assert(this.txn.sender === this.manager.value);
+  }
+
+  MANAGER_createToken(): void {
     assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
 
     if (this.tokenId.value === AssetID.zeroIndex) {
@@ -110,8 +107,21 @@ export class CaelusAdmin extends Contract {
         configAssetURL: 'https://vestige.fi',
       });
     }
+  }
 
+  MANAGER_updateVestTokensID(vestID: AssetID, stVestID: AssetID): void {
+    assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
+    this.vestId.value = vestID;
+    this.stVestId.value = stVestID;
+  }
+
+  MANAGER_changeManager(manager: Address): void {
+    assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
     this.manager.value = manager;
+  }
+
+  MANAGER_updatePoolContractCost(validatorPoolContractCost: uint64): void {
+    assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
     this.validatorPoolContractCost.value = validatorPoolContractCost;
   }
 
@@ -161,86 +171,15 @@ export class CaelusAdmin extends Contract {
     });
   }
 
-  delayedMintRequest(mintTxn: PayTxn, coverMBR: PayTxn): void {
-    verifyPayTxn(mintTxn, {
-      receiver: this.app.address,
-      amount: { greaterThanEqualTo: globals.minTxnFee },
-    });
-    verifyPayTxn(coverMBR, {
-      receiver: this.app.address,
-      amount: { greaterThanEqualTo: MINTCLAIM_ORDER_BOX_MBR },
-    });
-    assert(!this.mintOrders(mintTxn.sender).exists, 'can only create one mint order at the time');
-
-    this.idleStake.value += mintTxn.amount;
-    this.totalStake.value += mintTxn.amount;
-
-    const minted = this._getMintAmount(mintTxn.amount);
-
-    const mintOrder: MintClaim = {
-      amount: minted,
-      block: globals.round,
-    };
-
-    this.mintOrders(mintTxn.sender).value = mintOrder;
-
-    this.mintEvent.log({
-      instant: false,
-      amount: mintTxn.amount,
-      output: minted,
-    });
-  }
-
-  claimMint(): void {
-    assert(this.mintOrders(this.txn.sender).exists, 'no mint order to claim');
-    assert(
-      this.mintOrders(this.txn.sender).value.block < globals.round - CLAIM_DELAY,
-      'must wait 330 blocks after initial mint to claim the token'
-    );
-
-    const minted = this.mintOrders(this.txn.sender).value.amount;
-
-    this.mintOrders(this.txn.sender).delete();
-
-    this._doAxfer(this.txn.sender, minted, this.tokenId.value);
-
-    sendPayment({
-      receiver: this.txn.sender,
-      amount: MINTCLAIM_ORDER_BOX_MBR,
-    });
-
-    this.tokenCirculatingSupply.value += minted;
-  }
-
-  getPremiumAmount(amount: uint64): uint64 {
-    while (globals.opcodeBudget <= 4600) {
-      increaseOpcodeBudget();
-    }
-
-    let accumulatedRewards = 0;
-
-    for (let lookupRound = globals.round - 2 - 320; lookupRound < globals.round - 2; lookupRound += 1) {
-      accumulatedRewards += blocks[lookupRound].proposerPayout;
-      lookupRound += 1;
-    }
-
-    return wideRatio([amount, accumulatedRewards], [onlineStake()]);
-  }
-
-  instantMintRequest(mintTxn: PayTxn): void {
+  mintRequest(mintTxn: PayTxn): void {
     verifyPayTxn(mintTxn, {
       receiver: this.app.address,
       amount: { greaterThanEqualTo: globals.minTxnFee },
     });
 
-    const premium = this.getPremiumAmount(mintTxn.amount) < 1000 ? 1000 : this.getPremiumAmount(mintTxn.amount);
-    const premiumToByte = rawBytes(premium);
-    log('premium is: ' + premiumToByte);
-    const minted = this._getMintAmount(mintTxn.amount - premium);
-    this._doAxfer(this.txn.sender, minted, this.tokenId.value);
+    const minted = this.getMintAmount(mintTxn.amount);
+    this.doAxfer(this.txn.sender, minted, this.tokenId.value);
     this.tokenCirculatingSupply.value += minted;
-    this.idleStake.value += mintTxn.amount;
-    this.totalStake.value += mintTxn.amount;
 
     this.mintEvent.log({
       instant: true,
@@ -256,13 +195,12 @@ export class CaelusAdmin extends Contract {
       assetAmount: { greaterThanEqualTo: ALGORAND_BASE_FEE },
     });
 
-    const amountToBurn = this._getBurnAmount(burnTxn.assetAmount);
+    const amountToBurn = this.getBurnAmount(burnTxn.assetAmount);
     let burning = 0;
 
-    if (this.idleStake.value > 0) {
-      const amountToBurnFromIdle = this.idleStake.value >= amountToBurn ? amountToBurn : this.idleStake.value;
-      this.idleStake.value -= amountToBurnFromIdle;
-      this.totalStake.value -= amountToBurnFromIdle;
+    const idleAlgo = this.app.address.balance - this.app.address.minBalance;
+    if (idleAlgo > 0) {
+      const amountToBurnFromIdle = idleAlgo >= amountToBurn ? amountToBurn : idleAlgo;
       burning += amountToBurnFromIdle;
 
       sendPayment({
@@ -274,7 +212,7 @@ export class CaelusAdmin extends Contract {
     // After exhaust flag there needs to be at least 1 block cooldown, if the queue is full, otherwise 10 rounds
     if (
       this.burnTarget.value === AppID.zeroIndex &&
-      !this._queueIsFull() &&
+      !this.queueIsFull() &&
       globals.round - this.lastExhaustBlock.value > 1
     ) {
       assert(
@@ -283,39 +221,39 @@ export class CaelusAdmin extends Contract {
       );
     }
 
-    if (this._isPool(this.burnTarget.value)) {
+    if (this.isPool(this.burnTarget.value)) {
       const delegatedToTarget = this.burnTarget.value.globalState('delegated_stake') as uint64;
       if (delegatedToTarget >= amountToBurn) {
-        this._doBurnTxn(this.burnTarget.value, [amountToBurn, burnTo]);
+        this.doBurnTxn(this.burnTarget.value, [amountToBurn, burnTo]);
         const value = this.burnQueue.value[0];
         this.burnTarget.value = AppID.zeroIndex;
-        if (this._isPool(value)) {
+        if (this.isPool(value)) {
           this.snitchToBurn(value);
         }
         return;
       }
       burning = this.burnTarget.value.globalState('delegated_stake') as uint64;
-      this._doBurnTxn(this.burnTarget.value, [delegatedToTarget, burnTo]);
+      this.doBurnTxn(this.burnTarget.value, [delegatedToTarget, burnTo]);
     }
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
       const currentTargetInQueue = this.burnQueue.value[i];
-      if (this._isPool(currentTargetInQueue)) {
+      if (this.isPool(currentTargetInQueue)) {
         const delegatedToTarget = currentTargetInQueue.globalState('delegated_stake') as uint64;
         if (delegatedToTarget < amountToBurn - burning) {
-          this._doBurnTxn(currentTargetInQueue, [delegatedToTarget, burnTo]);
+          this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, burnTo]);
           this.burnQueue.value[i] = AppID.zeroIndex;
           burning += delegatedToTarget;
         } else {
-          this._doBurnTxn(currentTargetInQueue, [amountToBurn - burning, burnTo]);
+          this.doBurnTxn(currentTargetInQueue, [amountToBurn - burning, burnTo]);
           burning = amountToBurn;
           break;
         }
       }
     }
 
-    const amountLeft = this._getBurnAmount(amountToBurn - burning);
+    const amountLeft = this.getBurnAmount(amountToBurn - burning);
     if (amountLeft > 0) {
-      this._doAxfer(
+      this.doAxfer(
         burnTxn.sender, // the sender needs to be the burnTxn sender, so when operator burns vALGO from the app it returns the amount left to burn
         amountLeft,
         this.tokenId.value
@@ -347,8 +285,8 @@ export class CaelusAdmin extends Contract {
   }
 
   mintValidatorCommit(validatorAppID: AppID, stakeCommit: PayTxn): void {
-    assert(this._isPool(validatorAppID));
-    const operatorAddress = validatorAppID.globalState('operator_address') as Address;
+    assert(this.isPool(validatorAppID));
+    const operatorAddress = validatorAppID.globalState('operator') as Address;
     verifyPayTxn(stakeCommit, {
       sender: operatorAddress,
       receiver: this.app.address,
@@ -364,36 +302,26 @@ export class CaelusAdmin extends Contract {
       ],
     });
 
-    const amountToMint = this._getMintAmount(stakeCommit.amount);
-    this._doAxfer(validatorAppID.address, amountToMint, this.tokenId.value);
+    const amountToMint = this.getMintAmount(stakeCommit.amount);
+    this.doAxfer(validatorAppID.address, amountToMint, this.tokenId.value);
     this.totalStake.value += stakeCommit.amount;
     this.tokenCirculatingSupply.value += amountToMint;
   }
 
   // burn & send to operator; amount is the LST amount of commit to burn
-  burnValidatorCommit(appToBurnFrom: AppID, burnTxn: AssetTransferTxn): void {
-    // just like a burn but take from the operator app
-    // reduce tot circ supply of vALGO
-    // reduce tot Algo staked
-    this._isPool(appToBurnFrom);
-    // the txn has to be issued by the Validator App Account with the proper method
+  // this burn method for the operator directly burns vAlgo taking Algo from the validator contract of the operator, reducing his commit
+  burnValidatorCommit(appToBurnFrom: AppID, amount: uint64): void {
+    this.isPool(appToBurnFrom);
     verifyTxn(this.txn, {
-      sender: appToBurnFrom.address,
+      sender: appToBurnFrom.globalState('operator') as Address,
     });
-    verifyAssetTransferTxn(burnTxn, {
-      xferAsset: this.tokenId.value,
-      assetReceiver: this.app.address,
-    });
-    const opCmt = appToBurnFrom.globalState('operator_commit') as uint64;
-    assert(!(appToBurnFrom.globalState('is_delinquent') as boolean), 'con only burn when delinquency is solved');
-    const toBurn = this._getBurnAmount(burnTxn.assetAmount);
-    assert(opCmt < toBurn && opCmt - toBurn > globals.payoutsMinBalance, 'cannot burn more than the committed amount');
+    const toBurn = this.getBurnAmount(amount);
     sendMethodCall<typeof CaelusValidatorPool.prototype.removeFromOperatorCommit, void>({
       applicationID: appToBurnFrom,
-      methodArgs: [toBurn],
+      methodArgs: [toBurn, amount],
     });
     this.totalStake.value -= toBurn;
-    this.tokenCirculatingSupply.value -= burnTxn.assetAmount;
+    this.tokenCirculatingSupply.value -= amount;
   }
 
   // when operator is delinquent set up burn of his LST amount in the App Account
@@ -404,45 +332,45 @@ export class CaelusAdmin extends Contract {
     // check that app is pool
     // init burn request for the amount sent
     // reduce tot circ supply of vALGO
-    this._isPool(validatorAppID);
+    this.isPool(validatorAppID);
     assert(globals.round - this.lastExhaustBlock.value > BURN_COOLDOWN, "can only burn if we're not exhausted");
     verifyAssetTransferTxn(burnTxn, {
       xferAsset: this.tokenId.value,
       assetSender: validatorAppID.address,
     });
-    assert(validatorAppID.globalState('is_delinquent') as boolean);
+    assert((validatorAppID.globalState('status') as uint64) !== 2);
     let amountToUpdate = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
-    let toBurn = this._getBurnAmount(burnTxn.assetAmount) - (validatorAppID.globalState('operator_commit') as uint64); // burn from other validators the amount of Algo accrued from the operator LST
+    let toBurn = this.getBurnAmount(burnTxn.assetAmount) - (validatorAppID.globalState('operator_commit') as uint64); // burn from other validators the amount of Algo accrued from the operator LST
     let amtBurned = 0; // need this to subtract from totalAlgoSupply
-    if (this._isPool(this.burnTarget.value)) {
+    if (this.isPool(this.burnTarget.value)) {
       const prioStake = this.burnTarget.value.globalState('delegated_stake') as uint64;
       amtBurned = prioStake >= toBurn ? prioStake : toBurn - prioStake;
-      this._doBurnTxn(this.burnTarget.value, [amtBurned, this.app.address]);
+      this.doBurnTxn(this.burnTarget.value, [amtBurned, this.app.address]);
       toBurn -= amtBurned;
     }
     if (toBurn > 0) {
       for (let i = 0; i < this.burnQueue.value.length; i += 1) {
         const currentTargetInQueue = this.burnQueue.value[i];
-        if (this._isPool(currentTargetInQueue)) {
-          const delegatedToTarget = currentTargetInQueue.globalState('delinquent_stake') as uint64;
+        if (this.isPool(currentTargetInQueue)) {
+          const delegatedToTarget = currentTargetInQueue.globalState('delegated_stake') as uint64;
           if (delegatedToTarget >= toBurn) {
-            this._doBurnTxn(currentTargetInQueue, [toBurn, this.app.address]);
+            this.doBurnTxn(currentTargetInQueue, [toBurn, this.app.address]);
             amtBurned += toBurn;
             toBurn = 0;
             break;
           } else {
-            this._doBurnTxn(currentTargetInQueue, [delegatedToTarget, this.app.address]);
+            this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, this.app.address]);
             amtBurned += delegatedToTarget;
             toBurn -= delegatedToTarget;
           }
         }
       }
     }
-    amountToUpdate = this._getBurnAmount(toBurn - amtBurned);
+    amountToUpdate = this.getBurnAmount(toBurn - amtBurned);
     this.tokenCirculatingSupply.value -= burnTxn.assetAmount - amountToUpdate;
     this.totalStake.value -= amtBurned;
     if (amountToUpdate > 0) {
-      this._doAxfer(burnTxn.sender, amountToUpdate, this.tokenId.value);
+      this.doAxfer(burnTxn.sender, amountToUpdate, this.tokenId.value);
     }
     sendMethodCall<typeof CaelusValidatorPool.prototype.addToOperatorCommit>({
       applicationID: validatorAppID,
@@ -466,15 +394,15 @@ export class CaelusAdmin extends Contract {
     // get amount and check with operator commit
     // check that app is not delinquent anymore & his vAlgo amount is 0
     // send vAlgo amount corresponding to the current peg for the operatorCommit amount
-    this._isPool(app);
-    assert(!(app.globalState('is_delinquent') as boolean), 'must solve delinquency first');
+    this.isPool(app);
+    assert((app.globalState('status') as uint64) !== 2, 'must solve delinquency first');
     const amount = app.globalState('operator_commit') as uint64;
     assert(
       app.address.assetBalance(this.tokenId.value) === 0,
       'If the app already has vALGO it cannot mint with this method'
     );
-    const amountToMint = this._getMintAmount(amount);
-    this._doAxfer(app.address, amountToMint, this.tokenId.value);
+    const amountToMint = this.getMintAmount(amount);
+    this.doAxfer(app.address, amountToMint, this.tokenId.value);
     this.tokenCirculatingSupply.value += amountToMint;
 
     this.mintEvent.log({
@@ -487,9 +415,9 @@ export class CaelusAdmin extends Contract {
   // called to bid new validator as highest bidder
   // No assert call to avoid future P2P spam.
   bid(validatorAppID: AppID): void {
-    assert(this._isPool(validatorAppID));
+    assert(this.isPool(validatorAppID));
     const isDelegatable = validatorAppID.globalState('can_be_delegated') as boolean;
-    if (this._isPool(this.highestBidder.value)) {
+    if (!this.isPool(this.highestBidder.value)) {
       this.highestBidder.value = validatorAppID;
       return;
     }
@@ -508,9 +436,8 @@ export class CaelusAdmin extends Contract {
 
   // called to send the Algo used to mint vALGO to the highest bidder
   delegateStake(amount: uint64, validatorAppID: AppID): void {
-    assert(this._isPool(validatorAppID));
+    assert(this.isPool(validatorAppID));
     assert(validatorAppID === this.highestBidder.value, 'can only delegate to highest bidder account');
-    assert(amount <= this.idleStake.value, 'cant withdraw more than the amount of idleAlgo in the contract');
     sendMethodCall<typeof CaelusValidatorPool.prototype.addStake, void>({
       applicationID: validatorAppID,
       methodArgs: [
@@ -520,26 +447,29 @@ export class CaelusAdmin extends Contract {
         },
       ],
     });
-    this.idleStake.value -= amount;
+    this.totalStake.value += amount;
   }
 
   // used to set new validator inside the burn queue || burn Prio
   snitchToBurn(app: AppID): void {
-    assert(this._isPool(app));
+    assert(this.isPool(app));
     const satSnitch = app.globalState('saturation_buffer') as uint64;
     let minPrio = app;
     let minSat = satSnitch;
-    if (this._isPool(this.burnTarget.value)) {
+    if (this.isPool(this.burnTarget.value)) {
       const satPrio = this.burnTarget.value.globalState('saturation_buffer') as uint64;
       if (satSnitch > satPrio) {
         minPrio = this.burnTarget.value;
         minSat = satPrio;
         this.burnTarget.value = app;
       }
+    } else {
+      this.burnTarget.value = app;
+      return;
     }
     const queue = this.burnQueue.value;
     for (let i = 0; i < queue.length; i += 1) {
-      if (!this._isPool(queue[i])) {
+      if (!this.isPool(queue[i])) {
         queue[i] = minPrio;
         break;
       }
@@ -561,15 +491,14 @@ export class CaelusAdmin extends Contract {
 
   multiSnitchToBurn(apps: AppID[]): void {
     for (let i = 0; i < apps.length; i += 1) {
-      const currentTargetInQueue = apps[i];
-      assert(this._isPool(currentTargetInQueue));
-      this.snitchToBurn(currentTargetInQueue);
+      const appToSnitch = apps[i];
+      this.snitchToBurn(appToSnitch);
     }
   }
 
   snitchCheck(appToCheck: AppID, params: SnitchInfo): boolean {
-    assert(this._isPool(appToCheck));
-    assert(this._isPool(params.recipient) || params.recipient.address === this.app.address);
+    assert(this.isPool(appToCheck));
+    assert(this.isPool(params.recipient) || params.recipient.address === this.app.address);
 
     const result = sendMethodCall<typeof CaelusValidatorPool.prototype.getSnitched, boolean>({
       applicationID: appToCheck,
@@ -586,56 +515,32 @@ export class CaelusAdmin extends Contract {
 
   // used to route txn both to restake into the auction or to another validator, depending on the receiver
   reStakeFromSnitch(snitchedApp: AppID, receiverApp: AppID, restakeTxn: PayTxn): void {
-    assert(this._isPool(snitchedApp)); // or is this.App can't do it cause Spanish keyboard ñ
-    assert(receiverApp.address === restakeTxn.receiver);
-    if (restakeTxn.receiver !== this.app.address) {
-      sendMethodCall<typeof CaelusValidatorPool.prototype.getClawbackedStake, void>({
-        applicationID: receiverApp,
-        methodArgs: [
-          {
-            receiver: restakeTxn.receiver,
-            amount: restakeTxn.amount,
-          },
-        ],
-      });
-      return;
-    }
+    assert(this.isPool(snitchedApp));
+    assert(this.isPool(receiverApp) || receiverApp === this.app, 'receiver must be a pool or the admin');
     verifyPayTxn(restakeTxn, {
       sender: snitchedApp.address,
       receiver: this.app.address,
     });
-    this.idleStake.value += restakeTxn.amount;
-  }
-
-  declareRewards(txn: PayTxn, ifValidator: AppID): void {
-    verifyPayTxn(txn, {
-      receiver: this.app.address,
-    });
-    let restakeRewards = txn.amount;
-    assert(
-      (this._isPool(ifValidator) && ifValidator.address === this.txn.sender) || ifValidator === AppID.zeroIndex,
-      'either the caller is a Caelus Pool App or set the second param to 0 '
-    );
-    const protocolCut = wideRatio([PROTOCOL_COMMISSION, txn.amount], [100]);
-    if (this._isPool(ifValidator)) {
-      restakeRewards -= protocolCut;
-      sendPayment({
-        receiver: this.manager.value,
-        amount: protocolCut,
+    if (receiverApp !== this.app) {
+      sendMethodCall<typeof CaelusValidatorPool.prototype.getClawbackedStake, void>({
+        applicationID: receiverApp,
+        methodArgs: [
+          {
+            receiver: receiverApp.address,
+            amount: restakeTxn.amount,
+          },
+        ],
       });
+    } else {
+      this.totalStake.value -= restakeTxn.amount;
     }
-
-    this.idleStake.value += restakeRewards;
-    this.totalStake.value += restakeRewards;
   }
 
   // operator calls for its own app; clawback all delegated stake and ensure that the operator receives the ASA, he will proceed to burn
-  onOperatorExit(appToClose: AppID, closeTxn: PayTxn): void {
+  onOperatorExit(appToClose: AppID): void {
     verifyTxn(this.txn, {
-      sender: appToClose.address,
-      receiver: this.app.address,
+      sender: appToClose.globalState('operator') as Address,
     });
-    this.idleStake.value += closeTxn.amount;
     sendMethodCall<typeof CaelusValidatorPool.prototype.deleteApplication, void>({
       applicationID: appToClose,
       methodArgs: [],
@@ -653,10 +558,7 @@ export class CaelusAdmin extends Contract {
       amount: keepFee,
     });
 
-    this.idleStake.value += keepFee;
-
     assert(amounts.length === appToInclude.length, 'array length [amount, appToInclude] mismatch');
-    // Ask Joe if this.pendingGroup creates a new txn group or appends it as an inner.
     for (let i = 0; i < appToInclude.length; i += 1) {
       this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.flashloan, void>({
         applicationID: appToInclude[i],
@@ -682,8 +584,6 @@ export class CaelusAdmin extends Contract {
     this.flashLoanEvent.log({ apps: appToInclude, amounts: amounts });
   }
 
-  //-------------------------------------------------------------------------------------------------------------------
-
   @abi.readonly
   getFLcounter(): uint64 {
     if (this.lastFlashloanBlock.value === globals.round) {
@@ -699,36 +599,36 @@ export class CaelusAdmin extends Contract {
   }
 
   @abi.readonly
-  arc62_get_circulating_supply(asset_id: AssetID): uint64 {
-    assert(asset_id === this.tokenId.value, 'invalid asset id');
+  arc62_get_circulating_supply(assetId: AssetID): uint64 {
+    assert(assetId === this.tokenId.value, 'invalid asset id');
     return this.tokenCirculatingSupply.value;
   }
 
-  private _calculateLSTRatio(): void {
+  private calculateLSTRatio(): void {
     if (this.tokenCirculatingSupply.value === 0) {
       return;
     }
     this.pegRatio.value = wideRatio([this.totalStake.value, SCALE], [this.tokenCirculatingSupply.value]);
   }
 
-  private _getMintAmount(amount: uint64): uint64 {
-    this._calculateLSTRatio();
+  private getMintAmount(amount: uint64): uint64 {
+    this.calculateLSTRatio();
     return wideRatio([amount, SCALE], [this.pegRatio.value]);
   }
 
-  private _getBurnAmount(amount: uint64): uint64 {
-    this._calculateLSTRatio();
+  private getBurnAmount(amount: uint64): uint64 {
+    this.calculateLSTRatio();
     return wideRatio([amount, this.pegRatio.value], [SCALE]);
   }
 
-  private _doBurnTxn(target: AppID, args: [uint64, Address]): void {
+  private doBurnTxn(target: AppID, args: [uint64, Address]): void {
     sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
       applicationID: target,
       methodArgs: [args[0], args[1]],
     });
   }
 
-  private _doAxfer(receiver: Address, amount: uint64, asset: AssetID): void {
+  private doAxfer(receiver: Address, amount: uint64, asset: AssetID): void {
     sendAssetTransfer({
       assetReceiver: receiver,
       assetAmount: amount,
@@ -736,43 +636,21 @@ export class CaelusAdmin extends Contract {
     });
   }
 
-  private _isPool(app: AppID): boolean {
+  private isPool(app: AppID): boolean {
     return app.creator === this.app.address;
   }
 
-  private _queueIsFull(): boolean {
-    const prioIsSet = this._isPool(this.burnTarget.value);
-    let _queueIsFull = true;
+  private queueIsFull(): boolean {
+    const prioIsSet = this.isPool(this.burnTarget.value);
+    let queueIsFull = true;
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
-      _queueIsFull = this._isPool(this.burnQueue.value[i]);
-      if (!_queueIsFull) {
+      queueIsFull = this.isPool(this.burnQueue.value[i]);
+      if (!queueIsFull) {
         break;
       }
     }
-    return prioIsSet && _queueIsFull;
+    return prioIsSet && queueIsFull;
   }
-
-  // private minBalanceForAccount(
-  //   contracts: uint64,
-  //   extraPages: uint64,
-  //   assets: uint64,
-  //   localInts: uint64,
-  //   localBytes: uint64,
-  //   globalInts: uint64,
-  //   globalBytes: uint64,
-  // ): uint64 {
-  //   let minBal = ALGORAND_ACCOUNT_MIN_BALANCE;
-  //   minBal += contracts * APPLICATION_BASE_FEE;
-  //   minBal += extraPages * APPLICATION_BASE_FEE;
-  //   minBal += assets * ASSET_HOLDING_FEE;
-  //   minBal += localInts * SSC_VALUE_UINT;
-  //   minBal += globalInts * SSC_VALUE_UINT;
-  //   minBal += localBytes * SSC_VALUE_BYTES;
-  //   minBal += globalBytes * SSC_VALUE_BYTES;
-  //   return minBal;
-  // }
-
-  //-----------------------------------------------------------------------------------------------------------------
 
   validatorAddedEvent = new EventLogger<{
     operator: Address;

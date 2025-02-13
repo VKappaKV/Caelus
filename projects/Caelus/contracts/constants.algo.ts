@@ -6,9 +6,11 @@ export const SSC_VALUE_UINT = 28500; // cost for value as uint64
 export const SSC_VALUE_BYTES = 50000; // cost for value as bytes
 // export const ALGORAND_BASE_FEE = 1000;
 export const VALIDATOR_POOL_CONTRACT_MBR = 1120500; // 1_120_500
-export const MINTCLAIM_ORDER_BOX_MBR = 21700;
 
 export const PROTOCOL_COMMISSION = 4;
+export const VALIDATOR_COMMISSION = 6;
+export const OPERATOR_REPORT_MAX_TIME = 700;
+
 export const PERFORMANCE_STEP = 5;
 export const MAX_DELINQUENCY_TOLERATED = 10;
 export const BURN_COOLDOWN = 10;
@@ -28,11 +30,6 @@ export const FLASH_LOAN_FEE = 10000000; // 10_000_000
 export const SCALE = 100000; // 100_000
 
 export const CLAIM_DELAY = 330;
-
-export type MintClaim = {
-  block: uint64;
-  amount: uint64;
-};
 
 export type SnitchInfo = {
   performanceCheck: boolean;
