@@ -9,11 +9,14 @@
     "build": "npm run compile-contract && npm run generate-client",
     "test": "npm run build && jest",
     "lint": "eslint . --ext .ts",
-    "fix": "eslint . --ext .ts --fix"
+    "fix": "eslint . --ext .ts --fix",
+    "execute": "ts-node utils/execute.ts"
   },
   "dependencies": {
     "@algorandfoundation/algokit-utils": "^7.0.1",
-    "algosdk": "^2.7.0"
+    "algosdk": "^2.7.0",
+    "save-dev": "^0.0.1-security",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@algorandfoundation/algokit-client-generator": "4.0.6",
