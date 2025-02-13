@@ -541,6 +541,9 @@ export class CaelusAdmin extends Contract {
     verifyTxn(this.txn, {
       sender: appToClose.globalState('operator') as Address,
     });
+    const removedStake =
+      (appToClose.globalState('delegated_stake') as uint64) + (appToClose.globalState('operator_commit') as uint64);
+    this.totalStake.value -= removedStake;
     sendMethodCall<typeof CaelusValidatorPool.prototype.deleteApplication, void>({
       applicationID: appToClose,
       methodArgs: [],
