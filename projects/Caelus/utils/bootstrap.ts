@@ -6,7 +6,8 @@
 import * as algokit from '@algorandfoundation/algokit-utils';
 import { consoleLogger } from '@algorandfoundation/algokit-utils/types/logging';
 import { Config } from '@algorandfoundation/algokit-utils';
-import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
+import { OnSchemaBreak, OnUpdate } from '@algorandfoundation/algokit-utils/types/app';
+import { CaelusAdminClient, CaelusAdminFactory } from '../contracts/clients/CaelusAdminClient';
 import { CaelusValidatorPoolFactory } from '../contracts/clients/CaelusValidatorPoolClient';
 
 Config.configure({
@@ -39,9 +40,14 @@ const algorand = algokit.AlgorandClient.fromConfig({
     token: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     port: 4001,
   },
+  indexerConfig: {
+    server: 'http://localhost',
+    token: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    port: 8980,
+  },
 });
 
-const APP_ID = 1003n;
+const APP_ID = 1391n;
 
 export const test = async () => {
   const testAccount = await algorand.account.fromKmd(
@@ -81,27 +87,41 @@ export async function deploy() {
     (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
   );
 
-  const creatorAccount = testAccount;
+  const adminFactory = algorand.client.getTypedAppFactory(CaelusAdminFactory, {
+    defaultSender: testAccount.addr,
+    defaultSigner: testAccount.signer,
+  });
 
-  console.log(`CREATOR ACCOUNT IS ${creatorAccount}`);
+  const adminApprovalProgram = await adminFactory.appFactory.compile();
 
-  // const adminFactory = algorand.client.getTypedAppFactory(CaelusAdminFactory, {
-  //   defaultSender: creatorAccount.addr,
-  //   defaultSigner: creatorAccount.signer,
-  //   deployTimeParams: {},
-  // });
+  const appDeployer = await algorand.appDeployer.deploy({
+    metadata: {
+      name: 'Caelus',
+      version: '1.0.0',
+      deletable: false,
+      updatable: true,
+    },
+    createParams: {
+      sender: testAccount.addr,
+      approvalProgram: adminApprovalProgram.compiledApproval?.compiledBase64ToBytes!,
+      clearStateProgram: adminApprovalProgram.compiledClear?.compiledBase64ToBytes!,
+      schema: {
+        globalInts: 13,
+        globalByteSlices: 2,
+        localInts: 0,
+        localByteSlices: 0,
+      },
+      extraProgramPages: 3,
+    },
+    updateParams: { sender: testAccount.addr },
+    deleteParams: { sender: testAccount.addr },
+    onSchemaBreak: OnSchemaBreak.AppendApp,
+    onUpdate: OnUpdate.UpdateApp,
+    populateAppCallResources: true,
+  });
 
-  //   const adminApp = await adminFactory.send.create({
-  //     args: [],
-  //     extraProgramPages: 3,
-  //   }); // WHY TF THIS DOESNT WORK???
-
-  // const result = await adminFactory.deploy({
-  //   appName: 'VestGuardAdmin',
-  //   populateAppCallResources: true,
-  // });
-
-  // console.log(`DEPLOYING CAELUS ADMIN \n \t APP ID IS: ${deploy.result.appId} \n ${deploy.result}`);
+  console.log('APP ID IS: ', appDeployer.appId);
+  console.log('APP ADDRESS IS: ', appDeployer.appAddress);
 }
 
 export async function adminSetup() {
@@ -114,6 +134,13 @@ export async function adminSetup() {
     appId: APP_ID,
     defaultSender: testAccount.addr,
     defaultSigner: testAccount.signer,
+  });
+
+  await algorand.send.payment({
+    sender: testAccount.addr,
+    signer: testAccount,
+    receiver: adminClient.appAddress,
+    amount: algokit.microAlgos(1000000),
   });
 
   await adminClient.send.managerCreateToken({ args: [], extraFee: algokit.microAlgos(1000) });
@@ -136,6 +163,13 @@ export async function validatorSetup() {
   });
 
   const validatorPoolApprovalProgram = await validatorFactory.appFactory.compile();
+
+  await algorand.send.payment({
+    sender: testAccount.addr,
+    signer: testAccount,
+    receiver: adminClient.appAddress,
+    amount: algokit.microAlgos(1000000),
+  });
 
   await updatePoolProgram(adminClient, validatorPoolApprovalProgram.compiledApproval?.compiledBase64ToBytes!);
   await writePoolProgram(adminClient, validatorPoolApprovalProgram.compiledApproval?.compiledBase64ToBytes!);

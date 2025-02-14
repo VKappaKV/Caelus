@@ -611,7 +611,8 @@ export class CaelusAdmin extends Contract {
     if (this.tokenCirculatingSupply.value === 0) {
       return;
     }
-    this.pegRatio.value = wideRatio([this.totalStake.value, SCALE], [this.tokenCirculatingSupply.value]);
+    const idleStake = this.app.address.balance - this.app.address.minBalance;
+    this.pegRatio.value = wideRatio([this.totalStake.value + idleStake, SCALE], [this.tokenCirculatingSupply.value]);
   }
 
   private getMintAmount(amount: uint64): uint64 {

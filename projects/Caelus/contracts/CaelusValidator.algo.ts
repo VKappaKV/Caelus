@@ -450,13 +450,13 @@ export class CaelusValidatorPool extends Contract {
   }
 
   // called by CA; check delinquency, send ASA to operator and opt out, closeout to vestigeAddress
+  @allow.bareCall('NoOp')
   deleteApplication(): void {
     assert(this.status.value !== 2, 'Account is delinquent. Solve Delinquency state before closing');
     assert(
       this.txn.sender === this.creatorContractAppID.value.address,
       'Only the Caelus Admin contract can close the node'
     );
-    assert(this.operatorCommit.value === 0 && this.delegatedStake.value === 0, 'no stake left');
     sendPayment({
       receiver: this.creatorContractAppID.value.address,
       amount: this.operatorCommit.value + this.delegatedStake.value,

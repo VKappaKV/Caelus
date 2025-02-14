@@ -2197,7 +2197,7 @@ claimLeftAlgo:
 deleteApplication:
 	proto 0 0
 
-	// contracts\CaelusValidator.algo.ts:454
+	// contracts\CaelusValidator.algo.ts:455
 	// assert(this.status.value !== 2, 'Account is delinquent. Solve Delinquency state before closing')
 	bytec 4 //  "status"
 	app_global_get
@@ -2207,7 +2207,7 @@ deleteApplication:
 	// Account is delinquent. Solve Delinquency state before closing
 	assert
 
-	// contracts\CaelusValidator.algo.ts:455
+	// contracts\CaelusValidator.algo.ts:456
 	// assert(
 	//       this.txn.sender === this.creatorContractAppID.value.address,
 	//       'Only the Caelus Admin contract can close the node'
@@ -2220,24 +2220,6 @@ deleteApplication:
 	==
 
 	// Only the Caelus Admin contract can close the node
-	assert
-
-	// contracts\CaelusValidator.algo.ts:459
-	// assert(this.operatorCommit.value === 0 && this.delegatedStake.value === 0, 'no stake left')
-	bytec 3 //  "operator_commit"
-	app_global_get
-	intc 0 // 0
-	==
-	dup
-	bz *skip_and6
-	bytec 0 //  "delegated_stake"
-	app_global_get
-	intc 0 // 0
-	==
-	&&
-
-*skip_and6:
-	// no stake left
 	assert
 
 	// contracts\CaelusValidator.algo.ts:460
@@ -2440,7 +2422,7 @@ goOnline:
 	global PayoutsMinBalance
 	>=
 	dup
-	bz *skip_and7
+	bz *skip_and6
 	global CurrentApplicationAddress
 	acct_params_get AcctBalance
 	pop
@@ -2448,7 +2430,7 @@ goOnline:
 	<=
 	&&
 
-*skip_and7:
+*skip_and6:
 	// Contract needs 30k Algo as minimum balance for rewards eligibility and at most 50M Algo
 	assert
 
@@ -2951,14 +2933,14 @@ updateDelegationFactors:
 	global PayoutsMinBalance
 	>
 	dup
-	bz *skip_and8
+	bz *skip_and7
 	bytec 4 //  "status"
 	app_global_get
 	intc 0 // 0
 	==
 	&&
 
-*skip_and8:
+*skip_and7:
 	bz *if22_else
 
 	// *if22_consequent
@@ -3319,6 +3301,8 @@ getExpectedProposalsDelta:
 	err
 
 *call_NoOp:
+	txn NumAppArgs
+	bz *abi_route_deleteApplication
 	pushbytes 0xfb1bcb75 // method "optIntoLST()void"
 	pushbytes 0xdfa20764 // method "addToOperatorCommit(pay)void"
 	pushbytes 0x31b7ec19 // method "removeFromOperatorCommit(uint64,uint64)void"
