@@ -47,7 +47,7 @@ const algorand = algokit.AlgorandClient.fromConfig({
   },
 });
 
-const APP_ID = 1391n;
+const APP_ID = 1411n;
 
 export const test = async () => {
   const testAccount = await algorand.account.fromKmd(
@@ -74,8 +74,6 @@ export const test = async () => {
     console.log('CONFIRMATION OF TEST IS : ', pay.txIds);
   }
 };
-
-// export async function compile() {}
 
 export async function deploy() {
   /**
@@ -122,6 +120,21 @@ export async function deploy() {
 
   console.log('APP ID IS: ', appDeployer.appId);
   console.log('APP ADDRESS IS: ', appDeployer.appAddress);
+}
+
+export async function updateAdmin() {
+  const testAccount = await algorand.account.fromKmd(
+    'lora-dev',
+    (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
+  );
+
+  const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
+    appId: APP_ID,
+    defaultSender: testAccount.addr,
+    defaultSigner: testAccount.signer,
+  });
+
+  await adminClient.send.update({});
 }
 
 export async function adminSetup() {

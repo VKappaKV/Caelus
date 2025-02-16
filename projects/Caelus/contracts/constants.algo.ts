@@ -13,7 +13,7 @@ export const OPERATOR_REPORT_MAX_TIME = 700;
 
 export const PERFORMANCE_STEP = 5;
 export const MAX_DELINQUENCY_TOLERATED = 10;
-export const BURN_COOLDOWN = 10;
+export const BURN_COOLDOWN = 5;
 
 export const ALGORAND_STAKING_BLOCK_DELAY = 320; // # of blocks until algorand sees online balance changes in staking
 export const APPROX_AVG_ROUNDS_PER_DAY = 30857; // approx 'daily' rounds for APR bins (60*60*24/2.8)

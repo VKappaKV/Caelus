@@ -56,9 +56,7 @@ export class CaelusAdmin extends Contract {
 
   highestBidder = GlobalStateKey<AppID>({ key: 'highest_bidder' });
 
-  burnQueue = GlobalStateKey<StaticArray<AppID, 10>>({ key: 'burn_queue' });
-
-  burnTarget = GlobalStateKey<AppID>({ key: 'burn_target' });
+  burnQueue = GlobalStateKey<StaticArray<AppID, 5>>({ key: 'burn_queue' });
 
   lastExhaustBlock = GlobalStateKey<uint64>({ key: 'last_exhaust_block' });
 
@@ -81,11 +79,11 @@ export class CaelusAdmin extends Contract {
     this.highestBidder.value = AppID.zeroIndex;
 
     this.burnQueue.value = [];
-    this.burnTarget.value = AppID.zeroIndex;
 
     this.lastExhaustBlock.value = 0;
   }
 
+  @allow.bareCall('NoOp')
   updateApplication(): void {
     assert(this.txn.sender === this.manager.value);
   }
@@ -209,32 +207,16 @@ export class CaelusAdmin extends Contract {
       });
     }
 
-    // After exhaust flag there needs to be at least 1 block cooldown, if the queue is full, otherwise 10 rounds
-    if (
-      this.burnTarget.value === AppID.zeroIndex &&
-      !this.queueIsFull() &&
-      globals.round - this.lastExhaustBlock.value > 1
-    ) {
-      assert(
-        globals.round - this.lastExhaustBlock.value > BURN_COOLDOWN,
-        'wait at least 10 blocks since Exhaust Block'
-      );
+    if (burning === amountToBurn) {
+      return;
     }
 
-    if (this.isPool(this.burnTarget.value)) {
-      const delegatedToTarget = this.burnTarget.value.globalState('delegated_stake') as uint64;
-      if (delegatedToTarget >= amountToBurn) {
-        this.doBurnTxn(this.burnTarget.value, [amountToBurn, burnTo]);
-        const value = this.burnQueue.value[0];
-        this.burnTarget.value = AppID.zeroIndex;
-        if (this.isPool(value)) {
-          this.snitchToBurn(value);
-        }
-        return;
-      }
-      burning = this.burnTarget.value.globalState('delegated_stake') as uint64;
-      this.doBurnTxn(this.burnTarget.value, [delegatedToTarget, burnTo]);
+    if (this.queueIsEmpty()) {
+      return;
     }
+
+    assert(globals.round - this.lastExhaustBlock.value > BURN_COOLDOWN, 'wait at least 5 blocks since Exhaust Block');
+
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
       const currentTargetInQueue = this.burnQueue.value[i];
       if (this.isPool(currentTargetInQueue)) {
@@ -253,28 +235,15 @@ export class CaelusAdmin extends Contract {
 
     const amountLeft = this.getBurnAmount(amountToBurn - burning);
     if (amountLeft > 0) {
-      this.doAxfer(
-        burnTxn.sender, // the sender needs to be the burnTxn sender, so when operator burns vALGO from the app it returns the amount left to burn
-        amountLeft,
-        this.tokenId.value
-      );
-      this.tokenCirculatingSupply.value -= burnTxn.assetAmount - amountLeft;
-      this.totalStake.value -= burning;
+      this.doAxfer(burnTxn.sender, amountLeft, this.tokenId.value);
       this.lastExhaustBlock.value = globals.round;
-
-      this.burnEvent.log({
-        filled: amountLeft > 0,
-        amount: burnTxn.assetAmount - amountLeft,
-        output: burning,
-      });
-      return;
     }
+    this.tokenCirculatingSupply.value -= burnTxn.assetAmount - amountLeft;
     this.totalStake.value -= burning;
-    this.tokenCirculatingSupply.value -= burnTxn.assetAmount;
 
     this.burnEvent.log({
       filled: amountLeft > 0,
-      amount: burnTxn.assetAmount,
+      amount: burnTxn.assetAmount - amountLeft,
       output: burning,
     });
     // totalStake --
@@ -342,27 +311,19 @@ export class CaelusAdmin extends Contract {
     let amountToUpdate = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
     let toBurn = this.getBurnAmount(burnTxn.assetAmount) - (validatorAppID.globalState('operator_commit') as uint64); // burn from other validators the amount of Algo accrued from the operator LST
     let amtBurned = 0; // need this to subtract from totalAlgoSupply
-    if (this.isPool(this.burnTarget.value)) {
-      const prioStake = this.burnTarget.value.globalState('delegated_stake') as uint64;
-      amtBurned = prioStake >= toBurn ? prioStake : toBurn - prioStake;
-      this.doBurnTxn(this.burnTarget.value, [amtBurned, this.app.address]);
-      toBurn -= amtBurned;
-    }
-    if (toBurn > 0) {
-      for (let i = 0; i < this.burnQueue.value.length; i += 1) {
-        const currentTargetInQueue = this.burnQueue.value[i];
-        if (this.isPool(currentTargetInQueue)) {
-          const delegatedToTarget = currentTargetInQueue.globalState('delegated_stake') as uint64;
-          if (delegatedToTarget >= toBurn) {
-            this.doBurnTxn(currentTargetInQueue, [toBurn, this.app.address]);
-            amtBurned += toBurn;
-            toBurn = 0;
-            break;
-          } else {
-            this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, this.app.address]);
-            amtBurned += delegatedToTarget;
-            toBurn -= delegatedToTarget;
-          }
+    for (let i = 0; i < this.burnQueue.value.length; i += 1) {
+      const currentTargetInQueue = this.burnQueue.value[i];
+      if (this.isPool(currentTargetInQueue)) {
+        const delegatedToTarget = currentTargetInQueue.globalState('delegated_stake') as uint64;
+        if (delegatedToTarget >= toBurn) {
+          this.doBurnTxn(currentTargetInQueue, [toBurn, this.app.address]);
+          amtBurned += toBurn;
+          toBurn = 0;
+          break;
+        } else {
+          this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, this.app.address]);
+          amtBurned += delegatedToTarget;
+          toBurn -= delegatedToTarget;
         }
       }
     }
@@ -456,17 +417,7 @@ export class CaelusAdmin extends Contract {
     const satSnitch = app.globalState('saturation_buffer') as uint64;
     let minPrio = app;
     let minSat = satSnitch;
-    if (this.isPool(this.burnTarget.value)) {
-      const satPrio = this.burnTarget.value.globalState('saturation_buffer') as uint64;
-      if (satSnitch > satPrio) {
-        minPrio = this.burnTarget.value;
-        minSat = satPrio;
-        this.burnTarget.value = app;
-      }
-    } else {
-      this.burnTarget.value = app;
-      return;
-    }
+
     const queue = this.burnQueue.value;
     for (let i = 0; i < queue.length; i += 1) {
       if (!this.isPool(queue[i])) {
@@ -476,12 +427,12 @@ export class CaelusAdmin extends Contract {
       if ((queue[i].globalState('saturation_buffer') as uint64) < minSat) {
         const temp = minPrio;
         minPrio = queue[i];
+        minSat = queue[i].globalState('saturation_buffer') as uint64;
         queue[i] = temp;
       }
     }
 
     this.snitchQueueEvent.log({
-      prio: this.burnTarget.value,
       queue: this.burnQueue.value,
     });
     // for loop on the queue of addresses checking saturation vs minPrio
@@ -644,16 +595,13 @@ export class CaelusAdmin extends Contract {
     return app.creator === this.app.address;
   }
 
-  private queueIsFull(): boolean {
-    const prioIsSet = this.isPool(this.burnTarget.value);
-    let queueIsFull = true;
+  private queueIsEmpty(): boolean {
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
-      queueIsFull = this.isPool(this.burnQueue.value[i]);
-      if (!queueIsFull) {
-        break;
+      if (this.burnQueue.value[i] !== AppID.zeroIndex) {
+        return false;
       }
     }
-    return prioIsSet && queueIsFull;
+    return true;
   }
 
   validatorAddedEvent = new EventLogger<{
@@ -679,8 +627,7 @@ export class CaelusAdmin extends Contract {
   }>();
 
   snitchQueueEvent = new EventLogger<{
-    prio: AppID;
-    queue: StaticArray<AppID, 10>;
+    queue: StaticArray<AppID, 5>;
   }>();
 
   snitchValidatorEvent = new EventLogger<{
