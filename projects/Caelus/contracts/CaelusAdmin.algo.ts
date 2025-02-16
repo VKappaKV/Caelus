@@ -446,6 +446,13 @@ export class CaelusAdmin extends Contract {
     }
   }
 
+  /**
+   * Used to check the behavior of a Validator App
+   *
+   * @param {AppID} appToCheck - Validator AppID to snitch
+   * @param {SnitchInfo} params - SnitchInfo object containing the informations to check
+   * @returns {boolean} result of the snitch if successfull -> true
+   */
   snitchCheck(appToCheck: AppID, params: SnitchInfo): boolean {
     assert(this.isPool(appToCheck));
     assert(this.isPool(params.recipient) || params.recipient.address === this.app.address);
@@ -463,9 +470,18 @@ export class CaelusAdmin extends Contract {
     return result;
   }
 
-  // used to route txn both to restake into the auction or to another validator, depending on the receiver
+  /**
+   * Follow up operation called by the snitched App to perform restaking of the delegated Algo clawed back
+   *
+   * @param {AppID} snitchedApp - The AppID of the validator to snitch
+   * @param {AppID} receiverApp - The AppID of the receiver of the delegated Algo
+   * @param {PayTxn} restakeTxn - The PayTxn following the snitch that sends the delegated Algo to be moved back and restaked
+   */
   reStakeFromSnitch(snitchedApp: AppID, receiverApp: AppID, restakeTxn: PayTxn): void {
-    assert(this.isPool(snitchedApp));
+    assert(
+      this.isPool(snitchedApp) && this.txn.sender === snitchedApp.address,
+      'only the snitched app can initiate this method'
+    );
     assert(this.isPool(receiverApp) || receiverApp === this.app, 'receiver must be a pool or the admin');
     verifyPayTxn(restakeTxn, {
       sender: snitchedApp.address,
@@ -486,7 +502,11 @@ export class CaelusAdmin extends Contract {
     }
   }
 
-  // operator calls for its own app; clawback all delegated stake and ensure that the operator receives the ASA, he will proceed to burn
+  /**
+   * Used to close and delete a validator pool contract, only callable by the node operator.
+   *
+   * @param {AppID} appToClose  - The AppID of the operator to close
+   */
   onOperatorExit(appToClose: AppID): void {
     verifyTxn(this.txn, {
       sender: appToClose.globalState('operator') as Address,

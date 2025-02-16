@@ -134,7 +134,7 @@ export async function updateAdmin() {
     defaultSigner: testAccount.signer,
   });
 
-  await adminClient.send.update({});
+  // await adminClient.send.update({});
 }
 
 export async function adminSetup() {
