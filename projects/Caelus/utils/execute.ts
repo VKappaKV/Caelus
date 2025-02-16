@@ -1,7 +1,3 @@
-/* eslint-disable prettier/prettier */
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-plusplus */
 /* eslint-disable no-console */
 import { Config } from '@algorandfoundation/algokit-utils';
 import { addValidator, adminSetup, deploy, validatorSetup, test } from './bootstrap';

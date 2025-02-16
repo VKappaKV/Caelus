@@ -1,7 +1,4 @@
-/* eslint-disable prettier/prettier */
-/* eslint-disable no-use-before-define */
 /* eslint-disable no-await-in-loop */
-/* eslint-disable no-plusplus */
 /* eslint-disable no-console */
 import * as algokit from '@algorandfoundation/algokit-utils';
 import { consoleLogger } from '@algorandfoundation/algokit-utils/types/logging';
@@ -59,7 +56,7 @@ export const test = async () => {
     (account) => account.address === 'XVHVTMT7YQJSTPAH42DNYDOSL23R42QQ7OAUTFNHFMXUKWDVU4KZ3UNDTM'
   );
 
-  for (let i = 0; i < 320; i++) {
+  for (let i = 0; i < 320; i += 1) {
     await new Promise((f) => {
       setTimeout(f, 3000);
     });
@@ -159,35 +156,6 @@ export async function adminSetup() {
   await adminClient.send.managerCreateToken({ args: [], extraFee: algokit.microAlgos(1000) });
 }
 
-export async function validatorSetup() {
-  const testAccount = await algorand.account.fromKmd(
-    'lora-dev',
-    (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
-  );
-  const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
-    appId: APP_ID,
-    defaultSender: testAccount.addr,
-    defaultSigner: testAccount.signer,
-  });
-
-  const validatorFactory = algorand.client.getTypedAppFactory(CaelusValidatorPoolFactory, {
-    defaultSender: testAccount.addr,
-    defaultSigner: testAccount.signer,
-  });
-
-  const validatorPoolApprovalProgram = await validatorFactory.appFactory.compile();
-
-  await algorand.send.payment({
-    sender: testAccount.addr,
-    signer: testAccount,
-    receiver: adminClient.appAddress,
-    amount: algokit.microAlgos(1000000),
-  });
-
-  await updatePoolProgram(adminClient, validatorPoolApprovalProgram.compiledApproval?.compiledBase64ToBytes!);
-  await writePoolProgram(adminClient, validatorPoolApprovalProgram.compiledApproval?.compiledBase64ToBytes!);
-}
-
 export async function addValidator() {
   const testAccount = await algorand.account.fromKmd(
     'lora-dev',
@@ -235,4 +203,33 @@ export async function writePoolProgram(adminFactory: CaelusAdminClient, program:
   }
 
   writeGroup.send({ populateAppCallResources: true });
+}
+
+export async function validatorSetup() {
+  const testAccount = await algorand.account.fromKmd(
+    'lora-dev',
+    (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
+  );
+  const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
+    appId: APP_ID,
+    defaultSender: testAccount.addr,
+    defaultSigner: testAccount.signer,
+  });
+
+  const validatorFactory = algorand.client.getTypedAppFactory(CaelusValidatorPoolFactory, {
+    defaultSender: testAccount.addr,
+    defaultSigner: testAccount.signer,
+  });
+
+  const validatorPoolApprovalProgram = await validatorFactory.appFactory.compile();
+
+  await algorand.send.payment({
+    sender: testAccount.addr,
+    signer: testAccount,
+    receiver: adminClient.appAddress,
+    amount: algokit.microAlgos(1000000),
+  });
+
+  await updatePoolProgram(adminClient, validatorPoolApprovalProgram.compiledApproval?.compiledBase64ToBytes!);
+  await writePoolProgram(adminClient, validatorPoolApprovalProgram.compiledApproval?.compiledBase64ToBytes!);
 }
