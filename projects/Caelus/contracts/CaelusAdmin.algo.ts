@@ -83,7 +83,6 @@ export class CaelusAdmin extends Contract {
     this.lastExhaustBlock.value = 0;
   }
 
-  @allow.bareCall('NoOp')
   updateApplication(): void {
     assert(this.txn.sender === this.manager.value);
   }

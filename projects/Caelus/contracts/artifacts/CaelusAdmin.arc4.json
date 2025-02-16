@@ -347,12 +347,8 @@
           "name": "snitchQueueEvent",
           "args": [
             {
-              "name": "prio",
-              "type": "uint64"
-            },
-            {
               "name": "queue",
-              "type": "uint64[10]"
+              "type": "uint64[5]"
             }
           ],
           "desc": ""
@@ -562,12 +558,8 @@
       "name": "snitchQueueEvent",
       "args": [
         {
-          "name": "prio",
-          "type": "uint64"
-        },
-        {
           "name": "queue",
-          "type": "uint64[10]"
+          "type": "uint64[5]"
         }
       ],
       "desc": ""
