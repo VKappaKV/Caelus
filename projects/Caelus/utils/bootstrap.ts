@@ -44,6 +44,10 @@ const algorand = algokit.AlgorandClient.fromConfig({
   },
 });
 
+/**
+ * Change manually after Deploying
+ */
+
 const APP_ID = 1411n;
 
 export const test = async () => {
@@ -101,7 +105,7 @@ export async function deploy() {
       approvalProgram: adminApprovalProgram.compiledApproval?.compiledBase64ToBytes!,
       clearStateProgram: adminApprovalProgram.compiledClear?.compiledBase64ToBytes!,
       schema: {
-        globalInts: 13,
+        globalInts: 12,
         globalByteSlices: 2,
         localInts: 0,
         localByteSlices: 0,

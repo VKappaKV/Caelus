@@ -375,7 +375,7 @@ export class CaelusValidatorPool extends Contract {
       result = true;
     }
     assert(amount <= this.delegatedStake.value);
-    const isDelegatable = checks.recipient.globalState('can_be_delegated') as boolean;
+    const isDelegatable = (checks.recipient.globalState('status') as number) === 0;
     if (checks.split && amount > checks.max && isDelegatable) {
       const toRecipient = amount - checks.max;
       amount -= toRecipient;
