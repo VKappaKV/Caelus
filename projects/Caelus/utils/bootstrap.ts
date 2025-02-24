@@ -4,6 +4,7 @@ import * as algokit from '@algorandfoundation/algokit-utils';
 import { consoleLogger } from '@algorandfoundation/algokit-utils/types/logging';
 import { Config } from '@algorandfoundation/algokit-utils';
 import { OnSchemaBreak, OnUpdate } from '@algorandfoundation/algokit-utils/types/app';
+import algosdk from 'algosdk';
 import { CaelusAdminClient, CaelusAdminFactory } from '../contracts/clients/CaelusAdminClient';
 import { CaelusValidatorPoolFactory } from '../contracts/clients/CaelusValidatorPoolClient';
 
@@ -69,7 +70,7 @@ export const test = async () => {
       sender: testAccount.addr,
       signer: testAccount,
       receiver: validatorTest.addr,
-      amount: algokit.microAlgos(1000000),
+      amount: (1000000).microAlgo(),
     });
 
     console.log('CONFIRMATION OF TEST IS : ', pay.txIds);
@@ -77,10 +78,7 @@ export const test = async () => {
 };
 
 export async function deploy() {
-  /**
-   * to fix, how to properly deploy with AlgoKit Utils?
-   */
-
+  // change with other wallet depending on your network
   const testAccount = await algorand.account.fromKmd(
     'lora-dev',
     (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
@@ -129,13 +127,21 @@ export async function updateAdmin() {
     (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
   );
 
-  const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
-    appId: APP_ID,
+  const adminFactory = algorand.client.getTypedAppFactory(CaelusAdminFactory, {
     defaultSender: testAccount.addr,
     defaultSigner: testAccount.signer,
   });
 
-  // await adminClient.send.update({});
+  const adminApprovalProgram = await adminFactory.appFactory.compile();
+
+  await algorand.send.appUpdate({
+    sender: testAccount.addr,
+    signer: testAccount,
+    appId: APP_ID,
+    approvalProgram: adminApprovalProgram.compiledApproval?.compiledBase64ToBytes!,
+    clearStateProgram: adminApprovalProgram.compiledClear?.compiledBase64ToBytes!,
+    onComplete: algosdk.OnApplicationComplete.UpdateApplicationOC,
+  });
 }
 
 export async function adminSetup() {
@@ -154,10 +160,30 @@ export async function adminSetup() {
     sender: testAccount.addr,
     signer: testAccount,
     receiver: adminClient.appAddress,
-    amount: algokit.microAlgos(1000000),
+    amount: (1_000_000).microAlgo(),
   });
 
   await adminClient.send.managerCreateToken({ args: [], extraFee: algokit.microAlgos(1000) });
+
+  const dummyIDtxn = await algorand.send.assetCreate({
+    sender: testAccount.addr,
+    signer: testAccount,
+    assetName: 'dummy',
+    unitName: 'DUM',
+    total: 10_000_000_000_000_000n,
+    decimals: 6,
+  });
+
+  const stakedDummyIDtxn = await algorand.send.assetCreate({
+    sender: testAccount.addr,
+    signer: testAccount,
+    assetName: 'staked_dummy',
+    unitName: 'stDUM',
+    total: 10_000_000_000_000_000n,
+    decimals: 6,
+  });
+
+  await adminClient.send.managerUpdateVestTokensId({ args: [dummyIDtxn.assetId, stakedDummyIDtxn.assetId] });
 }
 
 export async function addValidator() {
@@ -176,7 +202,7 @@ export async function addValidator() {
   const pay = await algorand.createTransaction.payment({
     sender: testAccount.addr,
     receiver: adminClient.appAddress,
-    amount: algokit.microAlgos(1020500),
+    amount: (1020500).microAlgo(),
   });
   group.addValidator({ args: [pay] });
 }
@@ -231,7 +257,7 @@ export async function validatorSetup() {
     sender: testAccount.addr,
     signer: testAccount,
     receiver: adminClient.appAddress,
-    amount: algokit.microAlgos(1000000),
+    amount: (1000000).microAlgo(),
   });
 
   await updatePoolProgram(adminClient, validatorPoolApprovalProgram.compiledApproval?.compiledBase64ToBytes!);
