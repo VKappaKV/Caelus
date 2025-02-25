@@ -15,6 +15,7 @@
   "dependencies": {
     "@algorandfoundation/algokit-utils": "^7.0.1",
     "algosdk": "^2.7.0",
+    "dotenv": "^16.4.7",
     "save-dev": "^0.0.1-security",
     "ts-node": "^10.9.2"
   },

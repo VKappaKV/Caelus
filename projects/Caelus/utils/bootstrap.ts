@@ -49,17 +49,21 @@ const algorand = algokit.AlgorandClient.fromConfig({
  * Change manually after Deploying
  */
 
-const APP_ID = 1411n;
-
-export const test = async () => {
+const getAccount = async () => {
   const testAccount = await algorand.account.fromKmd(
     'lora-dev',
-    (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
+    (account) => account.address === '6D2HEIEYZK4QTQ4G5HJI3C3UARAWXYMAGKK24GHLTAJFQIBCFENCYJHVFA'
   );
-  const validatorTest = await algorand.account.fromKmd(
-    'lora-dev',
-    (account) => account.address === 'XVHVTMT7YQJSTPAH42DNYDOSL23R42QQ7OAUTFNHFMXUKWDVU4KZ3UNDTM'
-  );
+
+  const random = algorand.account.random();
+
+  return { testAccount, random };
+};
+
+const APP_ID = 1002n;
+
+export const test = async () => {
+  const { testAccount, random } = await getAccount();
 
   for (let i = 0; i < 320; i += 1) {
     await new Promise((f) => {
@@ -69,7 +73,7 @@ export const test = async () => {
     const pay = await algorand.send.payment({
       sender: testAccount.addr,
       signer: testAccount,
-      receiver: validatorTest.addr,
+      receiver: random.addr,
       amount: (1000000).microAlgo(),
     });
 
@@ -79,10 +83,7 @@ export const test = async () => {
 
 export async function deploy() {
   // change with other wallet depending on your network
-  const testAccount = await algorand.account.fromKmd(
-    'lora-dev',
-    (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
-  );
+  const { testAccount } = await getAccount();
 
   const adminFactory = algorand.client.getTypedAppFactory(CaelusAdminFactory, {
     defaultSender: testAccount.addr,
@@ -122,10 +123,7 @@ export async function deploy() {
 }
 
 export async function update() {
-  const testAccount = await algorand.account.fromKmd(
-    'lora-dev',
-    (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
-  );
+  const { testAccount } = await getAccount();
 
   const adminFactory = algorand.client.getTypedAppFactory(CaelusAdminFactory, {
     defaultSender: testAccount.addr,
@@ -145,10 +143,7 @@ export async function update() {
 }
 
 export async function adminSetup() {
-  const testAccount = await algorand.account.fromKmd(
-    'lora-dev',
-    (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
-  );
+  const { testAccount } = await getAccount();
 
   const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
     appId: APP_ID,
@@ -187,10 +182,7 @@ export async function adminSetup() {
 }
 
 export async function addValidator() {
-  const testAccount = await algorand.account.fromKmd(
-    'lora-dev',
-    (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
-  );
+  const { testAccount } = await getAccount();
 
   const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
     appId: APP_ID,
@@ -202,9 +194,11 @@ export async function addValidator() {
   const pay = await algorand.createTransaction.payment({
     sender: testAccount.addr,
     receiver: adminClient.appAddress,
-    amount: (1020500).microAlgo(),
+    amount: (1120500).microAlgo(),
   });
-  group.addValidator({ args: [pay] });
+  group.addValidator({ args: [pay], extraFee: algokit.microAlgos(1000) });
+
+  group.send({ populateAppCallResources: true });
 }
 
 export async function updatePoolProgram(adminFactory: CaelusAdminClient, program: Uint8Array) {
@@ -236,10 +230,7 @@ export async function writePoolProgram(adminFactory: CaelusAdminClient, program:
 }
 
 export async function validatorSetup() {
-  const testAccount = await algorand.account.fromKmd(
-    'lora-dev',
-    (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'
-  );
+  const { testAccount } = await getAccount();
   const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
     appId: APP_ID,
     defaultSender: testAccount.addr,
