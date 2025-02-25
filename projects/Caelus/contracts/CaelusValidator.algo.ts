@@ -159,7 +159,7 @@ export class CaelusValidatorPool extends Contract {
     });
     sendAssetTransfer({
       xferAsset: this.tokenId.value,
-      assetReceiver: this.operatorAddress.value,
+      assetReceiver: this.creatorContractAppID.value.address,
       assetAmount: claimRequestLST,
     });
     this.operatorCommit.value -= claimRequest;
@@ -361,7 +361,7 @@ export class CaelusValidatorPool extends Contract {
       result = true;
     }
     assert(amount <= this.delegatedStake.value);
-    const isDelegatable = (checks.recipient.globalState(StateKeys.STATUS) as number) === 0;
+    const isDelegatable = (checks.recipient.globalState(StateKeys.STATUS) as uint64) === 0;
     if (checks.split && amount > checks.max && isDelegatable) {
       const toRecipient = amount - checks.max;
       amount -= toRecipient;

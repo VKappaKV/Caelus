@@ -169,6 +169,7 @@ export class CaelusAdmin extends Contract {
 
     const minted = this.getMintAmount(mintTxn.amount);
     this.doAxfer(this.txn.sender, minted, this.tokenId.value);
+    this.totalStake.value += mintTxn.amount;
     this.tokenCirculatingSupply.value += minted;
 
     this.mintEvent.log({
@@ -303,8 +304,8 @@ export class CaelusAdmin extends Contract {
       assetSender: validatorAppID.address,
     });
     assert((validatorAppID.globalState(StateKeys.STATUS) as uint64) !== 2);
-    let amountToUpdate = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
-    let toBurn =
+    let amountToUpdate: uint64 = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
+    let toBurn: uint64 =
       this.getBurnAmount(burnTxn.assetAmount) - (validatorAppID.globalState(StateKeys.OPERATOR_COMMIT) as uint64); // burn from other validators the amount of Algo accrued from the operator LST
     let amtBurned = 0; // need this to subtract from totalAlgoSupply
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
@@ -404,7 +405,6 @@ export class CaelusAdmin extends Contract {
         },
       ],
     });
-    this.totalStake.value += amount;
   }
 
   // used to set new validator inside the burn queue || burn Prio
@@ -494,8 +494,6 @@ export class CaelusAdmin extends Contract {
           },
         ],
       });
-    } else {
-      this.totalStake.value -= restakeTxn.amount;
     }
   }
 
@@ -508,10 +506,7 @@ export class CaelusAdmin extends Contract {
     verifyTxn(this.txn, {
       sender: appToClose.globalState(StateKeys.OPERATOR_ADDRESS) as Address,
     });
-    const removedStake =
-      (appToClose.globalState(StateKeys.DELEGATED_STAKE) as uint64) +
-      (appToClose.globalState(StateKeys.OPERATOR_COMMIT) as uint64);
-    this.totalStake.value -= removedStake;
+
     sendMethodCall<typeof CaelusValidatorPool.prototype.deleteApplication, void>({
       applicationID: appToClose,
       methodArgs: [],
@@ -579,11 +574,7 @@ export class CaelusAdmin extends Contract {
     if (this.tokenCirculatingSupply.value === 0) {
       return;
     }
-    const idleStake = this.app.address.balance - this.app.address.minBalance;
-    this.pegRatio.value = wideRatio(
-      [this.totalStake.value + idleStake, Values.SCALE],
-      [this.tokenCirculatingSupply.value]
-    );
+    this.pegRatio.value = wideRatio([this.totalStake.value, Values.SCALE], [this.tokenCirculatingSupply.value]);
   }
 
   private getMintAmount(amount: uint64): uint64 {
