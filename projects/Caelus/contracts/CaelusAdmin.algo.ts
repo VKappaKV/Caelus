@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 import { Contract } from '@algorandfoundation/tealscript';
 import { CaelusValidatorPool } from './CaelusValidator.algo';
-import { VALUES, SnitchInfo, GKEYS } from './constants.algo';
+import { Values, SnitchInfo, StateKeys } from './constants.algo';
 
 /**
  * CaelusAdmin is the main contract handling the Caelus protocol. It acts as Factory contract by deploying the Validator
@@ -19,52 +19,52 @@ import { VALUES, SnitchInfo, GKEYS } from './constants.algo';
 export class CaelusAdmin extends Contract {
   programVersion = 11;
 
-  manager = GlobalStateKey<Address>({ key: GKEYS.MANAGER });
+  manager = GlobalStateKey<Address>({ key: StateKeys.MANAGER });
 
   validatorPoolContractApprovalProgram = BoxKey<bytes>({
-    key: GKEYS.VALIDATOR_POOL_APPROVAL_PROGRAM,
+    key: StateKeys.VALIDATOR_POOL_APPROVAL_PROGRAM,
   });
 
   validatorPoolContractVersion = GlobalStateKey<uint64>({
-    key: GKEYS.VALIDATOR_POOL_CONTRACT_VERSION,
+    key: StateKeys.VALIDATOR_POOL_CONTRACT_VERSION,
   });
 
   validatorPoolContractCost = GlobalStateKey<uint64>({
-    key: GKEYS.VALIDATOR_POOL_CONTRACT_COST,
+    key: StateKeys.VALIDATOR_POOL_CONTRACT_COST,
   });
 
-  totalStake = GlobalStateKey<uint64>({ key: GKEYS.TOTAL_STAKE });
+  totalStake = GlobalStateKey<uint64>({ key: StateKeys.TOTAL_STAKE });
 
-  pegRatio = GlobalStateKey<uint64>({ key: GKEYS.PEG_RATIO });
+  pegRatio = GlobalStateKey<uint64>({ key: StateKeys.PEG_RATIO });
 
-  tokenId = GlobalStateKey<AssetID>({ key: GKEYS.TOKEN_ID });
+  tokenId = GlobalStateKey<AssetID>({ key: StateKeys.TOKEN_ID });
 
-  vestId = GlobalStateKey<AssetID>({ key: GKEYS.VEST_ID });
+  vestId = GlobalStateKey<AssetID>({ key: StateKeys.VEST_ID });
 
-  stVestId = GlobalStateKey<AssetID>({ key: GKEYS.STAKED_VEST_ID });
+  stVestId = GlobalStateKey<AssetID>({ key: StateKeys.STAKED_VEST_ID });
 
   tokenCirculatingSupply = GlobalStateKey<uint64>({
     key: 'token_circulating_supply',
   });
 
-  highestBidder = GlobalStateKey<AppID>({ key: GKEYS.HIGHEST_BIDDER });
+  highestBidder = GlobalStateKey<AppID>({ key: StateKeys.HIGHEST_BIDDER });
 
-  burnQueue = GlobalStateKey<StaticArray<AppID, 5>>({ key: GKEYS.BURN_QUEUE });
+  burnQueue = GlobalStateKey<StaticArray<AppID, 5>>({ key: StateKeys.BURN_QUEUE });
 
-  lastExhaustBlock = GlobalStateKey<uint64>({ key: GKEYS.LAST_EXHAUST_BLOCK });
+  lastExhaustBlock = GlobalStateKey<uint64>({ key: StateKeys.LAST_EXHAUST_BLOCK });
 
-  lastFlashloanBlock = GlobalStateKey<uint64>({ key: GKEYS.LAST_FLASHLOAN_BLOCK });
+  lastFlashloanBlock = GlobalStateKey<uint64>({ key: StateKeys.LAST_FLASHLOAN_BLOCK });
 
-  flashLoanCounter = GlobalStateKey<uint64>({ key: GKEYS.FLASHLOAN_COUNTER });
+  flashLoanCounter = GlobalStateKey<uint64>({ key: StateKeys.FLASHLOAN_COUNTER });
 
   @allow.bareCreate('NoOp')
   createApplication(): void {
     this.manager.value = this.app.creator;
     this.validatorPoolContractVersion.value = 0;
-    this.validatorPoolContractCost.value = VALUES.VALIDATOR_POOL_CONTRACT_MBR;
+    this.validatorPoolContractCost.value = Values.VALIDATOR_POOL_CONTRACT_MBR;
 
     this.totalStake.value = 0;
-    this.pegRatio.value = 1 * VALUES.SCALE;
+    this.pegRatio.value = 1 * Values.SCALE;
 
     this.tokenId.value = AssetID.zeroIndex;
     this.tokenCirculatingSupply.value = 0;
@@ -182,7 +182,7 @@ export class CaelusAdmin extends Contract {
     verifyAssetTransferTxn(burnTxn, {
       xferAsset: this.tokenId.value,
       assetReceiver: this.app.address,
-      assetAmount: { greaterThanEqualTo: VALUES.ALGORAND_BASE_FEE },
+      assetAmount: { greaterThanEqualTo: Values.ALGORAND_BASE_FEE },
     });
 
     const amountToBurn = this.getBurnAmount(burnTxn.assetAmount);
@@ -208,14 +208,14 @@ export class CaelusAdmin extends Contract {
     }
 
     assert(
-      globals.round - this.lastExhaustBlock.value > VALUES.BURN_COOLDOWN,
+      globals.round - this.lastExhaustBlock.value > Values.BURN_COOLDOWN,
       'wait at least 5 blocks since Exhaust Block'
     );
 
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
       const currentTargetInQueue = this.burnQueue.value[i];
       if (this.isPool(currentTargetInQueue)) {
-        const delegatedToTarget = currentTargetInQueue.globalState(GKEYS.DELEGATED_STAKE) as uint64;
+        const delegatedToTarget = currentTargetInQueue.globalState(StateKeys.DELEGATED_STAKE) as uint64;
         if (delegatedToTarget < amountToBurn - burning) {
           this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, burnTo]);
           this.burnQueue.value[i] = AppID.zeroIndex;
@@ -250,7 +250,7 @@ export class CaelusAdmin extends Contract {
 
   mintValidatorCommit(validatorAppID: AppID, stakeCommit: PayTxn): void {
     assert(this.isPool(validatorAppID));
-    const operatorAddress = validatorAppID.globalState(GKEYS.OPERATOR_ADDRESS) as Address;
+    const operatorAddress = validatorAppID.globalState(StateKeys.OPERATOR_ADDRESS) as Address;
     verifyPayTxn(stakeCommit, {
       sender: operatorAddress,
       receiver: this.app.address,
@@ -277,7 +277,7 @@ export class CaelusAdmin extends Contract {
   burnValidatorCommit(appToBurnFrom: AppID, amount: uint64): void {
     this.isPool(appToBurnFrom);
     verifyTxn(this.txn, {
-      sender: appToBurnFrom.globalState(GKEYS.OPERATOR_ADDRESS) as Address,
+      sender: appToBurnFrom.globalState(StateKeys.OPERATOR_ADDRESS) as Address,
     });
     const toBurn = this.getBurnAmount(amount);
     sendMethodCall<typeof CaelusValidatorPool.prototype.removeFromOperatorCommit, void>({
@@ -297,20 +297,20 @@ export class CaelusAdmin extends Contract {
     // init burn request for the amount sent
     // reduce tot circ supply of vALGO
     this.isPool(validatorAppID);
-    assert(globals.round - this.lastExhaustBlock.value > VALUES.BURN_COOLDOWN, "can only burn if we're not exhausted");
+    assert(globals.round - this.lastExhaustBlock.value > Values.BURN_COOLDOWN, "can only burn if we're not exhausted");
     verifyAssetTransferTxn(burnTxn, {
       xferAsset: this.tokenId.value,
       assetSender: validatorAppID.address,
     });
-    assert((validatorAppID.globalState(GKEYS.STATUS) as uint64) !== 2);
+    assert((validatorAppID.globalState(StateKeys.STATUS) as uint64) !== 2);
     let amountToUpdate = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
     let toBurn =
-      this.getBurnAmount(burnTxn.assetAmount) - (validatorAppID.globalState(GKEYS.OPERATOR_COMMIT) as uint64); // burn from other validators the amount of Algo accrued from the operator LST
+      this.getBurnAmount(burnTxn.assetAmount) - (validatorAppID.globalState(StateKeys.OPERATOR_COMMIT) as uint64); // burn from other validators the amount of Algo accrued from the operator LST
     let amtBurned = 0; // need this to subtract from totalAlgoSupply
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
       const currentTargetInQueue = this.burnQueue.value[i];
       if (this.isPool(currentTargetInQueue)) {
-        const delegatedToTarget = currentTargetInQueue.globalState(GKEYS.DELEGATED_STAKE) as uint64;
+        const delegatedToTarget = currentTargetInQueue.globalState(StateKeys.DELEGATED_STAKE) as uint64;
         if (delegatedToTarget >= toBurn) {
           this.doBurnTxn(currentTargetInQueue, [toBurn, this.app.address]);
           amtBurned += toBurn;
@@ -352,8 +352,8 @@ export class CaelusAdmin extends Contract {
     // check that app is not delinquent anymore & his vAlgo amount is 0
     // send vAlgo amount corresponding to the current peg for the operatorCommit amount
     this.isPool(app);
-    assert((app.globalState(GKEYS.STATUS) as uint64) !== 2, 'must solve delinquency first');
-    const amount = app.globalState(GKEYS.OPERATOR_COMMIT) as uint64;
+    assert((app.globalState(StateKeys.STATUS) as uint64) !== 2, 'must solve delinquency first');
+    const amount = app.globalState(StateKeys.OPERATOR_COMMIT) as uint64;
     assert(
       app.address.assetBalance(this.tokenId.value) === 0,
       'If the app already has vALGO it cannot mint with this method'
@@ -373,13 +373,13 @@ export class CaelusAdmin extends Contract {
   // No assert call to avoid future P2P spam.
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
-    const isDelegatable = (validatorAppID.globalState(GKEYS.STATUS) as uint64) === 0;
+    const isDelegatable = (validatorAppID.globalState(StateKeys.STATUS) as uint64) === 0;
     if (!this.isPool(this.highestBidder.value)) {
       this.highestBidder.value = validatorAppID;
       return;
     }
-    const challengerBuffer = validatorAppID.globalState(GKEYS.SATURATION_BUFFER) as uint64;
-    const highestBuffer = this.highestBidder.value.globalState(GKEYS.SATURATION_BUFFER) as uint64;
+    const challengerBuffer = validatorAppID.globalState(StateKeys.SATURATION_BUFFER) as uint64;
+    const highestBuffer = this.highestBidder.value.globalState(StateKeys.SATURATION_BUFFER) as uint64;
     assert(isDelegatable, 'only bid delegatable Apps');
     if (challengerBuffer > highestBuffer) {
       this.highestBidder.value = validatorAppID;
@@ -410,7 +410,7 @@ export class CaelusAdmin extends Contract {
   // used to set new validator inside the burn queue || burn Prio
   snitchToBurn(app: AppID): void {
     assert(this.isPool(app));
-    const satSnitch = app.globalState(GKEYS.SATURATION_BUFFER) as uint64;
+    const satSnitch = app.globalState(StateKeys.SATURATION_BUFFER) as uint64;
     let minPrio = app;
     let minSat = satSnitch;
 
@@ -420,10 +420,10 @@ export class CaelusAdmin extends Contract {
         queue[i] = minPrio;
         break;
       }
-      if ((queue[i].globalState(GKEYS.SATURATION_BUFFER) as uint64) < minSat) {
+      if ((queue[i].globalState(StateKeys.SATURATION_BUFFER) as uint64) < minSat) {
         const temp = minPrio;
         minPrio = queue[i];
-        minSat = queue[i].globalState(GKEYS.SATURATION_BUFFER) as uint64;
+        minSat = queue[i].globalState(StateKeys.SATURATION_BUFFER) as uint64;
         queue[i] = temp;
       }
     }
@@ -506,11 +506,11 @@ export class CaelusAdmin extends Contract {
    */
   onOperatorExit(appToClose: AppID): void {
     verifyTxn(this.txn, {
-      sender: appToClose.globalState(GKEYS.OPERATOR_ADDRESS) as Address,
+      sender: appToClose.globalState(StateKeys.OPERATOR_ADDRESS) as Address,
     });
     const removedStake =
-      (appToClose.globalState(GKEYS.DELEGATED_STAKE) as uint64) +
-      (appToClose.globalState(GKEYS.OPERATOR_COMMIT) as uint64);
+      (appToClose.globalState(StateKeys.DELEGATED_STAKE) as uint64) +
+      (appToClose.globalState(StateKeys.OPERATOR_COMMIT) as uint64);
     this.totalStake.value -= removedStake;
     sendMethodCall<typeof CaelusValidatorPool.prototype.deleteApplication, void>({
       applicationID: appToClose,
@@ -522,7 +522,7 @@ export class CaelusAdmin extends Contract {
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
     this.getFLcounter();
     this.flashLoanCounter.value += appToInclude.length;
-    const keepFee = this.flashLoanCounter.value + VALUES.FLASH_LOAN_FEE;
+    const keepFee = this.flashLoanCounter.value + Values.FLASH_LOAN_FEE;
 
     verifyPayTxn(payFeeTxn, {
       receiver: this.app.address,
@@ -581,19 +581,19 @@ export class CaelusAdmin extends Contract {
     }
     const idleStake = this.app.address.balance - this.app.address.minBalance;
     this.pegRatio.value = wideRatio(
-      [this.totalStake.value + idleStake, VALUES.SCALE],
+      [this.totalStake.value + idleStake, Values.SCALE],
       [this.tokenCirculatingSupply.value]
     );
   }
 
   private getMintAmount(amount: uint64): uint64 {
     this.calculateLSTRatio();
-    return wideRatio([amount, VALUES.SCALE], [this.pegRatio.value]);
+    return wideRatio([amount, Values.SCALE], [this.pegRatio.value]);
   }
 
   private getBurnAmount(amount: uint64): uint64 {
     this.calculateLSTRatio();
-    return wideRatio([amount, this.pegRatio.value], [VALUES.SCALE]);
+    return wideRatio([amount, this.pegRatio.value], [Values.SCALE]);
   }
 
   private doBurnTxn(target: AppID, args: [uint64, Address]): void {

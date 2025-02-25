@@ -7,7 +7,7 @@ export type SnitchInfo = {
   max: uint64; // use if split is true and set to the max amount to send to the validator
 };
 
-export const VALUES = {
+export const Values = {
   ALGORAND_ACCOUNT_MIN_BALANCE: 100000,
   ALGORAND_BASE_FEE: 1000,
   APPLICATION_BASE_FEE: 100000,
@@ -32,7 +32,7 @@ export const VALUES = {
   CLAIM_DELAY: 330,
 };
 
-export const GKEYS = {
+export const StateKeys = {
   // ADMIN KEYS
   MANAGER: 'manager',
   VALIDATOR_POOL_APPROVAL_PROGRAM: 'validator_approval_program',

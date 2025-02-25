@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { Config } from '@algorandfoundation/algokit-utils';
-import { addValidator, adminSetup, deploy, validatorSetup, test } from './bootstrap';
+import { addValidator, adminSetup, deploy, validatorSetup, test, update } from './bootstrap';
 
 Config.configure({
   debug: true,
@@ -11,6 +11,10 @@ switch (process.argv[2]) {
   case 'deploy':
     console.log(`EXECUTING DEPLOY...`);
     deploy();
+    break;
+  case 'update':
+    console.log(`EXECUTING UPDATE...`);
+    update();
     break;
   case 'admin':
     console.log(`EXECUTING ADMIN SET UP...`);

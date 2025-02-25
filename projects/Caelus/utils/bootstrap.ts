@@ -121,7 +121,7 @@ export async function deploy() {
   console.log('APP ADDRESS IS: ', appDeployer.appAddress);
 }
 
-export async function updateAdmin() {
+export async function update() {
   const testAccount = await algorand.account.fromKmd(
     'lora-dev',
     (account) => account.address === 'W6RAW7BEU6JGZU5X5QH4JGHAA27YBT6BRWZW5HTB7WGTZZNNBWM6SHGNDI'

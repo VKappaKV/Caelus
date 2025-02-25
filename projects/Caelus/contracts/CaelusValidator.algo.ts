@@ -1,6 +1,6 @@
 /* eslint-disable import/no-cycle */
 import { Contract } from '@algorandfoundation/tealscript';
-import { VALUES, SnitchInfo, GKEYS } from './constants.algo';
+import { Values, SnitchInfo, StateKeys } from './constants.algo';
 
 import { CaelusAdmin } from './CaelusAdmin.algo';
 
@@ -11,51 +11,51 @@ import { CaelusAdmin } from './CaelusAdmin.algo';
 export class CaelusValidatorPool extends Contract {
   programVersion = 11;
 
-  creatorContractAppID = GlobalStateKey<AppID>({ key: GKEYS.CREATOR });
+  creatorContractAppID = GlobalStateKey<AppID>({ key: StateKeys.CREATOR });
 
   validatorPoolContractVersion = GlobalStateKey<uint64>({
-    key: GKEYS.CONTRACT_VERSION,
+    key: StateKeys.CONTRACT_VERSION,
   });
 
-  tokenId = GlobalStateKey<AssetID>({ key: GKEYS.TOKEN_ID });
+  tokenId = GlobalStateKey<AssetID>({ key: StateKeys.TOKEN_ID });
 
-  vestID = GlobalStateKey<AssetID>({ key: GKEYS.VEST_ID });
+  vestID = GlobalStateKey<AssetID>({ key: StateKeys.VEST_ID });
 
-  stVestID = GlobalStateKey<AssetID>({ key: GKEYS.STAKED_VEST_ID });
+  stVestID = GlobalStateKey<AssetID>({ key: StateKeys.STAKED_VEST_ID });
 
   // Operator specific params
 
-  operatorAddress = GlobalStateKey<Address>({ key: GKEYS.OPERATOR_ADDRESS });
+  operatorAddress = GlobalStateKey<Address>({ key: StateKeys.OPERATOR_ADDRESS });
 
-  operatorCommit = GlobalStateKey<uint64>({ key: GKEYS.OPERATOR_COMMIT });
+  operatorCommit = GlobalStateKey<uint64>({ key: StateKeys.OPERATOR_COMMIT });
 
   // Delegated Stake params
 
-  delegatedStake = GlobalStateKey<uint64>({ key: GKEYS.DELEGATED_STAKE });
+  delegatedStake = GlobalStateKey<uint64>({ key: StateKeys.DELEGATED_STAKE });
 
   maxDelegatableStake = GlobalStateKey<uint64>({
-    key: GKEYS.MAX_DELEGATABLE_STAKE,
+    key: StateKeys.MAX_DELEGATABLE_STAKE,
   });
 
-  status = GlobalStateKey<uint64>({ key: GKEYS.STATUS }); // 0 : ok; 1 : can't be delegated; 2 : delinquent
+  status = GlobalStateKey<uint64>({ key: StateKeys.STATUS }); // 0 : ok; 1 : can't be delegated; 2 : delinquent
 
   // Node performance params
 
-  performanceCounter = GlobalStateKey<uint64>({ key: GKEYS.PERFORMANCE_COUNTER });
+  performanceCounter = GlobalStateKey<uint64>({ key: StateKeys.PERFORMANCE_COUNTER });
 
-  saturationBUFFER = GlobalStateKey<uint64>({ key: GKEYS.SATURATION_BUFFER }); // value goes from 0 to 1000
+  saturationBUFFER = GlobalStateKey<uint64>({ key: StateKeys.SATURATION_BUFFER }); // value goes from 0 to 1000
 
-  lastRewardReport = GlobalStateKey<uint64>({ key: GKEYS.LAST_REWARD_REPORT });
+  lastRewardReport = GlobalStateKey<uint64>({ key: StateKeys.LAST_REWARD_REPORT });
 
-  lastDelinquencyReport = GlobalStateKey<uint64>({ key: GKEYS.LAST_DELINQUENCY_REPORT });
+  lastDelinquencyReport = GlobalStateKey<uint64>({ key: StateKeys.LAST_DELINQUENCY_REPORT });
 
-  delinquencyScore = GlobalStateKey<uint64>({ key: GKEYS.DELINQUENCY_SCORE });
+  delinquencyScore = GlobalStateKey<uint64>({ key: StateKeys.DELINQUENCY_SCORE });
 
   // for Flash Loan
 
-  balanceCheckpoint = GlobalStateKey<uint64>({ key: GKEYS.BALANCE_CHECKPOINT });
+  balanceCheckpoint = GlobalStateKey<uint64>({ key: StateKeys.BALANCE_CHECKPOINT });
 
-  repaid = GlobalStateKey<boolean>({ key: GKEYS.REPAID });
+  repaid = GlobalStateKey<boolean>({ key: StateKeys.REPAID });
 
   /**
    * createApplication method called at creation, initializes some globalKey values
@@ -99,7 +99,7 @@ export class CaelusValidatorPool extends Contract {
 
     assert(!this.app.address.isOptedInToAsset(this.tokenId.value), 'already opted in tokenId');
 
-    const lst = this.creatorContractAppID.value.globalState(GKEYS.TOKEN_ID) as AssetID;
+    const lst = this.creatorContractAppID.value.globalState(StateKeys.TOKEN_ID) as AssetID;
 
     sendAssetTransfer({
       assetReceiver: this.app.address,
@@ -247,12 +247,12 @@ export class CaelusValidatorPool extends Contract {
   reportRewards(block: uint64): void {
     assert(blocks[block].proposer === this.app.address); // NOTE THAT IN SDK WHEN CRAFTING TXN BLOCK NEEDS TO BE INCLUDED IN FIRST VALID TO NOW RANGE
     assert(block > this.lastRewardReport.value);
-    const isOperatorReportTime = globals.round - block < VALUES.OPERATOR_REPORT_MAX_TIME;
+    const isOperatorReportTime = globals.round - block < Values.OPERATOR_REPORT_MAX_TIME;
     const report = blocks[block].proposerPayout;
-    const takeFee = wideRatio([report, VALUES.VALIDATOR_COMMISSION], [100]);
+    const takeFee = wideRatio([report, Values.VALIDATOR_COMMISSION], [100]);
 
-    const protocolCut = wideRatio([VALUES.PROTOCOL_COMMISSION, report - takeFee], [100]);
-    const manager = this.creatorContractAppID.value.globalState(GKEYS.MANAGER) as Address;
+    const protocolCut = wideRatio([Values.PROTOCOL_COMMISSION, report - takeFee], [100]);
+    const manager = this.creatorContractAppID.value.globalState(StateKeys.MANAGER) as Address;
     sendPayment({
       receiver: manager,
       amount: protocolCut,
@@ -331,7 +331,7 @@ export class CaelusValidatorPool extends Contract {
     if (checks.performanceCheck) {
       result = this.performanceCheck();
     }
-    if (checks.stakeAmountCheck && this.app.address.balance > VALUES.MAX_STAKE_PER_ACCOUNT) {
+    if (checks.stakeAmountCheck && this.app.address.balance > Values.MAX_STAKE_PER_ACCOUNT) {
       this.setDelinquency();
       result = true;
     }
@@ -361,7 +361,7 @@ export class CaelusValidatorPool extends Contract {
       result = true;
     }
     assert(amount <= this.delegatedStake.value);
-    const isDelegatable = (checks.recipient.globalState(GKEYS.STATUS) as number) === 0;
+    const isDelegatable = (checks.recipient.globalState(StateKeys.STATUS) as number) === 0;
     if (checks.split && amount > checks.max && isDelegatable) {
       const toRecipient = amount - checks.max;
       amount -= toRecipient;
@@ -428,7 +428,7 @@ export class CaelusValidatorPool extends Contract {
   claimLeftAlgo(): void {
     const dust =
       this.app.address.balance - this.operatorCommit.value - this.delegatedStake.value - this.app.address.minBalance;
-    const manager = this.creatorContractAppID.value.globalState(GKEYS.MANAGER) as Address;
+    const manager = this.creatorContractAppID.value.globalState(StateKeys.MANAGER) as Address;
     sendPayment({
       receiver: manager,
       amount: dust,
@@ -446,7 +446,7 @@ export class CaelusValidatorPool extends Contract {
     sendPayment({
       receiver: this.creatorContractAppID.value.address,
       amount: this.operatorCommit.value + this.delegatedStake.value,
-      closeRemainderTo: this.creatorContractAppID.value.globalState(GKEYS.MANAGER) as Address,
+      closeRemainderTo: this.creatorContractAppID.value.globalState(StateKeys.MANAGER) as Address,
     });
     sendAssetTransfer({
       xferAsset: this.tokenId.value,
@@ -491,7 +491,7 @@ export class CaelusValidatorPool extends Contract {
 
     // Check that contract balance is at least 30k Algo and less than MAX_STAKE_PER_ACCOUNT
     assert(
-      this.app.address.balance >= globals.payoutsMinBalance && this.app.address.balance <= VALUES.MAX_STAKE_PER_ACCOUNT,
+      this.app.address.balance >= globals.payoutsMinBalance && this.app.address.balance <= Values.MAX_STAKE_PER_ACCOUNT,
       'Contract needs 30k Algo as minimum balance for rewards eligibility and at most 50M Algo'
     );
 
@@ -576,7 +576,7 @@ export class CaelusValidatorPool extends Contract {
   }
 
   private delinquencyThresholdCheck(): boolean {
-    if (this.delinquencyScore.value > VALUES.MAX_DELINQUENCY_TOLERATED) {
+    if (this.delinquencyScore.value > Values.MAX_DELINQUENCY_TOLERATED) {
       return false;
     }
     return true;
@@ -621,14 +621,14 @@ export class CaelusValidatorPool extends Contract {
 
       // add in the performance counter to increase delegatable amount, increases of 10k delegatable stake per multiples of 5 for performanceCounter
       this.maxDelegatableStake.value +=
-        VALUES.PERFORMANCE_STAKE_INCREASE * (this.performanceCounter.value / VALUES.PERFORMANCE_STEP);
+        Values.PERFORMANCE_STAKE_INCREASE * (this.performanceCounter.value / Values.PERFORMANCE_STEP);
 
       // check against globals.payoutsMaxBalance (50M)
-      if (this.app.address.balance >= VALUES.MAX_STAKE_PER_ACCOUNT) {
+      if (this.app.address.balance >= Values.MAX_STAKE_PER_ACCOUNT) {
         this.maxDelegatableStake.value = 0;
         this.setDelinquency();
-      } else if (this.app.address.balance + this.maxDelegatableStake.value > VALUES.MAX_STAKE_PER_ACCOUNT) {
-        this.maxDelegatableStake.value = VALUES.MAX_STAKE_PER_ACCOUNT - this.app.address.balance;
+      } else if (this.app.address.balance + this.maxDelegatableStake.value > Values.MAX_STAKE_PER_ACCOUNT) {
+        this.maxDelegatableStake.value = Values.MAX_STAKE_PER_ACCOUNT - this.app.address.balance;
       }
     } else {
       this.maxDelegatableStake.value = 0;
@@ -645,9 +645,9 @@ export class CaelusValidatorPool extends Contract {
 
   private getVESTid(type: uint64): void {
     if (type === 0) {
-      this.vestID.value = this.creatorContractAppID.value.globalState(GKEYS.VEST_ID) as AssetID;
+      this.vestID.value = this.creatorContractAppID.value.globalState(StateKeys.VEST_ID) as AssetID;
     } else if (type === 1) {
-      this.stVestID.value = this.creatorContractAppID.value.globalState(GKEYS.STAKED_VEST_ID) as AssetID;
+      this.stVestID.value = this.creatorContractAppID.value.globalState(StateKeys.STAKED_VEST_ID) as AssetID;
     }
   }
 
@@ -660,10 +660,10 @@ export class CaelusValidatorPool extends Contract {
     }
     const lockedVEST = this.operatorAddress.value.assetBalance(this.vestID.value);
     const ownedVEST = this.operatorAddress.value.assetBalance(this.stVestID.value);
-    if (lockedVEST + ownedVEST >= VALUES.VEST_TIER_5) {
+    if (lockedVEST + ownedVEST >= Values.VEST_TIER_5) {
       return 2;
     }
-    if (lockedVEST + ownedVEST >= VALUES.VEST_TIER_4) {
+    if (lockedVEST + ownedVEST >= Values.VEST_TIER_4) {
       return 1;
     }
     return 0;
