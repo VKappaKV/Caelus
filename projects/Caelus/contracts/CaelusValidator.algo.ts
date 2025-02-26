@@ -446,7 +446,6 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
-  @allow.call('CloseOut')
   deleteApplication(): void {
     assert(this.status.value !== 2, 'Account is delinquent. Solve Delinquency state before closing');
     assert(this.txn.sender === this.operatorAddress.value, 'Only the node operator can close the node');

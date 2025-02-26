@@ -26,7 +26,7 @@ const algorand = algokit.AlgorandClient.fromConfig({
 const getAccount = async () => {
   const testAccount = await algorand.account.fromKmd(
     'lora-dev',
-    (account) => account.address === 'Z7JNJLJD3TRGEOZGK3DZ6XBEA6ZCZK2CUILBCMEB3U4WXOKTAPKQKHO6QM'
+    (account) => account.address === 'NYSW5ZHRHQX6P7MVKPLXVQOP7X7KNHJL74VHRMKW5TAJLQAZGO2R3UAF7E'
   );
 
   const random = algorand.account.random();
