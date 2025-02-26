@@ -52,15 +52,13 @@ const algorand = algokit.AlgorandClient.fromConfig({
 const getAccount = async () => {
   const testAccount = await algorand.account.fromKmd(
     'lora-dev',
-    (account) => account.address === '6D2HEIEYZK4QTQ4G5HJI3C3UARAWXYMAGKK24GHLTAJFQIBCFENCYJHVFA'
+    (account) => account.address === 'Z7JNJLJD3TRGEOZGK3DZ6XBEA6ZCZK2CUILBCMEB3U4WXOKTAPKQKHO6QM'
   );
 
   const random = algorand.account.random();
 
   return { testAccount, random };
 };
-
-const APP_ID = 1002n;
 
 export const test = async () => {
   const { testAccount, random } = await getAccount();
@@ -81,7 +79,7 @@ export const test = async () => {
   }
 };
 
-export async function deploy() {
+export async function deploy(): Promise<bigint> {
   // change with other wallet depending on your network
   const { testAccount } = await getAccount();
 
@@ -120,9 +118,11 @@ export async function deploy() {
 
   console.log('APP ID IS: ', appDeployer.appId);
   console.log('APP ADDRESS IS: ', appDeployer.appAddress);
+
+  return appDeployer.appId;
 }
 
-export async function update() {
+export async function update(APP_ID: bigint) {
   const { testAccount } = await getAccount();
 
   const adminFactory = algorand.client.getTypedAppFactory(CaelusAdminFactory, {
@@ -142,7 +142,7 @@ export async function update() {
   });
 }
 
-export async function adminSetup() {
+export async function adminSetup(APP_ID: bigint) {
   const { testAccount } = await getAccount();
 
   const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
@@ -181,7 +181,7 @@ export async function adminSetup() {
   await adminClient.send.managerUpdateVestTokensId({ args: [dummyIDtxn.assetId, stakedDummyIDtxn.assetId] });
 }
 
-export async function addValidator() {
+export async function addValidator(APP_ID: bigint) {
   const { testAccount } = await getAccount();
 
   const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
@@ -229,7 +229,7 @@ export async function writePoolProgram(adminFactory: CaelusAdminClient, program:
   writeGroup.send({ populateAppCallResources: true });
 }
 
-export async function validatorSetup() {
+export async function validatorSetup(APP_ID: bigint) {
   const { testAccount } = await getAccount();
   const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
     appId: APP_ID,

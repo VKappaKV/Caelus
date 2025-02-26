@@ -501,22 +501,6 @@ export class CaelusAdmin extends Contract {
     }
   }
 
-  /**
-   * Used to close and delete a validator pool contract, only callable by the node operator.
-   *
-   * @param {AppID} appToClose  - The AppID of the operator to close
-   */
-  onOperatorExit(appToClose: AppID): void {
-    verifyTxn(this.txn, {
-      sender: appToClose.globalState('operator') as Address,
-    });
-
-    sendMethodCall<typeof CaelusValidatorPool.prototype.deleteApplication, void>({
-      applicationID: appToClose,
-      methodArgs: [],
-    });
-  }
-
   // TODO : DOCUMENT ON THE EVENTUAL SDK HOW THE FEE STRUCTURE WORKS TO AVOID SOMEONE YEETING THEIR NETWORTH ON A FLASH LOAN FEE
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
     this.getFLcounter();

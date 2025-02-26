@@ -428,20 +428,6 @@
       }
     },
     {
-      "name": "onOperatorExit",
-      "desc": "Used to close and delete a validator pool contract, only callable by the node operator.",
-      "args": [
-        {
-          "name": "appToClose",
-          "type": "uint64",
-          "desc": "The AppID of the operator to close"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
       "name": "makeFlashLoanRequest",
       "args": [
         {
