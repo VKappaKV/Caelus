@@ -369,18 +369,22 @@
     },
     {
       "name": "snitchCheck",
+      "desc": "Used to check the behavior of a Validator App",
       "args": [
         {
           "name": "appToCheck",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "Validator AppID to snitch"
         },
         {
           "name": "params",
-          "type": "(bool,bool,bool,uint64,bool,uint64)"
+          "type": "(bool,bool,bool,uint64,bool,uint64)",
+          "desc": "SnitchInfo object containing the informations to check"
         }
       ],
       "returns": {
-        "type": "bool"
+        "type": "bool",
+        "desc": "boolean result of the snitch if successfull - true"
       },
       "events": [
         {
@@ -401,18 +405,22 @@
     },
     {
       "name": "reStakeFromSnitch",
+      "desc": "Follow up operation called by the snitched App to perform restaking of the delegated Algo clawed back",
       "args": [
         {
           "name": "snitchedApp",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "The AppID of the validator to snitch"
         },
         {
           "name": "receiverApp",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "The AppID of the receiver of the delegated Algo"
         },
         {
           "name": "restakeTxn",
-          "type": "pay"
+          "type": "pay",
+          "desc": "The PayTxn following the snitch that sends the delegated Algo to be moved back and restaked"
         }
       ],
       "returns": {
@@ -421,10 +429,12 @@
     },
     {
       "name": "onOperatorExit",
+      "desc": "Used to close and delete a validator pool contract, only callable by the node operator.",
       "args": [
         {
           "name": "appToClose",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "The AppID of the operator to close"
         }
       ],
       "returns": {
