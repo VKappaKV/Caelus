@@ -28,7 +28,7 @@ Config.configure({
       break;
     case 'update':
       console.log(`EXECUTING UPDATE...`);
-      update(1002n);
+      update(16328303n);
       break;
     case 'admin':
       console.log(`EXECUTING ADMIN SET UP...`);

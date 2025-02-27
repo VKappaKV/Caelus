@@ -4,7 +4,7 @@ import * as algokit from '@algorandfoundation/algokit-utils';
 import { consoleLogger } from '@algorandfoundation/algokit-utils/types/logging';
 import { Config } from '@algorandfoundation/algokit-utils';
 import { OnSchemaBreak, OnUpdate } from '@algorandfoundation/algokit-utils/types/app';
-import algosdk from 'algosdk';
+import algosdk, { ABIMethod } from 'algosdk';
 import { CaelusAdminClient, CaelusAdminFactory } from '../contracts/clients/CaelusAdminClient';
 import { CaelusValidatorPoolFactory } from '../contracts/clients/CaelusValidatorPoolClient';
 import { MNEMONIC } from '../env';
@@ -142,18 +142,40 @@ export async function update(APP_ID: bigint) {
     defaultSigner: testAccount.signer,
   });
 
+  const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
+    appId: APP_ID,
+    defaultSender: testAccount.addr,
+    defaultSigner: testAccount.signer,
+  });
+
   const adminApprovalProgram = await adminFactory.appFactory.compile();
 
-  await algorand.send.appUpdate({
+  await algorand.send.appUpdateMethodCall({
     sender: testAccount.addr,
     signer: testAccount,
     appId: APP_ID,
+    method: adminClient.appClient.getABIMethod('updateApplication()void'),
     approvalProgram: adminApprovalProgram.compiledApproval?.compiledBase64ToBytes!,
     clearStateProgram: adminApprovalProgram.compiledClear?.compiledBase64ToBytes!,
     onComplete: algosdk.OnApplicationComplete.UpdateApplicationOC,
     populateAppCallResources: true,
   });
 }
+
+// export async function updateFix(APP_ID: bigint) {
+//   const { testAccount } = await getAccount();
+
+//   const adminFactory = algorand.client.getTypedAppFactory(CaelusAdminFactory, {
+//     defaultSender: testAccount.addr,
+//     defaultSigner: testAccount.signer,
+//   });
+
+//   const adminApprovalProgram = await adminFactory.appFactory.compile();
+
+//   const updateTxn = await
+
+//   await
+// }
 
 export async function adminSetup(APP_ID: bigint) {
   const { testAccount } = await getAccount();
