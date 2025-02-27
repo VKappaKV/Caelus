@@ -675,6 +675,11 @@ mintRequest:
 	app_global_put
 
 	// contracts\CaelusAdmin.algo.ts:182
+	// log('minted!')
+	pushbytes 0x6d696e74656421 // "minted!"
+	log
+
+	// contracts\CaelusAdmin.algo.ts:184
 	// this.mintEvent.log({
 	//       instant: true,
 	//       amount: mintTxn.amount,
@@ -733,7 +738,7 @@ burnRequest:
 	bytec 0 // 0x
 	dupn 7
 
-	// contracts\CaelusAdmin.algo.ts:190
+	// contracts\CaelusAdmin.algo.ts:192
 	// verifyAssetTransferTxn(burnTxn, {
 	//       xferAsset: this.tokenId.value,
 	//       assetReceiver: this.app.address,
@@ -767,19 +772,19 @@ burnRequest:
 	// transaction verification failed: {"txn":"burnTxn","field":"assetAmount","condition":"greaterThanEqualTo","expected":">=ALGORAND_BASE_FEE"}
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:196
+	// contracts\CaelusAdmin.algo.ts:198
 	// amountToBurn = this.getBurnAmount(burnTxn.assetAmount)
 	frame_dig -1 // burnTxn: AssetTransferTxn
 	gtxns AssetAmount
 	callsub getBurnAmount
 	frame_bury 0 // amountToBurn: uint64
 
-	// contracts\CaelusAdmin.algo.ts:197
+	// contracts\CaelusAdmin.algo.ts:199
 	// burning = 0
 	intc 0 // 0
 	frame_bury 1 // burning: uint64
 
-	// contracts\CaelusAdmin.algo.ts:199
+	// contracts\CaelusAdmin.algo.ts:201
 	// idleAlgo = this.app.address.balance - this.app.address.minBalance
 	global CurrentApplicationAddress
 	acct_params_get AcctBalance
@@ -791,7 +796,7 @@ burnRequest:
 	frame_bury 2 // idleAlgo: uint64
 
 	// *if2_condition
-	// contracts\CaelusAdmin.algo.ts:200
+	// contracts\CaelusAdmin.algo.ts:202
 	// idleAlgo > 0
 	frame_dig 2 // idleAlgo: uint64
 	intc 0 // 0
@@ -799,7 +804,7 @@ burnRequest:
 	bz *if2_end
 
 	// *if2_consequent
-	// contracts\CaelusAdmin.algo.ts:201
+	// contracts\CaelusAdmin.algo.ts:203
 	// amountToBurnFromIdle = idleAlgo >= amountToBurn ? amountToBurn : idleAlgo
 	frame_dig 2 // idleAlgo: uint64
 	frame_dig 0 // amountToBurn: uint64
@@ -814,14 +819,14 @@ burnRequest:
 *ternary0_end:
 	frame_bury 3 // amountToBurnFromIdle: uint64
 
-	// contracts\CaelusAdmin.algo.ts:202
+	// contracts\CaelusAdmin.algo.ts:204
 	// burning += amountToBurnFromIdle
 	frame_dig 1 // burning: uint64
 	frame_dig 3 // amountToBurnFromIdle: uint64
 	+
 	frame_bury 1 // burning: uint64
 
-	// contracts\CaelusAdmin.algo.ts:204
+	// contracts\CaelusAdmin.algo.ts:206
 	// sendPayment({
 	//         receiver: burnTxn.sender,
 	//         amount: amountToBurnFromIdle,
@@ -830,13 +835,13 @@ burnRequest:
 	intc 1 //  pay
 	itxn_field TypeEnum
 
-	// contracts\CaelusAdmin.algo.ts:205
+	// contracts\CaelusAdmin.algo.ts:207
 	// receiver: burnTxn.sender
 	frame_dig -1 // burnTxn: AssetTransferTxn
 	gtxns Sender
 	itxn_field Receiver
 
-	// contracts\CaelusAdmin.algo.ts:206
+	// contracts\CaelusAdmin.algo.ts:208
 	// amount: amountToBurnFromIdle
 	frame_dig 3 // amountToBurnFromIdle: uint64
 	itxn_field Amount
@@ -850,7 +855,7 @@ burnRequest:
 
 *if2_end:
 	// *if3_condition
-	// contracts\CaelusAdmin.algo.ts:210
+	// contracts\CaelusAdmin.algo.ts:212
 	// burning === amountToBurn
 	frame_dig 1 // burning: uint64
 	frame_dig 0 // amountToBurn: uint64
@@ -858,24 +863,24 @@ burnRequest:
 	bz *if3_end
 
 	// *if3_consequent
-	// contracts\CaelusAdmin.algo.ts:211
+	// contracts\CaelusAdmin.algo.ts:213
 	// return;
 	retsub
 
 *if3_end:
 	// *if4_condition
-	// contracts\CaelusAdmin.algo.ts:214
+	// contracts\CaelusAdmin.algo.ts:216
 	// this.queueIsEmpty()
 	callsub queueIsEmpty
 	bz *if4_end
 
 	// *if4_consequent
-	// contracts\CaelusAdmin.algo.ts:215
+	// contracts\CaelusAdmin.algo.ts:217
 	// return;
 	retsub
 
 *if4_end:
-	// contracts\CaelusAdmin.algo.ts:218
+	// contracts\CaelusAdmin.algo.ts:220
 	// assert(globals.round - this.lastExhaustBlock.value > BURN_COOLDOWN, 'wait at least 5 blocks since Exhaust Block')
 	global Round
 	bytec 12 //  "last_exhaust_block"
@@ -887,13 +892,13 @@ burnRequest:
 	// wait at least 5 blocks since Exhaust Block
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:220
+	// contracts\CaelusAdmin.algo.ts:222
 	// for (let i = 0; i < this.burnQueue.value.length; i += 1)
 	intc 0 // 0
 	frame_bury 4 // i: uint64
 
 *for_0:
-	// contracts\CaelusAdmin.algo.ts:220
+	// contracts\CaelusAdmin.algo.ts:222
 	// i < this.burnQueue.value.length
 	frame_dig 4 // i: uint64
 	bytec 1 //  "burn_queue"
@@ -902,7 +907,7 @@ burnRequest:
 	<
 	bz *for_0_end
 
-	// contracts\CaelusAdmin.algo.ts:221
+	// contracts\CaelusAdmin.algo.ts:223
 	// currentTargetInQueue = this.burnQueue.value[i]
 	bytec 1 //  "burn_queue"
 	app_global_get
@@ -915,14 +920,14 @@ burnRequest:
 	frame_bury 5 // currentTargetInQueue: uint64
 
 	// *if5_condition
-	// contracts\CaelusAdmin.algo.ts:222
+	// contracts\CaelusAdmin.algo.ts:224
 	// this.isPool(currentTargetInQueue)
 	frame_dig 5 // currentTargetInQueue: uint64
 	callsub isPool
 	bz *if5_end
 
 	// *if5_consequent
-	// contracts\CaelusAdmin.algo.ts:223
+	// contracts\CaelusAdmin.algo.ts:225
 	// delegatedToTarget = currentTargetInQueue.globalState('delegated_stake') as uint64
 	frame_dig 5 // currentTargetInQueue: uint64
 	bytec 18 //  "delegated_stake"
@@ -933,7 +938,7 @@ burnRequest:
 	frame_bury 6 // delegatedToTarget: uint64
 
 	// *if6_condition
-	// contracts\CaelusAdmin.algo.ts:224
+	// contracts\CaelusAdmin.algo.ts:226
 	// delegatedToTarget < amountToBurn - burning
 	frame_dig 6 // delegatedToTarget: uint64
 	frame_dig 0 // amountToBurn: uint64
@@ -943,7 +948,7 @@ burnRequest:
 	bz *if6_else
 
 	// *if6_consequent
-	// contracts\CaelusAdmin.algo.ts:225
+	// contracts\CaelusAdmin.algo.ts:227
 	// this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, burnTo])
 	frame_dig 6 // delegatedToTarget: uint64
 	itob
@@ -952,7 +957,7 @@ burnRequest:
 	frame_dig 5 // currentTargetInQueue: uint64
 	callsub doBurnTxn
 
-	// contracts\CaelusAdmin.algo.ts:226
+	// contracts\CaelusAdmin.algo.ts:228
 	// this.burnQueue.value[i] = AppID.zeroIndex
 	bytec 1 //  "burn_queue"
 	app_global_get
@@ -965,7 +970,7 @@ burnRequest:
 	swap
 	app_global_put
 
-	// contracts\CaelusAdmin.algo.ts:227
+	// contracts\CaelusAdmin.algo.ts:229
 	// burning += delegatedToTarget
 	frame_dig 1 // burning: uint64
 	frame_dig 6 // delegatedToTarget: uint64
@@ -974,7 +979,7 @@ burnRequest:
 	b *if6_end
 
 *if6_else:
-	// contracts\CaelusAdmin.algo.ts:229
+	// contracts\CaelusAdmin.algo.ts:231
 	// this.doBurnTxn(currentTargetInQueue, [amountToBurn - burning, burnTo])
 	frame_dig 0 // amountToBurn: uint64
 	frame_dig 1 // burning: uint64
@@ -985,7 +990,7 @@ burnRequest:
 	frame_dig 5 // currentTargetInQueue: uint64
 	callsub doBurnTxn
 
-	// contracts\CaelusAdmin.algo.ts:230
+	// contracts\CaelusAdmin.algo.ts:232
 	// burning = amountToBurn
 	frame_dig 0 // amountToBurn: uint64
 	frame_bury 1 // burning: uint64
@@ -996,7 +1001,7 @@ burnRequest:
 *if5_end:
 
 *for_0_continue:
-	// contracts\CaelusAdmin.algo.ts:220
+	// contracts\CaelusAdmin.algo.ts:222
 	// i += 1
 	frame_dig 4 // i: uint64
 	intc 1 // 1
@@ -1005,7 +1010,7 @@ burnRequest:
 	b *for_0
 
 *for_0_end:
-	// contracts\CaelusAdmin.algo.ts:236
+	// contracts\CaelusAdmin.algo.ts:238
 	// amountLeft = this.getBurnAmount(amountToBurn - burning)
 	frame_dig 0 // amountToBurn: uint64
 	frame_dig 1 // burning: uint64
@@ -1014,7 +1019,7 @@ burnRequest:
 	frame_bury 7 // amountLeft: uint64
 
 	// *if7_condition
-	// contracts\CaelusAdmin.algo.ts:237
+	// contracts\CaelusAdmin.algo.ts:239
 	// amountLeft > 0
 	frame_dig 7 // amountLeft: uint64
 	intc 0 // 0
@@ -1022,7 +1027,7 @@ burnRequest:
 	bz *if7_end
 
 	// *if7_consequent
-	// contracts\CaelusAdmin.algo.ts:238
+	// contracts\CaelusAdmin.algo.ts:240
 	// this.doAxfer(burnTxn.sender, amountLeft, this.tokenId.value)
 	bytec 3 //  "token_id"
 	app_global_get
@@ -1031,14 +1036,14 @@ burnRequest:
 	gtxns Sender
 	callsub doAxfer
 
-	// contracts\CaelusAdmin.algo.ts:239
+	// contracts\CaelusAdmin.algo.ts:241
 	// this.lastExhaustBlock.value = globals.round
 	bytec 12 //  "last_exhaust_block"
 	global Round
 	app_global_put
 
 *if7_end:
-	// contracts\CaelusAdmin.algo.ts:241
+	// contracts\CaelusAdmin.algo.ts:243
 	// this.tokenCirculatingSupply.value -= burnTxn.assetAmount - amountLeft
 	bytec 2 //  "circulating_supply"
 	app_global_get
@@ -1051,7 +1056,7 @@ burnRequest:
 	swap
 	app_global_put
 
-	// contracts\CaelusAdmin.algo.ts:242
+	// contracts\CaelusAdmin.algo.ts:244
 	// this.totalStake.value -= burning
 	bytec 4 //  "total_stake"
 	app_global_get
@@ -1061,7 +1066,7 @@ burnRequest:
 	swap
 	app_global_put
 
-	// contracts\CaelusAdmin.algo.ts:244
+	// contracts\CaelusAdmin.algo.ts:246
 	// this.burnEvent.log({
 	//       filled: amountLeft > 0,
 	//       amount: burnTxn.assetAmount - amountLeft,
@@ -1118,13 +1123,13 @@ mintValidatorCommit:
 	bytec 0 // 0x
 	dup
 
-	// contracts\CaelusAdmin.algo.ts:257
+	// contracts\CaelusAdmin.algo.ts:259
 	// assert(this.isPool(validatorAppID))
 	frame_dig -1 // validatorAppID: AppID
 	callsub isPool
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:258
+	// contracts\CaelusAdmin.algo.ts:260
 	// operatorAddress = validatorAppID.globalState('operator') as Address
 	frame_dig -1 // validatorAppID: AppID
 	bytec 20 //  "operator"
@@ -1134,7 +1139,7 @@ mintValidatorCommit:
 	assert
 	frame_bury 0 // operatorAddress: address
 
-	// contracts\CaelusAdmin.algo.ts:259
+	// contracts\CaelusAdmin.algo.ts:261
 	// verifyPayTxn(stakeCommit, {
 	//       sender: operatorAddress,
 	//       receiver: this.app.address,
@@ -1157,7 +1162,7 @@ mintValidatorCommit:
 	// transaction verification failed: {"txn":"stakeCommit","field":"receiver","expected":"this.app.address"}
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:264
+	// contracts\CaelusAdmin.algo.ts:266
 	// sendMethodCall<typeof CaelusValidatorPool.prototype.addToOperatorCommit>({
 	//       applicationID: validatorAppID,
 	//       methodArgs: [
@@ -1171,14 +1176,14 @@ mintValidatorCommit:
 	intc 1 //  pay
 	itxn_field TypeEnum
 
-	// contracts\CaelusAdmin.algo.ts:268
+	// contracts\CaelusAdmin.algo.ts:270
 	// receiver: validatorAppID.address
 	frame_dig -1 // validatorAppID: AppID
 	app_params_get AppAddress
 	pop
 	itxn_field Receiver
 
-	// contracts\CaelusAdmin.algo.ts:269
+	// contracts\CaelusAdmin.algo.ts:271
 	// amount: stakeCommit.amount
 	frame_dig -2 // stakeCommit: PayTxn
 	gtxns Amount
@@ -1193,12 +1198,12 @@ mintValidatorCommit:
 	bytec 23 //  method "addToOperatorCommit(pay)void"
 	itxn_field ApplicationArgs
 
-	// contracts\CaelusAdmin.algo.ts:265
+	// contracts\CaelusAdmin.algo.ts:267
 	// applicationID: validatorAppID
 	frame_dig -1 // validatorAppID: AppID
 	itxn_field ApplicationID
 
-	// contracts\CaelusAdmin.algo.ts:266
+	// contracts\CaelusAdmin.algo.ts:268
 	// methodArgs: [
 	//         {
 	//           receiver: validatorAppID.address,
@@ -1212,14 +1217,14 @@ mintValidatorCommit:
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts\CaelusAdmin.algo.ts:274
+	// contracts\CaelusAdmin.algo.ts:276
 	// amountToMint = this.getMintAmount(stakeCommit.amount)
 	frame_dig -2 // stakeCommit: PayTxn
 	gtxns Amount
 	callsub getMintAmount
 	frame_bury 1 // amountToMint: uint64
 
-	// contracts\CaelusAdmin.algo.ts:275
+	// contracts\CaelusAdmin.algo.ts:277
 	// this.doAxfer(validatorAppID.address, amountToMint, this.tokenId.value)
 	bytec 3 //  "token_id"
 	app_global_get
@@ -1229,7 +1234,7 @@ mintValidatorCommit:
 	pop
 	callsub doAxfer
 
-	// contracts\CaelusAdmin.algo.ts:276
+	// contracts\CaelusAdmin.algo.ts:278
 	// this.totalStake.value += stakeCommit.amount
 	bytec 4 //  "total_stake"
 	app_global_get
@@ -1240,7 +1245,7 @@ mintValidatorCommit:
 	swap
 	app_global_put
 
-	// contracts\CaelusAdmin.algo.ts:277
+	// contracts\CaelusAdmin.algo.ts:279
 	// this.tokenCirculatingSupply.value += amountToMint
 	bytec 2 //  "circulating_supply"
 	app_global_get
@@ -1273,12 +1278,12 @@ burnValidatorCommit:
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	bytec 0 // 0x
 
-	// contracts\CaelusAdmin.algo.ts:283
+	// contracts\CaelusAdmin.algo.ts:285
 	// this.isPool(appToBurnFrom)
 	frame_dig -1 // appToBurnFrom: AppID
 	callsub isPool
 
-	// contracts\CaelusAdmin.algo.ts:284
+	// contracts\CaelusAdmin.algo.ts:286
 	// verifyTxn(this.txn, {
 	//       sender: appToBurnFrom.globalState('operator') as Address,
 	//     })
@@ -1295,13 +1300,13 @@ burnValidatorCommit:
 	// transaction verification failed: {"txn":"this.txn","field":"sender","expected":"appToBurnFrom.globalState('operator') as Address"}
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:287
+	// contracts\CaelusAdmin.algo.ts:289
 	// toBurn = this.getBurnAmount(amount)
 	frame_dig -2 // amount: uint64
 	callsub getBurnAmount
 	frame_bury 0 // toBurn: uint64
 
-	// contracts\CaelusAdmin.algo.ts:288
+	// contracts\CaelusAdmin.algo.ts:290
 	// sendMethodCall<typeof CaelusValidatorPool.prototype.removeFromOperatorCommit, void>({
 	//       applicationID: appToBurnFrom,
 	//       methodArgs: [toBurn, amount],
@@ -1312,12 +1317,12 @@ burnValidatorCommit:
 	pushbytes 0x31b7ec19 // method "removeFromOperatorCommit(uint64,uint64)void"
 	itxn_field ApplicationArgs
 
-	// contracts\CaelusAdmin.algo.ts:289
+	// contracts\CaelusAdmin.algo.ts:291
 	// applicationID: appToBurnFrom
 	frame_dig -1 // appToBurnFrom: AppID
 	itxn_field ApplicationID
 
-	// contracts\CaelusAdmin.algo.ts:290
+	// contracts\CaelusAdmin.algo.ts:292
 	// methodArgs: [toBurn, amount]
 	frame_dig 0 // toBurn: uint64
 	itob
@@ -1333,7 +1338,7 @@ burnValidatorCommit:
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts\CaelusAdmin.algo.ts:292
+	// contracts\CaelusAdmin.algo.ts:294
 	// this.totalStake.value -= toBurn
 	bytec 4 //  "total_stake"
 	app_global_get
@@ -1343,7 +1348,7 @@ burnValidatorCommit:
 	swap
 	app_global_put
 
-	// contracts\CaelusAdmin.algo.ts:293
+	// contracts\CaelusAdmin.algo.ts:295
 	// this.tokenCirculatingSupply.value -= amount
 	bytec 2 //  "circulating_supply"
 	app_global_get
@@ -1385,12 +1390,12 @@ burnToDelinquentValidator:
 	bytec 0 // 0x
 	dupn 5
 
-	// contracts\CaelusAdmin.algo.ts:304
+	// contracts\CaelusAdmin.algo.ts:306
 	// this.isPool(validatorAppID)
 	frame_dig -2 // validatorAppID: AppID
 	callsub isPool
 
-	// contracts\CaelusAdmin.algo.ts:305
+	// contracts\CaelusAdmin.algo.ts:307
 	// assert(globals.round - this.lastExhaustBlock.value > BURN_COOLDOWN, "can only burn if we're not exhausted")
 	global Round
 	bytec 12 //  "last_exhaust_block"
@@ -1402,7 +1407,7 @@ burnToDelinquentValidator:
 	// can only burn if we're not exhausted
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:306
+	// contracts\CaelusAdmin.algo.ts:308
 	// verifyAssetTransferTxn(burnTxn, {
 	//       xferAsset: this.tokenId.value,
 	//       assetSender: validatorAppID.address,
@@ -1428,7 +1433,7 @@ burnToDelinquentValidator:
 	// transaction verification failed: {"txn":"burnTxn","field":"assetSender","expected":"validatorAppID.address"}
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:310
+	// contracts\CaelusAdmin.algo.ts:312
 	// assert((validatorAppID.globalState('status') as uint64) !== 2)
 	frame_dig -2 // validatorAppID: AppID
 	bytec 15 //  "status"
@@ -1440,12 +1445,12 @@ burnToDelinquentValidator:
 	!=
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:311
+	// contracts\CaelusAdmin.algo.ts:313
 	// amountToUpdate: uint64 = 0
 	intc 0 // 0
 	frame_bury 0 // amountToUpdate: uint64
 
-	// contracts\CaelusAdmin.algo.ts:312
+	// contracts\CaelusAdmin.algo.ts:314
 	// toBurn: uint64 =
 	//       this.getBurnAmount(burnTxn.assetAmount) - (validatorAppID.globalState('operator_commit') as uint64)
 	frame_dig -1 // burnTxn: AssetTransferTxn
@@ -1460,18 +1465,18 @@ burnToDelinquentValidator:
 	-
 	frame_bury 1 // toBurn: uint64
 
-	// contracts\CaelusAdmin.algo.ts:314
+	// contracts\CaelusAdmin.algo.ts:316
 	// amtBurned = 0
 	intc 0 // 0
 	frame_bury 2 // amtBurned: uint64
 
-	// contracts\CaelusAdmin.algo.ts:315
+	// contracts\CaelusAdmin.algo.ts:317
 	// for (let i = 0; i < this.burnQueue.value.length; i += 1)
 	intc 0 // 0
 	frame_bury 3 // i: uint64
 
 *for_1:
-	// contracts\CaelusAdmin.algo.ts:315
+	// contracts\CaelusAdmin.algo.ts:317
 	// i < this.burnQueue.value.length
 	frame_dig 3 // i: uint64
 	bytec 1 //  "burn_queue"
@@ -1480,7 +1485,7 @@ burnToDelinquentValidator:
 	<
 	bz *for_1_end
 
-	// contracts\CaelusAdmin.algo.ts:316
+	// contracts\CaelusAdmin.algo.ts:318
 	// currentTargetInQueue = this.burnQueue.value[i]
 	bytec 1 //  "burn_queue"
 	app_global_get
@@ -1493,14 +1498,14 @@ burnToDelinquentValidator:
 	frame_bury 4 // currentTargetInQueue: uint64
 
 	// *if8_condition
-	// contracts\CaelusAdmin.algo.ts:317
+	// contracts\CaelusAdmin.algo.ts:319
 	// this.isPool(currentTargetInQueue)
 	frame_dig 4 // currentTargetInQueue: uint64
 	callsub isPool
 	bz *if8_end
 
 	// *if8_consequent
-	// contracts\CaelusAdmin.algo.ts:318
+	// contracts\CaelusAdmin.algo.ts:320
 	// delegatedToTarget = currentTargetInQueue.globalState('delegated_stake') as uint64
 	frame_dig 4 // currentTargetInQueue: uint64
 	bytec 18 //  "delegated_stake"
@@ -1511,7 +1516,7 @@ burnToDelinquentValidator:
 	frame_bury 5 // delegatedToTarget: uint64
 
 	// *if9_condition
-	// contracts\CaelusAdmin.algo.ts:319
+	// contracts\CaelusAdmin.algo.ts:321
 	// delegatedToTarget >= toBurn
 	frame_dig 5 // delegatedToTarget: uint64
 	frame_dig 1 // toBurn: uint64
@@ -1519,7 +1524,7 @@ burnToDelinquentValidator:
 	bz *if9_else
 
 	// *if9_consequent
-	// contracts\CaelusAdmin.algo.ts:320
+	// contracts\CaelusAdmin.algo.ts:322
 	// this.doBurnTxn(currentTargetInQueue, [toBurn, this.app.address])
 	frame_dig 1 // toBurn: uint64
 	itob
@@ -1528,14 +1533,14 @@ burnToDelinquentValidator:
 	frame_dig 4 // currentTargetInQueue: uint64
 	callsub doBurnTxn
 
-	// contracts\CaelusAdmin.algo.ts:321
+	// contracts\CaelusAdmin.algo.ts:323
 	// amtBurned += toBurn
 	frame_dig 2 // amtBurned: uint64
 	frame_dig 1 // toBurn: uint64
 	+
 	frame_bury 2 // amtBurned: uint64
 
-	// contracts\CaelusAdmin.algo.ts:322
+	// contracts\CaelusAdmin.algo.ts:324
 	// toBurn = 0
 	intc 0 // 0
 	frame_bury 1 // toBurn: uint64
@@ -1543,7 +1548,7 @@ burnToDelinquentValidator:
 	b *if9_end
 
 *if9_else:
-	// contracts\CaelusAdmin.algo.ts:325
+	// contracts\CaelusAdmin.algo.ts:327
 	// this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, this.app.address])
 	frame_dig 5 // delegatedToTarget: uint64
 	itob
@@ -1552,14 +1557,14 @@ burnToDelinquentValidator:
 	frame_dig 4 // currentTargetInQueue: uint64
 	callsub doBurnTxn
 
-	// contracts\CaelusAdmin.algo.ts:326
+	// contracts\CaelusAdmin.algo.ts:328
 	// amtBurned += delegatedToTarget
 	frame_dig 2 // amtBurned: uint64
 	frame_dig 5 // delegatedToTarget: uint64
 	+
 	frame_bury 2 // amtBurned: uint64
 
-	// contracts\CaelusAdmin.algo.ts:327
+	// contracts\CaelusAdmin.algo.ts:329
 	// toBurn -= delegatedToTarget
 	frame_dig 1 // toBurn: uint64
 	frame_dig 5 // delegatedToTarget: uint64
@@ -1571,7 +1576,7 @@ burnToDelinquentValidator:
 *if8_end:
 
 *for_1_continue:
-	// contracts\CaelusAdmin.algo.ts:315
+	// contracts\CaelusAdmin.algo.ts:317
 	// i += 1
 	frame_dig 3 // i: uint64
 	intc 1 // 1
@@ -1580,7 +1585,7 @@ burnToDelinquentValidator:
 	b *for_1
 
 *for_1_end:
-	// contracts\CaelusAdmin.algo.ts:331
+	// contracts\CaelusAdmin.algo.ts:333
 	// amountToUpdate = this.getBurnAmount(toBurn - amtBurned)
 	frame_dig 1 // toBurn: uint64
 	frame_dig 2 // amtBurned: uint64
@@ -1588,7 +1593,7 @@ burnToDelinquentValidator:
 	callsub getBurnAmount
 	frame_bury 0 // amountToUpdate: uint64
 
-	// contracts\CaelusAdmin.algo.ts:332
+	// contracts\CaelusAdmin.algo.ts:334
 	// this.tokenCirculatingSupply.value -= burnTxn.assetAmount - amountToUpdate
 	bytec 2 //  "circulating_supply"
 	app_global_get
@@ -1601,7 +1606,7 @@ burnToDelinquentValidator:
 	swap
 	app_global_put
 
-	// contracts\CaelusAdmin.algo.ts:333
+	// contracts\CaelusAdmin.algo.ts:335
 	// this.totalStake.value -= amtBurned
 	bytec 4 //  "total_stake"
 	app_global_get
@@ -1612,7 +1617,7 @@ burnToDelinquentValidator:
 	app_global_put
 
 	// *if10_condition
-	// contracts\CaelusAdmin.algo.ts:334
+	// contracts\CaelusAdmin.algo.ts:336
 	// amountToUpdate > 0
 	frame_dig 0 // amountToUpdate: uint64
 	intc 0 // 0
@@ -1620,7 +1625,7 @@ burnToDelinquentValidator:
 	bz *if10_end
 
 	// *if10_consequent
-	// contracts\CaelusAdmin.algo.ts:335
+	// contracts\CaelusAdmin.algo.ts:337
 	// this.doAxfer(burnTxn.sender, amountToUpdate, this.tokenId.value)
 	bytec 3 //  "token_id"
 	app_global_get
@@ -1630,7 +1635,7 @@ burnToDelinquentValidator:
 	callsub doAxfer
 
 *if10_end:
-	// contracts\CaelusAdmin.algo.ts:337
+	// contracts\CaelusAdmin.algo.ts:339
 	// sendMethodCall<typeof CaelusValidatorPool.prototype.addToOperatorCommit>({
 	//       applicationID: validatorAppID,
 	//       methodArgs: [
@@ -1644,14 +1649,14 @@ burnToDelinquentValidator:
 	intc 1 //  pay
 	itxn_field TypeEnum
 
-	// contracts\CaelusAdmin.algo.ts:341
+	// contracts\CaelusAdmin.algo.ts:343
 	// receiver: validatorAppID.address
 	frame_dig -2 // validatorAppID: AppID
 	app_params_get AppAddress
 	pop
 	itxn_field Receiver
 
-	// contracts\CaelusAdmin.algo.ts:342
+	// contracts\CaelusAdmin.algo.ts:344
 	// amount: amtBurned
 	frame_dig 2 // amtBurned: uint64
 	itxn_field Amount
@@ -1665,12 +1670,12 @@ burnToDelinquentValidator:
 	bytec 23 //  method "addToOperatorCommit(pay)void"
 	itxn_field ApplicationArgs
 
-	// contracts\CaelusAdmin.algo.ts:338
+	// contracts\CaelusAdmin.algo.ts:340
 	// applicationID: validatorAppID
 	frame_dig -2 // validatorAppID: AppID
 	itxn_field ApplicationID
 
-	// contracts\CaelusAdmin.algo.ts:339
+	// contracts\CaelusAdmin.algo.ts:341
 	// methodArgs: [
 	//         {
 	//           receiver: validatorAppID.address,
@@ -1684,7 +1689,7 @@ burnToDelinquentValidator:
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts\CaelusAdmin.algo.ts:347
+	// contracts\CaelusAdmin.algo.ts:349
 	// this.burnEvent.log({
 	//       filled: amountToUpdate > 0,
 	//       amount: burnTxn.assetAmount,
@@ -1727,12 +1732,12 @@ reMintDelinquentCommit:
 	bytec 0 // 0x
 	dup
 
-	// contracts\CaelusAdmin.algo.ts:359
+	// contracts\CaelusAdmin.algo.ts:361
 	// this.isPool(app)
 	frame_dig -1 // app: AppID
 	callsub isPool
 
-	// contracts\CaelusAdmin.algo.ts:360
+	// contracts\CaelusAdmin.algo.ts:362
 	// assert((app.globalState('status') as uint64) !== 2, 'must solve delinquency first')
 	frame_dig -1 // app: AppID
 	bytec 15 //  "status"
@@ -1746,7 +1751,7 @@ reMintDelinquentCommit:
 	// must solve delinquency first
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:361
+	// contracts\CaelusAdmin.algo.ts:363
 	// amount = app.globalState('operator_commit') as uint64
 	frame_dig -1 // app: AppID
 	bytec 19 //  "operator_commit"
@@ -1756,7 +1761,7 @@ reMintDelinquentCommit:
 	assert
 	frame_bury 0 // amount: uint64
 
-	// contracts\CaelusAdmin.algo.ts:362
+	// contracts\CaelusAdmin.algo.ts:364
 	// assert(
 	//       app.address.assetBalance(this.tokenId.value) === 0,
 	//       'If the app already has vALGO it cannot mint with this method'
@@ -1774,13 +1779,13 @@ reMintDelinquentCommit:
 	// If the app already has vALGO it cannot mint with this method
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:366
+	// contracts\CaelusAdmin.algo.ts:368
 	// amountToMint = this.getMintAmount(amount)
 	frame_dig 0 // amount: uint64
 	callsub getMintAmount
 	frame_bury 1 // amountToMint: uint64
 
-	// contracts\CaelusAdmin.algo.ts:367
+	// contracts\CaelusAdmin.algo.ts:369
 	// this.doAxfer(app.address, amountToMint, this.tokenId.value)
 	bytec 3 //  "token_id"
 	app_global_get
@@ -1790,7 +1795,7 @@ reMintDelinquentCommit:
 	pop
 	callsub doAxfer
 
-	// contracts\CaelusAdmin.algo.ts:368
+	// contracts\CaelusAdmin.algo.ts:370
 	// this.tokenCirculatingSupply.value += amountToMint
 	bytec 2 //  "circulating_supply"
 	app_global_get
@@ -1800,7 +1805,7 @@ reMintDelinquentCommit:
 	swap
 	app_global_put
 
-	// contracts\CaelusAdmin.algo.ts:370
+	// contracts\CaelusAdmin.algo.ts:372
 	// this.mintEvent.log({
 	//       instant: true,
 	//       amount: amount,
@@ -1840,13 +1845,13 @@ bid:
 	bytec 0 // 0x
 	dupn 2
 
-	// contracts\CaelusAdmin.algo.ts:380
+	// contracts\CaelusAdmin.algo.ts:382
 	// assert(this.isPool(validatorAppID))
 	frame_dig -1 // validatorAppID: AppID
 	callsub isPool
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:381
+	// contracts\CaelusAdmin.algo.ts:383
 	// isDelegatable = (validatorAppID.globalState('status') as uint64) === 0
 	frame_dig -1 // validatorAppID: AppID
 	bytec 15 //  "status"
@@ -1859,7 +1864,7 @@ bid:
 	frame_bury 0 // isDelegatable: bool
 
 	// *if11_condition
-	// contracts\CaelusAdmin.algo.ts:382
+	// contracts\CaelusAdmin.algo.ts:384
 	// !this.isPool(this.highestBidder.value)
 	bytec 7 //  "highest_bidder"
 	app_global_get
@@ -1868,18 +1873,18 @@ bid:
 	bz *if11_end
 
 	// *if11_consequent
-	// contracts\CaelusAdmin.algo.ts:383
+	// contracts\CaelusAdmin.algo.ts:385
 	// this.highestBidder.value = validatorAppID
 	bytec 7 //  "highest_bidder"
 	frame_dig -1 // validatorAppID: AppID
 	app_global_put
 
-	// contracts\CaelusAdmin.algo.ts:384
+	// contracts\CaelusAdmin.algo.ts:386
 	// return;
 	retsub
 
 *if11_end:
-	// contracts\CaelusAdmin.algo.ts:386
+	// contracts\CaelusAdmin.algo.ts:388
 	// challengerBuffer = validatorAppID.globalState('saturation_buffer') as uint64
 	frame_dig -1 // validatorAppID: AppID
 	bytec 11 //  "saturation_buffer"
@@ -1889,7 +1894,7 @@ bid:
 	assert
 	frame_bury 1 // challengerBuffer: uint64
 
-	// contracts\CaelusAdmin.algo.ts:387
+	// contracts\CaelusAdmin.algo.ts:389
 	// highestBuffer = this.highestBidder.value.globalState('saturation_buffer') as uint64
 	bytec 7 //  "highest_bidder"
 	app_global_get
@@ -1900,7 +1905,7 @@ bid:
 	assert
 	frame_bury 2 // highestBuffer: uint64
 
-	// contracts\CaelusAdmin.algo.ts:388
+	// contracts\CaelusAdmin.algo.ts:390
 	// assert(isDelegatable, 'only bid delegatable Apps')
 	frame_dig 0 // isDelegatable: bool
 
@@ -1908,7 +1913,7 @@ bid:
 	assert
 
 	// *if12_condition
-	// contracts\CaelusAdmin.algo.ts:389
+	// contracts\CaelusAdmin.algo.ts:391
 	// challengerBuffer > highestBuffer
 	frame_dig 1 // challengerBuffer: uint64
 	frame_dig 2 // highestBuffer: uint64
@@ -1916,14 +1921,14 @@ bid:
 	bz *if12_end
 
 	// *if12_consequent
-	// contracts\CaelusAdmin.algo.ts:390
+	// contracts\CaelusAdmin.algo.ts:392
 	// this.highestBidder.value = validatorAppID
 	bytec 7 //  "highest_bidder"
 	frame_dig -1 // validatorAppID: AppID
 	app_global_put
 
 *if12_end:
-	// contracts\CaelusAdmin.algo.ts:393
+	// contracts\CaelusAdmin.algo.ts:395
 	// this.bidEvent.log({
 	//       app: validatorAppID,
 	//       isHeighest: this.highestBidder.value === validatorAppID,
@@ -1962,13 +1967,13 @@ bid:
 delegateStake:
 	proto 2 0
 
-	// contracts\CaelusAdmin.algo.ts:401
+	// contracts\CaelusAdmin.algo.ts:403
 	// assert(this.isPool(validatorAppID))
 	frame_dig -2 // validatorAppID: AppID
 	callsub isPool
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:402
+	// contracts\CaelusAdmin.algo.ts:404
 	// assert(validatorAppID === this.highestBidder.value, 'can only delegate to highest bidder account')
 	frame_dig -2 // validatorAppID: AppID
 	bytec 7 //  "highest_bidder"
@@ -1978,7 +1983,7 @@ delegateStake:
 	// can only delegate to highest bidder account
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:403
+	// contracts\CaelusAdmin.algo.ts:405
 	// sendMethodCall<typeof CaelusValidatorPool.prototype.addStake, void>({
 	//       applicationID: validatorAppID,
 	//       methodArgs: [
@@ -1992,14 +1997,14 @@ delegateStake:
 	intc 1 //  pay
 	itxn_field TypeEnum
 
-	// contracts\CaelusAdmin.algo.ts:407
+	// contracts\CaelusAdmin.algo.ts:409
 	// receiver: validatorAppID.address
 	frame_dig -2 // validatorAppID: AppID
 	app_params_get AppAddress
 	pop
 	itxn_field Receiver
 
-	// contracts\CaelusAdmin.algo.ts:408
+	// contracts\CaelusAdmin.algo.ts:410
 	// amount: amount
 	frame_dig -1 // amount: uint64
 	itxn_field Amount
@@ -2013,12 +2018,12 @@ delegateStake:
 	pushbytes 0xd4502100 // method "addStake(pay)void"
 	itxn_field ApplicationArgs
 
-	// contracts\CaelusAdmin.algo.ts:404
+	// contracts\CaelusAdmin.algo.ts:406
 	// applicationID: validatorAppID
 	frame_dig -2 // validatorAppID: AppID
 	itxn_field ApplicationID
 
-	// contracts\CaelusAdmin.algo.ts:405
+	// contracts\CaelusAdmin.algo.ts:407
 	// methodArgs: [
 	//         {
 	//           receiver: validatorAppID.address,
@@ -2052,13 +2057,13 @@ snitchToBurn:
 	bytec 0 // 0x
 	dupn 4
 
-	// contracts\CaelusAdmin.algo.ts:416
+	// contracts\CaelusAdmin.algo.ts:418
 	// assert(this.isPool(app))
 	frame_dig -1 // app: AppID
 	callsub isPool
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:417
+	// contracts\CaelusAdmin.algo.ts:419
 	// satSnitch = app.globalState('saturation_buffer') as uint64
 	frame_dig -1 // app: AppID
 	bytec 11 //  "saturation_buffer"
@@ -2068,23 +2073,23 @@ snitchToBurn:
 	assert
 	frame_bury 0 // satSnitch: uint64
 
-	// contracts\CaelusAdmin.algo.ts:418
+	// contracts\CaelusAdmin.algo.ts:420
 	// minPrio = app
 	frame_dig -1 // app: AppID
 	frame_bury 1 // minPrio: uint64
 
-	// contracts\CaelusAdmin.algo.ts:419
+	// contracts\CaelusAdmin.algo.ts:421
 	// minSat = satSnitch
 	frame_dig 0 // satSnitch: uint64
 	frame_bury 2 // minSat: uint64
 
-	// contracts\CaelusAdmin.algo.ts:422
+	// contracts\CaelusAdmin.algo.ts:424
 	// for (let i = 0; i < queue.length; i += 1)
 	intc 0 // 0
 	frame_bury 3 // i: uint64
 
 *for_2:
-	// contracts\CaelusAdmin.algo.ts:422
+	// contracts\CaelusAdmin.algo.ts:424
 	// i < queue.length
 	frame_dig 3 // i: uint64
 	intc 4 // 5
@@ -2092,7 +2097,7 @@ snitchToBurn:
 	bz *for_2_end
 
 	// *if13_condition
-	// contracts\CaelusAdmin.algo.ts:423
+	// contracts\CaelusAdmin.algo.ts:425
 	// !this.isPool(queue[i])
 	bytec 1 //  "burn_queue"
 	app_global_get
@@ -2107,7 +2112,7 @@ snitchToBurn:
 	bz *if13_end
 
 	// *if13_consequent
-	// contracts\CaelusAdmin.algo.ts:424
+	// contracts\CaelusAdmin.algo.ts:426
 	// queue[i] = minPrio
 	bytec 1 //  "burn_queue"
 	app_global_get
@@ -2124,7 +2129,7 @@ snitchToBurn:
 
 *if13_end:
 	// *if14_condition
-	// contracts\CaelusAdmin.algo.ts:427
+	// contracts\CaelusAdmin.algo.ts:429
 	// (queue[i].globalState('saturation_buffer') as uint64) < minSat
 	bytec 1 //  "burn_queue"
 	app_global_get
@@ -2144,12 +2149,12 @@ snitchToBurn:
 	bz *if14_end
 
 	// *if14_consequent
-	// contracts\CaelusAdmin.algo.ts:428
+	// contracts\CaelusAdmin.algo.ts:430
 	// temp = minPrio
 	frame_dig 1 // minPrio: uint64
 	frame_bury 4 // temp: uint64
 
-	// contracts\CaelusAdmin.algo.ts:429
+	// contracts\CaelusAdmin.algo.ts:431
 	// minPrio = queue[i]
 	bytec 1 //  "burn_queue"
 	app_global_get
@@ -2161,7 +2166,7 @@ snitchToBurn:
 	btoi
 	frame_bury 1 // minPrio: uint64
 
-	// contracts\CaelusAdmin.algo.ts:430
+	// contracts\CaelusAdmin.algo.ts:432
 	// minSat = queue[i].globalState('saturation_buffer') as uint64
 	bytec 1 //  "burn_queue"
 	app_global_get
@@ -2178,7 +2183,7 @@ snitchToBurn:
 	assert
 	frame_bury 2 // minSat: uint64
 
-	// contracts\CaelusAdmin.algo.ts:431
+	// contracts\CaelusAdmin.algo.ts:433
 	// queue[i] = temp
 	bytec 1 //  "burn_queue"
 	app_global_get
@@ -2195,7 +2200,7 @@ snitchToBurn:
 *if14_end:
 
 *for_2_continue:
-	// contracts\CaelusAdmin.algo.ts:422
+	// contracts\CaelusAdmin.algo.ts:424
 	// i += 1
 	frame_dig 3 // i: uint64
 	intc 1 // 1
@@ -2204,7 +2209,7 @@ snitchToBurn:
 	b *for_2
 
 *for_2_end:
-	// contracts\CaelusAdmin.algo.ts:435
+	// contracts\CaelusAdmin.algo.ts:437
 	// this.snitchQueueEvent.log({
 	//       queue: this.burnQueue.value,
 	//     })
@@ -2234,13 +2239,13 @@ multiSnitchToBurn:
 	bytec 0 // 0x
 	dup
 
-	// contracts\CaelusAdmin.algo.ts:444
+	// contracts\CaelusAdmin.algo.ts:446
 	// for (let i = 0; i < apps.length; i += 1)
 	intc 0 // 0
 	frame_bury 0 // i: uint64
 
 *for_3:
-	// contracts\CaelusAdmin.algo.ts:444
+	// contracts\CaelusAdmin.algo.ts:446
 	// i < apps.length
 	frame_dig 0 // i: uint64
 	frame_dig -1 // apps: AppID[]
@@ -2250,7 +2255,7 @@ multiSnitchToBurn:
 	<
 	bz *for_3_end
 
-	// contracts\CaelusAdmin.algo.ts:445
+	// contracts\CaelusAdmin.algo.ts:447
 	// appToSnitch = apps[i]
 	frame_dig -1 // apps: AppID[]
 	store 255 // full array
@@ -2266,13 +2271,13 @@ multiSnitchToBurn:
 	btoi
 	frame_bury 1 // appToSnitch: uint64
 
-	// contracts\CaelusAdmin.algo.ts:446
+	// contracts\CaelusAdmin.algo.ts:448
 	// this.snitchToBurn(appToSnitch)
 	frame_dig 1 // appToSnitch: uint64
 	callsub snitchToBurn
 
 *for_3_continue:
-	// contracts\CaelusAdmin.algo.ts:444
+	// contracts\CaelusAdmin.algo.ts:446
 	// i += 1
 	frame_dig 0 // i: uint64
 	intc 1 // 1
@@ -2326,13 +2331,13 @@ snitchCheck:
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	bytec 0 // 0x
 
-	// contracts\CaelusAdmin.algo.ts:458
+	// contracts\CaelusAdmin.algo.ts:460
 	// assert(this.isPool(appToCheck))
 	frame_dig -1 // appToCheck: AppID
 	callsub isPool
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:459
+	// contracts\CaelusAdmin.algo.ts:461
 	// assert(this.isPool(params.recipient) || params.recipient.address === this.app.address)
 	frame_dig -2 // params: SnitchInfo
 	store 255 // full array
@@ -2356,7 +2361,7 @@ snitchCheck:
 *skip_or0:
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:461
+	// contracts\CaelusAdmin.algo.ts:463
 	// result = sendMethodCall<typeof CaelusValidatorPool.prototype.getSnitched, boolean>({
 	//       applicationID: appToCheck,
 	//       methodArgs: [params],
@@ -2367,12 +2372,12 @@ snitchCheck:
 	pushbytes 0x5b674f2f // method "getSnitched((bool,bool,bool,uint64,bool,uint64))bool"
 	itxn_field ApplicationArgs
 
-	// contracts\CaelusAdmin.algo.ts:462
+	// contracts\CaelusAdmin.algo.ts:464
 	// applicationID: appToCheck
 	frame_dig -1 // appToCheck: AppID
 	itxn_field ApplicationID
 
-	// contracts\CaelusAdmin.algo.ts:463
+	// contracts\CaelusAdmin.algo.ts:465
 	// methodArgs: [params]
 	frame_dig -2 // params: SnitchInfo
 	itxn_field ApplicationArgs
@@ -2392,7 +2397,7 @@ snitchCheck:
 	getbit
 	frame_bury 0 // result: bool
 
-	// contracts\CaelusAdmin.algo.ts:466
+	// contracts\CaelusAdmin.algo.ts:468
 	// this.snitchValidatorEvent.log({
 	//       request: params,
 	//       result: result,
@@ -2407,7 +2412,7 @@ snitchCheck:
 	concat
 	log
 
-	// contracts\CaelusAdmin.algo.ts:471
+	// contracts\CaelusAdmin.algo.ts:473
 	// return result;
 	frame_dig 0 // result: bool
 
@@ -2452,7 +2457,7 @@ snitchCheck:
 reStakeFromSnitch:
 	proto 3 0
 
-	// contracts\CaelusAdmin.algo.ts:482
+	// contracts\CaelusAdmin.algo.ts:484
 	// assert(
 	//       this.isPool(snitchedApp) && this.txn.sender === snitchedApp.address,
 	//       'only the snitched app can initiate this method'
@@ -2472,7 +2477,7 @@ reStakeFromSnitch:
 	// only the snitched app can initiate this method
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:486
+	// contracts\CaelusAdmin.algo.ts:488
 	// assert(this.isPool(receiverApp) || receiverApp === this.app, 'receiver must be a pool or the admin')
 	frame_dig -2 // receiverApp: AppID
 	callsub isPool
@@ -2487,7 +2492,7 @@ reStakeFromSnitch:
 	// receiver must be a pool or the admin
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:487
+	// contracts\CaelusAdmin.algo.ts:489
 	// verifyPayTxn(restakeTxn, {
 	//       sender: snitchedApp.address,
 	//       receiver: this.app.address,
@@ -2513,7 +2518,7 @@ reStakeFromSnitch:
 	assert
 
 	// *if15_condition
-	// contracts\CaelusAdmin.algo.ts:491
+	// contracts\CaelusAdmin.algo.ts:493
 	// receiverApp !== this.app
 	frame_dig -2 // receiverApp: AppID
 	txna Applications 0
@@ -2521,7 +2526,7 @@ reStakeFromSnitch:
 	bz *if15_end
 
 	// *if15_consequent
-	// contracts\CaelusAdmin.algo.ts:492
+	// contracts\CaelusAdmin.algo.ts:494
 	// sendMethodCall<typeof CaelusValidatorPool.prototype.getClawbackedStake, void>({
 	//         applicationID: receiverApp,
 	//         methodArgs: [
@@ -2535,14 +2540,14 @@ reStakeFromSnitch:
 	intc 1 //  pay
 	itxn_field TypeEnum
 
-	// contracts\CaelusAdmin.algo.ts:496
+	// contracts\CaelusAdmin.algo.ts:498
 	// receiver: receiverApp.address
 	frame_dig -2 // receiverApp: AppID
 	app_params_get AppAddress
 	pop
 	itxn_field Receiver
 
-	// contracts\CaelusAdmin.algo.ts:497
+	// contracts\CaelusAdmin.algo.ts:499
 	// amount: restakeTxn.amount
 	frame_dig -3 // restakeTxn: PayTxn
 	gtxns Amount
@@ -2557,12 +2562,12 @@ reStakeFromSnitch:
 	pushbytes 0xbdf01e8e // method "getClawbackedStake(pay)void"
 	itxn_field ApplicationArgs
 
-	// contracts\CaelusAdmin.algo.ts:493
+	// contracts\CaelusAdmin.algo.ts:495
 	// applicationID: receiverApp
 	frame_dig -2 // receiverApp: AppID
 	itxn_field ApplicationID
 
-	// contracts\CaelusAdmin.algo.ts:494
+	// contracts\CaelusAdmin.algo.ts:496
 	// methodArgs: [
 	//           {
 	//             receiver: receiverApp.address,
@@ -2614,12 +2619,12 @@ makeFlashLoanRequest:
 	bytec 0 // 0x
 	dupn 4
 
-	// contracts\CaelusAdmin.algo.ts:506
+	// contracts\CaelusAdmin.algo.ts:508
 	// this.getFLcounter()
 	callsub getFLcounter
 	pop
 
-	// contracts\CaelusAdmin.algo.ts:507
+	// contracts\CaelusAdmin.algo.ts:509
 	// this.flashLoanCounter.value += appToInclude.length
 	bytec 5 //  "flashloan_counter"
 	app_global_get
@@ -2632,7 +2637,7 @@ makeFlashLoanRequest:
 	swap
 	app_global_put
 
-	// contracts\CaelusAdmin.algo.ts:508
+	// contracts\CaelusAdmin.algo.ts:510
 	// keepFee = this.flashLoanCounter.value + FLASH_LOAN_FEE
 	bytec 5 //  "flashloan_counter"
 	app_global_get
@@ -2640,7 +2645,7 @@ makeFlashLoanRequest:
 	+
 	frame_bury 0 // keepFee: uint64
 
-	// contracts\CaelusAdmin.algo.ts:510
+	// contracts\CaelusAdmin.algo.ts:512
 	// verifyPayTxn(payFeeTxn, {
 	//       receiver: this.app.address,
 	//       amount: keepFee,
@@ -2663,7 +2668,7 @@ makeFlashLoanRequest:
 	// transaction verification failed: {"txn":"payFeeTxn","field":"amount","expected":"keepFee"}
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:515
+	// contracts\CaelusAdmin.algo.ts:517
 	// assert(amounts.length === appToInclude.length, 'array length [amount, appToInclude] mismatch')
 	frame_dig -2 // amounts: uint64[]
 	len
@@ -2678,13 +2683,13 @@ makeFlashLoanRequest:
 	// array length [amount, appToInclude] mismatch
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:516
+	// contracts\CaelusAdmin.algo.ts:518
 	// for (let i = 0; i < appToInclude.length; i += 1)
 	intc 0 // 0
 	frame_bury 1 // i: uint64
 
 *for_4:
-	// contracts\CaelusAdmin.algo.ts:516
+	// contracts\CaelusAdmin.algo.ts:518
 	// i < appToInclude.length
 	frame_dig 1 // i: uint64
 	frame_dig -3 // appToInclude: AppID[]
@@ -2694,7 +2699,7 @@ makeFlashLoanRequest:
 	<
 	bz *for_4_end
 
-	// contracts\CaelusAdmin.algo.ts:517
+	// contracts\CaelusAdmin.algo.ts:519
 	// this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.flashloan, void>({
 	//         applicationID: appToInclude[i],
 	//         methodArgs: [amounts[i], this.txn.sender],
@@ -2705,7 +2710,7 @@ makeFlashLoanRequest:
 	pushbytes 0x4a5356cc // method "flashloan(uint64,address)void"
 	itxn_field ApplicationArgs
 
-	// contracts\CaelusAdmin.algo.ts:518
+	// contracts\CaelusAdmin.algo.ts:520
 	// applicationID: appToInclude[i]
 	frame_dig -3 // appToInclude: AppID[]
 	store 255 // full array
@@ -2721,7 +2726,7 @@ makeFlashLoanRequest:
 	btoi
 	itxn_field ApplicationID
 
-	// contracts\CaelusAdmin.algo.ts:519
+	// contracts\CaelusAdmin.algo.ts:521
 	// methodArgs: [amounts[i], this.txn.sender]
 	frame_dig -2 // amounts: uint64[]
 	store 255 // full array
@@ -2744,31 +2749,31 @@ makeFlashLoanRequest:
 	intc 0 // 0
 	itxn_field Fee
 
-	// contracts\CaelusAdmin.algo.ts:522
+	// contracts\CaelusAdmin.algo.ts:524
 	// for (let j = this.txn.groupIndex; j < this.txnGroup.length; j += 1)
 	txn GroupIndex
 	frame_bury 2 // j: uint64
 
 *for_5:
-	// contracts\CaelusAdmin.algo.ts:522
+	// contracts\CaelusAdmin.algo.ts:524
 	// j < this.txnGroup.length
 	frame_dig 2 // j: uint64
 	global GroupSize
 	<
 	bz *for_5_end
 
-	// contracts\CaelusAdmin.algo.ts:523
+	// contracts\CaelusAdmin.algo.ts:525
 	// txn = this.txnGroup[j]
 	frame_dig 2 // j: uint64
 	frame_bury 3 // txn: txn
 
-	// contracts\CaelusAdmin.algo.ts:524
+	// contracts\CaelusAdmin.algo.ts:526
 	// repaid = false
 	intc 0 // 0
 	frame_bury 4 // repaid: bool
 
 	// *if16_condition
-	// contracts\CaelusAdmin.algo.ts:526
+	// contracts\CaelusAdmin.algo.ts:528
 	// txn.typeEnum === TransactionType.ApplicationCall &&
 	//           txn.applicationID === appToInclude[i] &&
 	//           txn.onCompletion === 0 &&
@@ -2828,19 +2833,19 @@ makeFlashLoanRequest:
 	bz *if16_end
 
 	// *if16_consequent
-	// contracts\CaelusAdmin.algo.ts:532
+	// contracts\CaelusAdmin.algo.ts:534
 	// repaid = true
 	intc 1 // 1
 	frame_bury 4 // repaid: bool
 
 *if16_end:
-	// contracts\CaelusAdmin.algo.ts:534
+	// contracts\CaelusAdmin.algo.ts:536
 	// assert(repaid)
 	frame_dig 4 // repaid: bool
 	assert
 
 *for_5_continue:
-	// contracts\CaelusAdmin.algo.ts:522
+	// contracts\CaelusAdmin.algo.ts:524
 	// j += 1
 	frame_dig 2 // j: uint64
 	intc 1 // 1
@@ -2851,7 +2856,7 @@ makeFlashLoanRequest:
 *for_5_end:
 
 *for_4_continue:
-	// contracts\CaelusAdmin.algo.ts:516
+	// contracts\CaelusAdmin.algo.ts:518
 	// i += 1
 	frame_dig 1 // i: uint64
 	intc 1 // 1
@@ -2860,11 +2865,11 @@ makeFlashLoanRequest:
 	b *for_4
 
 *for_4_end:
-	// contracts\CaelusAdmin.algo.ts:537
+	// contracts\CaelusAdmin.algo.ts:539
 	// this.pendingGroup.submit()
 	itxn_submit
 
-	// contracts\CaelusAdmin.algo.ts:538
+	// contracts\CaelusAdmin.algo.ts:540
 	// this.flashLoanEvent.log({ apps: appToInclude, amounts: amounts })
 	pushbytes 0xaa4e641a // flashLoanEvent(uint64[],uint64[])
 	bytec 0 //  initial head
@@ -2917,7 +2922,7 @@ getFLcounter:
 	bytec 0 // 0x
 
 	// *if17_condition
-	// contracts\CaelusAdmin.algo.ts:543
+	// contracts\CaelusAdmin.algo.ts:545
 	// this.lastFlashloanBlock.value === globals.round
 	bytec 17 //  "last_flashloan_block"
 	app_global_get
@@ -2926,14 +2931,14 @@ getFLcounter:
 	bz *if17_end
 
 	// *if17_consequent
-	// contracts\CaelusAdmin.algo.ts:544
+	// contracts\CaelusAdmin.algo.ts:546
 	// return this.flashLoanCounter.value;
 	bytec 5 //  "flashloan_counter"
 	app_global_get
 	b *getFLcounter*return
 
 *if17_end:
-	// contracts\CaelusAdmin.algo.ts:546
+	// contracts\CaelusAdmin.algo.ts:548
 	// reduce = globals.round - this.lastFlashloanBlock.value
 	global Round
 	bytec 17 //  "last_flashloan_block"
@@ -2942,7 +2947,7 @@ getFLcounter:
 	frame_bury 0 // reduce: uint64
 
 	// *if18_condition
-	// contracts\CaelusAdmin.algo.ts:547
+	// contracts\CaelusAdmin.algo.ts:549
 	// reduce > this.flashLoanCounter.value
 	frame_dig 0 // reduce: uint64
 	bytec 5 //  "flashloan_counter"
@@ -2951,20 +2956,20 @@ getFLcounter:
 	bz *if18_end
 
 	// *if18_consequent
-	// contracts\CaelusAdmin.algo.ts:548
+	// contracts\CaelusAdmin.algo.ts:550
 	// this.flashLoanCounter.value = 0
 	bytec 5 //  "flashloan_counter"
 	intc 0 // 0
 	app_global_put
 
-	// contracts\CaelusAdmin.algo.ts:549
+	// contracts\CaelusAdmin.algo.ts:551
 	// return this.flashLoanCounter.value;
 	bytec 5 //  "flashloan_counter"
 	app_global_get
 	b *getFLcounter*return
 
 *if18_end:
-	// contracts\CaelusAdmin.algo.ts:551
+	// contracts\CaelusAdmin.algo.ts:553
 	// this.flashLoanCounter.value -= reduce * 2 > this.flashLoanCounter.value ? reduce * 2 : reduce
 	bytec 5 //  "flashloan_counter"
 	app_global_get
@@ -2989,7 +2994,7 @@ getFLcounter:
 	swap
 	app_global_put
 
-	// contracts\CaelusAdmin.algo.ts:552
+	// contracts\CaelusAdmin.algo.ts:554
 	// return this.flashLoanCounter.value;
 	bytec 5 //  "flashloan_counter"
 	app_global_get
@@ -3020,7 +3025,7 @@ getFLcounter:
 arc62_get_circulating_supply:
 	proto 1 1
 
-	// contracts\CaelusAdmin.algo.ts:557
+	// contracts\CaelusAdmin.algo.ts:559
 	// assert(assetId === this.tokenId.value, 'invalid asset id')
 	frame_dig -1 // assetId: AssetID
 	bytec 3 //  "token_id"
@@ -3030,7 +3035,7 @@ arc62_get_circulating_supply:
 	// invalid asset id
 	assert
 
-	// contracts\CaelusAdmin.algo.ts:558
+	// contracts\CaelusAdmin.algo.ts:560
 	// return this.tokenCirculatingSupply.value;
 	bytec 2 //  "circulating_supply"
 	app_global_get
@@ -3041,7 +3046,7 @@ calculateLSTRatio:
 	proto 0 0
 
 	// *if19_condition
-	// contracts\CaelusAdmin.algo.ts:562
+	// contracts\CaelusAdmin.algo.ts:564
 	// this.tokenCirculatingSupply.value === 0
 	bytec 2 //  "circulating_supply"
 	app_global_get
@@ -3050,12 +3055,12 @@ calculateLSTRatio:
 	bz *if19_end
 
 	// *if19_consequent
-	// contracts\CaelusAdmin.algo.ts:563
+	// contracts\CaelusAdmin.algo.ts:565
 	// return;
 	retsub
 
 *if19_end:
-	// contracts\CaelusAdmin.algo.ts:565
+	// contracts\CaelusAdmin.algo.ts:567
 	// this.pegRatio.value = wideRatio([this.totalStake.value, SCALE], [this.tokenCirculatingSupply.value])
 	bytec 13 //  "peg_ratio"
 	bytec 4 //  "total_stake"
@@ -3080,11 +3085,11 @@ calculateLSTRatio:
 getMintAmount:
 	proto 1 1
 
-	// contracts\CaelusAdmin.algo.ts:569
+	// contracts\CaelusAdmin.algo.ts:571
 	// this.calculateLSTRatio()
 	callsub calculateLSTRatio
 
-	// contracts\CaelusAdmin.algo.ts:570
+	// contracts\CaelusAdmin.algo.ts:572
 	// return wideRatio([amount, SCALE], [this.pegRatio.value]);
 	frame_dig -1 // amount: uint64
 	intc 6 // 100000
@@ -3106,11 +3111,11 @@ getMintAmount:
 getBurnAmount:
 	proto 1 1
 
-	// contracts\CaelusAdmin.algo.ts:574
+	// contracts\CaelusAdmin.algo.ts:576
 	// this.calculateLSTRatio()
 	callsub calculateLSTRatio
 
-	// contracts\CaelusAdmin.algo.ts:575
+	// contracts\CaelusAdmin.algo.ts:577
 	// return wideRatio([amount, this.pegRatio.value], [SCALE]);
 	frame_dig -1 // amount: uint64
 	bytec 13 //  "peg_ratio"
@@ -3132,7 +3137,7 @@ getBurnAmount:
 doBurnTxn:
 	proto 2 0
 
-	// contracts\CaelusAdmin.algo.ts:579
+	// contracts\CaelusAdmin.algo.ts:581
 	// sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
 	//       applicationID: target,
 	//       methodArgs: [args[0], args[1]],
@@ -3143,12 +3148,12 @@ doBurnTxn:
 	pushbytes 0x3dc7ae79 // method "burnStake(uint64,address)void"
 	itxn_field ApplicationArgs
 
-	// contracts\CaelusAdmin.algo.ts:580
+	// contracts\CaelusAdmin.algo.ts:582
 	// applicationID: target
 	frame_dig -1 // target: AppID
 	itxn_field ApplicationID
 
-	// contracts\CaelusAdmin.algo.ts:581
+	// contracts\CaelusAdmin.algo.ts:583
 	// methodArgs: [args[0], args[1]]
 	frame_dig -2 // args: [uint64, Address]
 	extract 0 8
@@ -3171,7 +3176,7 @@ doBurnTxn:
 doAxfer:
 	proto 3 0
 
-	// contracts\CaelusAdmin.algo.ts:586
+	// contracts\CaelusAdmin.algo.ts:588
 	// sendAssetTransfer({
 	//       assetReceiver: receiver,
 	//       assetAmount: amount,
@@ -3181,17 +3186,17 @@ doAxfer:
 	intc 7 //  axfer
 	itxn_field TypeEnum
 
-	// contracts\CaelusAdmin.algo.ts:587
+	// contracts\CaelusAdmin.algo.ts:589
 	// assetReceiver: receiver
 	frame_dig -1 // receiver: Address
 	itxn_field AssetReceiver
 
-	// contracts\CaelusAdmin.algo.ts:588
+	// contracts\CaelusAdmin.algo.ts:590
 	// assetAmount: amount
 	frame_dig -2 // amount: uint64
 	itxn_field AssetAmount
 
-	// contracts\CaelusAdmin.algo.ts:589
+	// contracts\CaelusAdmin.algo.ts:591
 	// xferAsset: asset
 	frame_dig -3 // asset: AssetID
 	itxn_field XferAsset
@@ -3208,7 +3213,7 @@ doAxfer:
 isPool:
 	proto 1 1
 
-	// contracts\CaelusAdmin.algo.ts:594
+	// contracts\CaelusAdmin.algo.ts:596
 	// return app.creator === this.app.address;
 	frame_dig -1 // app: AppID
 	app_params_get AppCreator
@@ -3224,13 +3229,13 @@ queueIsEmpty:
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	bytec 0 // 0x
 
-	// contracts\CaelusAdmin.algo.ts:598
+	// contracts\CaelusAdmin.algo.ts:600
 	// for (let i = 0; i < this.burnQueue.value.length; i += 1)
 	intc 0 // 0
 	frame_bury 0 // i: uint64
 
 *for_6:
-	// contracts\CaelusAdmin.algo.ts:598
+	// contracts\CaelusAdmin.algo.ts:600
 	// i < this.burnQueue.value.length
 	frame_dig 0 // i: uint64
 	bytec 1 //  "burn_queue"
@@ -3240,7 +3245,7 @@ queueIsEmpty:
 	bz *for_6_end
 
 	// *if20_condition
-	// contracts\CaelusAdmin.algo.ts:599
+	// contracts\CaelusAdmin.algo.ts:601
 	// this.burnQueue.value[i] !== AppID.zeroIndex
 	bytec 1 //  "burn_queue"
 	app_global_get
@@ -3255,7 +3260,7 @@ queueIsEmpty:
 	bz *if20_end
 
 	// *if20_consequent
-	// contracts\CaelusAdmin.algo.ts:600
+	// contracts\CaelusAdmin.algo.ts:602
 	// return false;
 	intc 0 // 0
 	b *queueIsEmpty*return
@@ -3263,7 +3268,7 @@ queueIsEmpty:
 *if20_end:
 
 *for_6_continue:
-	// contracts\CaelusAdmin.algo.ts:598
+	// contracts\CaelusAdmin.algo.ts:600
 	// i += 1
 	frame_dig 0 // i: uint64
 	intc 1 // 1
@@ -3272,7 +3277,7 @@ queueIsEmpty:
 	b *for_6
 
 *for_6_end:
-	// contracts\CaelusAdmin.algo.ts:603
+	// contracts\CaelusAdmin.algo.ts:605
 	// return true;
 	intc 1 // 1
 

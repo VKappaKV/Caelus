@@ -282,6 +282,14 @@ export class CaelusValidatorPool extends Contract {
         amount: takeFee,
       });
     }
+
+    this.delegatedStake.value += report - takeFee;
+
+    sendMethodCall<typeof CaelusAdmin.prototype.setTotalStakeOnRewards>({
+      applicationID: this.creatorContractAppID.value,
+      methodArgs: [this.app, block, report],
+    });
+
     this.updateDelegationFactors();
 
     this.rewardsEvent.log({

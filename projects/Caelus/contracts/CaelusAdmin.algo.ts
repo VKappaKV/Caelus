@@ -179,6 +179,8 @@ export class CaelusAdmin extends Contract {
     this.totalStake.value += mintTxn.amount;
     this.tokenCirculatingSupply.value += minted;
 
+    log('minted!');
+
     this.mintEvent.log({
       instant: true,
       amount: mintTxn.amount,
@@ -394,6 +396,11 @@ export class CaelusAdmin extends Contract {
       app: validatorAppID,
       isHeighest: this.highestBidder.value === validatorAppID,
     });
+  }
+
+  setTotalStakeOnRewards(proposer: AppID, block: uint64, amount: uint64): void {
+    assert(blocks[block].proposer === proposer.address);
+    this.totalStake.value += amount;
   }
 
   // called to send the Algo used to mint vALGO to the highest bidder

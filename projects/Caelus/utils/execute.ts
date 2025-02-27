@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { Config } from '@algorandfoundation/algokit-utils';
 import { addValidator, adminSetup, deploy, validatorSetup, test, update } from './bootstrap';
-import { deleteApp, mintOperatorCommit, validatorOptIntoLST } from './helpers';
+import { deleteApp, mint, mintOperatorCommit, validatorOptIntoLST } from './helpers';
 
 Config.configure({
   debug: true,
@@ -36,27 +36,27 @@ Config.configure({
       break;
     case 'validator':
       console.log(`EXECUTING VALIDATOR SET UP...`);
-      validatorSetup(1002n);
+      validatorSetup(16328303n);
       break;
     case 'spawn':
       console.log(`EXECUTING SPAWN...`);
-      addValidator(1002n);
+      addValidator(16328303n);
       break;
-    case 'spam':
+    case 'test':
       console.log('EXECUTING SPAM');
-      test();
+      mint();
       break;
     case 'mintOperator':
       console.log('EXECUTING OPERATOR MINT');
-      mintOperatorCommit(1002n, 1015n);
+      mintOperatorCommit(16328303n, 16328320n);
       break;
     case 'poolOptIn':
       console.log('EXECUTING VALIDATOR POOL OPT IN');
-      validatorOptIntoLST(1015n);
+      validatorOptIntoLST(16328320n);
       break;
     case 'delete':
       console.log('EXECUTING VALIDATOR POOL DELETE');
-      deleteApp(1015n);
+      deleteApp(16328320n);
       break;
     default:
       console.log('DEFAULT, WHAT?');

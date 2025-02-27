@@ -4,18 +4,32 @@ import * as algokit from '@algorandfoundation/algokit-utils';
 import algosdk from 'algosdk';
 import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
 import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
+import { MNEMONIC } from '../env';
+
 /* eslint-disable no-console */
+
+// const algorand = algokit.AlgorandClient.fromConfig({
+//   algodConfig: {
+//     server: 'http://localhost',
+//     token: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//     port: 4001,
+//   },
+//   indexerConfig: {
+//     server: 'http://localhost',
+//     token: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//     port: 8980,
+//   },
+// });
+
+const ALGOD_ENDPOINT = 'https://fnet-api.4160.nodely.dev';
+const ALGOD_TOKEN = '';
+const ALGOD_PORT = 443;
 
 const algorand = algokit.AlgorandClient.fromConfig({
   algodConfig: {
-    server: 'http://localhost',
-    token: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    port: 4001,
-  },
-  indexerConfig: {
-    server: 'http://localhost',
-    token: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    port: 8980,
+    server: ALGOD_ENDPOINT,
+    token: ALGOD_TOKEN,
+    port: ALGOD_PORT,
   },
 });
 
@@ -24,10 +38,12 @@ const algorand = algokit.AlgorandClient.fromConfig({
  */
 
 const getAccount = async () => {
-  const testAccount = await algorand.account.fromKmd(
-    'lora-dev',
-    (account) => account.address === 'NYSW5ZHRHQX6P7MVKPLXVQOP7X7KNHJL74VHRMKW5TAJLQAZGO2R3UAF7E'
-  );
+  // const testAccount = await algorand.account.fromKmd(
+  //   'lora-dev',
+  //   (account) => account.address === 'NYSW5ZHRHQX6P7MVKPLXVQOP7X7KNHJL74VHRMKW5TAJLQAZGO2R3UAF7E'
+  // );
+
+  const testAccount = algorand.account.fromMnemonic(MNEMONIC);
 
   const random = algorand.account.random();
 
@@ -51,7 +67,11 @@ export async function mint() {
     amount: (100).algos(),
   });
 
-  const mintTxn = await client.send.mintRequest({ args: [pay], populateAppCallResources: true });
+  const mintTxn = await client.send.mintRequest({
+    args: [pay],
+    populateAppCallResources: true,
+    extraFee: (2000).microAlgos(),
+  });
 
   console.log(`Minted: ${mintTxn.txIds}`);
 }
