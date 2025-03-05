@@ -20,8 +20,7 @@ import {
  * Anyone can then call the contract to execute a snitch check on a Validator, this is used to verify the correct behavior
  * of the Validator contract, whatever it is participating correctly or other things.
  *
- * Finally the Admin contract can be used to route a FlashLoan request, this type of atomic group call asserts that the
- * balance of each contract touched is brought back at the start of each operation.
+ * Finally the Admin contract can be used to route a FlashLoan request using the Algo balance of the validators.
  */
 export class CaelusAdmin extends Contract {
   programVersion = 11;
@@ -297,8 +296,7 @@ export class CaelusAdmin extends Contract {
 
   // when operator is delinquent set up burn of his LST amount in the App Account
   // burn & send to validator app
-  burnToDelinquentValidator(burnTxn: AssetTransferTxn, validatorAppID: AppID): void {
-    // get AssetTransferTxn as burn type
+  burnToDelinquentValidator(burnTxn: AssetTransferTxn, validatorAppID: AppID, amountOperator: uint64): void {
     // check that app is delinquent
     // check that app is pool
     // init burn request for the amount sent
@@ -333,6 +331,7 @@ export class CaelusAdmin extends Contract {
     amountToUpdate = this.getBurnAmount(toBurn - amtBurned);
     this.tokenCirculatingSupply.value -= burnTxn.assetAmount - amountToUpdate;
     this.totalStake.value -= amtBurned;
+    this.totalStake.value -= amountOperator;
     if (amountToUpdate > 0) {
       this.doAxfer(burnTxn.sender, amountToUpdate, this.tokenId.value);
     }
@@ -367,6 +366,8 @@ export class CaelusAdmin extends Contract {
     );
     const amountToMint = this.getMintAmount(amount);
     this.doAxfer(app.address, amountToMint, this.tokenId.value);
+
+    this.totalStake.value += amount;
     this.tokenCirculatingSupply.value += amountToMint;
 
     this.mintEvent.log({
@@ -496,7 +497,7 @@ export class CaelusAdmin extends Contract {
       receiver: this.app.address,
     });
     if (receiverApp !== this.app) {
-      sendMethodCall<typeof CaelusValidatorPool.prototype.getClawbackedStake, void>({
+      sendMethodCall<typeof CaelusValidatorPool.prototype.addStake, void>({
         applicationID: receiverApp,
         methodArgs: [
           {

@@ -16,7 +16,11 @@ import {
 import { CaelusAdmin } from './CaelusAdmin.algo';
 
 /**
- * Caelus Validator Pool Contract.
+ * Caelus Validator Pool Contract is the contract account participating in the consensus protocol and receiver of the delegated stake.
+ * Each Pool has a node operator who's responsible for the correct behavior of the node to which the account is participating with.
+ * Misbehaviors are controlled through possible regular checks by anyone.
+ * The more the contract proposes blocks within the expected time the more delegated stake it can accrue. It's important for the node operator to be declaring to the admin contract which blocks it has proposed to successfully be recognized his share of the amount.
+ * Delinquency state is required to properly deter node operators from misbehaving, while it doesn't slash on delinquency the contract delegated stake is routed away, so no delegated stake is at risk or ends up underperforming.
  */
 
 export class CaelusValidatorPool extends Contract {
@@ -368,6 +372,7 @@ export class CaelusValidatorPool extends Contract {
               assetAmount: this.app.address.assetBalance(this.tokenId.value),
             },
             this.app,
+            this.operatorCommit.value,
           ],
         });
       }
@@ -411,16 +416,6 @@ export class CaelusValidatorPool extends Contract {
       this.updateDelegationFactors();
     }
     return result;
-  }
-
-  // follow up callback from the snitch
-  getClawbackedStake(receivedStake: PayTxn): void {
-    assert(this.txn.sender === this.creatorContractAppID.value.address);
-    verifyPayTxn(receivedStake, {
-      receiver: this.app.address,
-    });
-    this.delegatedStake.value += receivedStake.amount;
-    this.updateDelegationFactors();
   }
 
   flashloan(amount: uint64, receiver: Address): void {
@@ -610,6 +605,7 @@ export class CaelusValidatorPool extends Contract {
           assetAmount: this.app.address.assetBalance(this.tokenId.value),
         },
         this.app,
+        this.operatorCommit.value,
       ],
     });
   }
