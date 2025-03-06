@@ -229,6 +229,10 @@
         {
           "name": "validatorAppID",
           "type": "uint64"
+        },
+        {
+          "name": "amountOperator",
+          "type": "uint64"
         }
       ],
       "returns": {

@@ -135,7 +135,6 @@ export class CaelusAdmin extends Contract {
 
   MANAGER_writePoolContractProgram(offset: uint64, data: bytes): void {
     assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
-
     this.validatorPoolContractApprovalProgram.replace(offset, data);
   }
 
@@ -177,8 +176,6 @@ export class CaelusAdmin extends Contract {
     this.doAxfer(this.txn.sender, minted, this.tokenId.value);
     this.totalStake.value += mintTxn.amount;
     this.tokenCirculatingSupply.value += minted;
-
-    log('minted!');
 
     this.mintEvent.log({
       instant: true,
@@ -509,7 +506,6 @@ export class CaelusAdmin extends Contract {
     }
   }
 
-  // TODO : DOCUMENT ON THE EVENTUAL SDK HOW THE FEE STRUCTURE WORKS TO AVOID SOMEONE YEETING THEIR NETWORTH ON A FLASH LOAN FEE
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
     this.getFLcounter();
     this.flashLoanCounter.value += appToInclude.length;

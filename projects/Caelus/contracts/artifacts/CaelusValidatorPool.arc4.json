@@ -273,18 +273,6 @@
       }
     },
     {
-      "name": "getClawbackedStake",
-      "args": [
-        {
-          "name": "receivedStake",
-          "type": "pay"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
       "name": "flashloan",
       "args": [
         {
