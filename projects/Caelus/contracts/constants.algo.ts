@@ -28,4 +28,12 @@ export const VEST_TIER_4 = 100_000_000_000;
 export const VEST_TIER_5 = 150_000_000_000;
 export const FLASH_LOAN_FEE = 10_000_000;
 export const SCALE = 100_000;
-export const CLAIM_DELAY = 330;
+
+export const NEUTRAL_STATUS = 0;
+export const NOT_DELEGATABLE_STATUS = 1;
+export const DELINQUENCY_STATUS = 2;
+
+export const BUFFER_MAX = 1000;
+
+export const UPDATABLE = 0;
+export const LOCKED = 1;

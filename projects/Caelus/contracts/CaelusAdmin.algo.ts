@@ -1,7 +1,17 @@
 /* eslint-disable import/no-cycle */
 import { Contract } from '@algorandfoundation/tealscript';
 import { CaelusValidatorPool } from './CaelusValidator.algo';
-import { ALGORAND_BASE_FEE, BURN_COOLDOWN, FLASH_LOAN_FEE, SCALE, VALIDATOR_POOL_CONTRACT_MBR } from './constants.algo';
+import {
+  ALGORAND_BASE_FEE,
+  BURN_COOLDOWN,
+  DELINQUENCY_STATUS,
+  FLASH_LOAN_FEE,
+  LOCKED,
+  NEUTRAL_STATUS,
+  SCALE,
+  UPDATABLE,
+  VALIDATOR_POOL_CONTRACT_MBR,
+} from './constants.algo';
 
 /**
  * CaelusAdmin is the main contract handling the Caelus protocol. It acts as Factory contract by deploying the Validator
@@ -30,6 +40,10 @@ export class CaelusAdmin extends Contract {
 
   validatorPoolContractCost = GlobalStateKey<uint64>({
     key: 'validator_pool_cost',
+  });
+
+  poolContractLock = GlobalStateKey<uint64>({
+    key: 'pool_contract_lock_flag',
   });
 
   totalStake = GlobalStateKey<uint64>({ key: 'total_stake' });
@@ -109,6 +123,12 @@ export class CaelusAdmin extends Contract {
     this.manager.value = manager;
   }
 
+  MANAGER_lockContract(): void {
+    assert(this.txn.sender === this.manager.value);
+
+    this.poolContractLock.value = LOCKED;
+  }
+
   MANAGER_updatePoolContractCost(validatorPoolContractCost: uint64): void {
     assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
     this.validatorPoolContractCost.value = validatorPoolContractCost;
@@ -116,6 +136,7 @@ export class CaelusAdmin extends Contract {
 
   MANAGER_updatePoolContractProgram(programSize: uint64): void {
     assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
+    assert(this.poolContractLock.value === UPDATABLE, 'cannot rewrite contract anymore');
 
     if (this.validatorPoolContractApprovalProgram.exists) {
       this.validatorPoolContractApprovalProgram.resize(programSize);
@@ -128,6 +149,8 @@ export class CaelusAdmin extends Contract {
 
   MANAGER_writePoolContractProgram(offset: uint64, data: bytes): void {
     assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
+    assert(this.poolContractLock.value === UPDATABLE, 'cannot rewrite contract anymore');
+
     this.validatorPoolContractApprovalProgram.replace(offset, data);
   }
 
@@ -297,7 +320,7 @@ export class CaelusAdmin extends Contract {
       xferAsset: this.tokenId.value,
       assetSender: validatorAppID.address,
     });
-    assert((validatorAppID.globalState('status') as uint64) !== 2);
+    assert((validatorAppID.globalState('status') as uint64) !== DELINQUENCY_STATUS);
     let amountToUpdate: uint64 = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
     let toBurn: uint64 =
       this.getBurnAmount(burnTxn.assetAmount) - (validatorAppID.globalState('operator_commit') as uint64); // burn from other validators the amount of Algo accrued from the operator LST
@@ -348,7 +371,7 @@ export class CaelusAdmin extends Contract {
     // check that app is not delinquent anymore & his vAlgo amount is 0
     // send vAlgo amount corresponding to the current peg for the operatorCommit amount
     this.isPool(app);
-    assert((app.globalState('status') as uint64) !== 2, 'must solve delinquency first');
+    assert((app.globalState('status') as uint64) !== DELINQUENCY_STATUS, 'must solve delinquency first');
     const amount = app.globalState('operator_commit') as uint64;
     assert(
       app.address.assetBalance(this.tokenId.value) === 0,
@@ -371,7 +394,7 @@ export class CaelusAdmin extends Contract {
   // No assert call to avoid future P2P spam.
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
-    const isDelegatable = (validatorAppID.globalState('status') as uint64) === 0;
+    const isDelegatable = (validatorAppID.globalState('status') as uint64) === NEUTRAL_STATUS;
     if (!this.isPool(this.highestBidder.value)) {
       this.highestBidder.value = validatorAppID;
       return;

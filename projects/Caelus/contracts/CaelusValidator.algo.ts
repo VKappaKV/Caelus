@@ -11,6 +11,10 @@ import {
   VALIDATOR_COMMISSION,
   VEST_TIER_4,
   VEST_TIER_5,
+  NOT_DELEGATABLE_STATUS,
+  DELINQUENCY_STATUS,
+  NEUTRAL_STATUS,
+  BUFFER_MAX,
 } from './constants.algo';
 
 import { CaelusAdmin } from './CaelusAdmin.algo';
@@ -58,7 +62,7 @@ export class CaelusValidatorPool extends Contract {
 
   performanceCounter = GlobalStateKey<uint64>({ key: 'performance' });
 
-  saturationBUFFER = GlobalStateKey<uint64>({ key: 'saturation_buffer' }); // value goes from 0 to 1000
+  saturationBuffer = GlobalStateKey<uint64>({ key: 'saturation_buffer' }); // value goes from 0 to 1000
 
   lastRewardReport = GlobalStateKey<uint64>({ key: 'reward_report' });
 
@@ -99,8 +103,8 @@ export class CaelusValidatorPool extends Contract {
     this.maxDelegatableStake.value = 0;
 
     // init buffer, flags & counters
-    this.status.value = 1;
-    this.saturationBUFFER.value = 0;
+    this.status.value = NOT_DELEGATABLE_STATUS;
+    this.saturationBuffer.value = 0;
     this.performanceCounter.value = 0;
     this.delinquencyScore.value = 0;
 
@@ -137,7 +141,7 @@ export class CaelusValidatorPool extends Contract {
       receiver: this.app.address,
     });
     this.operatorCommit.value += opStake.amount;
-    if (this.status.value === 2) {
+    if (this.status.value === DELINQUENCY_STATUS) {
       return;
     }
     this.updateDelegationFactors();
@@ -158,7 +162,7 @@ export class CaelusValidatorPool extends Contract {
   removeFromOperatorCommit(claimRequest: uint64, claimRequestLST: uint64): void {
     assert(this.txn.sender === this.creatorContractAppID.value.address);
     assert(
-      this.status.value !== 2,
+      this.status.value !== DELINQUENCY_STATUS,
       'cannot withdraw funds if the account is flagged as delinquent, must solve delinquency first'
     );
     assert(
@@ -190,7 +194,7 @@ export class CaelusValidatorPool extends Contract {
 
   // call this method if Account has been flagged as delinquent wait fixed amount of time before resetting it and expects payment if necessary (?)
   solveDelinquency(block: uint64): void {
-    assert(this.status.value !== 2, 'Account is not delinquent');
+    assert(this.status.value !== DELINQUENCY_STATUS, 'Account is not delinquent');
     assert(this.txn.sender === this.operatorAddress.value, 'Only the Node Operator can clear up Delinquency');
     assert(
       this.delegatedStake.value === 0,
@@ -199,7 +203,7 @@ export class CaelusValidatorPool extends Contract {
     assert(blocks[block].proposer === this.app.address, 'the solving block must be proposed by this account');
     assert(this.lastDelinquencyReport.value < block); // validator has to win a proposal sooner than latest delinquency report to clear up delinquency
     assert(this.delinquencyThresholdCheck(), 'Delinquency score must be below threshold');
-    this.status.value = 0;
+    this.status.value = NEUTRAL_STATUS;
     this.updateDelegationFactors();
     sendMethodCall<typeof CaelusAdmin.prototype.reMintDelinquentCommit, void>({
       applicationID: this.creatorContractAppID.value,
@@ -290,7 +294,7 @@ export class CaelusValidatorPool extends Contract {
 
   // calls to another Validator getSnitched method. If successfull it will increase performanceCounter
   snitchValidator(appToSnitch: AppID, params: SnitchInfo): void {
-    assert(this.status.value !== 2);
+    assert(this.status.value !== DELINQUENCY_STATUS);
     const result = sendMethodCall<typeof CaelusValidatorPool.prototype.getSnitched, boolean>({
       applicationID: appToSnitch,
       methodArgs: [params],
@@ -315,7 +319,7 @@ export class CaelusValidatorPool extends Contract {
     if (checks.delinquentCheck) {
       result = result || this.checkDelinquencyOnSnitch();
     }
-    if (this.status.value !== 2) this.updateDelegationFactors();
+    if (this.status.value !== DELINQUENCY_STATUS) this.updateDelegationFactors();
     return result;
   }
 
@@ -351,7 +355,7 @@ export class CaelusValidatorPool extends Contract {
   }
 
   deleteApplication(): void {
-    assert(this.status.value !== 2, 'Account is delinquent. Solve Delinquency state before closing');
+    assert(this.status.value !== DELINQUENCY_STATUS, 'Account is delinquent. Solve Delinquency state before closing');
     assert(this.txn.sender === this.operatorAddress.value, 'Only the node operator can close the node');
     sendAssetTransfer({
       xferAsset: this.tokenId.value,
@@ -412,7 +416,7 @@ export class CaelusValidatorPool extends Contract {
       'Operator commit must be higher than minimum balance for rewards eligibility'
     );
 
-    if (this.status.value === 2) {
+    if (this.status.value === DELINQUENCY_STATUS) {
       assert(
         this.delegatedStake.value === 0,
         'if Delinquent go Online only with your own stake to clear up delinquency'
@@ -433,8 +437,8 @@ export class CaelusValidatorPool extends Contract {
       fee: extraFee,
     });
 
-    if (this.status.value !== 2) {
-      this.status.value = 0;
+    if (this.status.value !== DELINQUENCY_STATUS) {
+      this.status.value = NEUTRAL_STATUS;
     }
 
     this.goOnlineEvent.log({
@@ -458,7 +462,7 @@ export class CaelusValidatorPool extends Contract {
       'Only Node Operator or Caelus Admin contract can set the contract offline'
     );
     sendOfflineKeyRegistration({});
-    this.status.value = 1;
+    this.status.value = NOT_DELEGATABLE_STATUS;
 
     this.goOfflineEvent.log({
       app: this.app,
@@ -520,7 +524,7 @@ export class CaelusValidatorPool extends Contract {
   private checkStakeOnSnitch(recipient: AppID, split: boolean, max: uint64): boolean {
     const hasMoreThanMax = this.app.address.balance > MAX_STAKE_PER_ACCOUNT;
     if (hasMoreThanMax) this.setDelinquency();
-    const hasMoreThanDelegatable = this.saturationBUFFER.value > 1000;
+    const hasMoreThanDelegatable = this.saturationBuffer.value > BUFFER_MAX;
     if (hasMoreThanDelegatable) {
       const amount = this.delegatedStake.value - this.maxDelegatableStake.value;
       this.delegatedStake.value -= amount;
@@ -554,7 +558,7 @@ export class CaelusValidatorPool extends Contract {
   }
 
   private checkDelinquencyOnSnitch(): boolean {
-    if (this.status.value !== 2) return false;
+    if (this.status.value !== DELINQUENCY_STATUS) return false;
     if (this.app.address.assetBalance(this.tokenId.value) === 0) return false;
     sendMethodCall<typeof CaelusAdmin.prototype.burnToDelinquentValidator>({
       applicationID: this.creatorContractAppID.value,
@@ -611,21 +615,24 @@ export class CaelusValidatorPool extends Contract {
     this.delegatedStake.value = 0;
     this.performanceCounter.value = 0;
     this.updateDelegationFactors();
-    this.status.value = 2;
+    this.status.value = DELINQUENCY_STATUS;
   }
 
   private fixDelinquencyScore(): void {
     if (this.delinquencyScore.value === 0) {
       return;
     }
-    if (this.status.value === 2) {
+    if (this.status.value === DELINQUENCY_STATUS) {
       this.delinquencyScore.value -= 5;
     }
     this.delinquencyScore.value = 0;
   }
 
   private updateDelegationFactors(): void {
-    assert(this.status.value !== 2, 'Account is delinquent. Solve Delinquency state before updating parameters');
+    assert(
+      this.status.value !== DELINQUENCY_STATUS,
+      'Account is delinquent. Solve Delinquency state before updating parameters'
+    );
     // start counting from the operator commit
     if (this.operatorCommit.value > globals.payoutsMinBalance && this.status.value === 0) {
       this.maxDelegatableStake.value = this.operatorCommit.value;
@@ -650,10 +657,10 @@ export class CaelusValidatorPool extends Contract {
 
     // calculate saturation buffer with 3 decimal precision & set flag for delegation eligibility
     if (this.maxDelegatableStake.value > 0) {
-      this.saturationBUFFER.value = (this.delegatedStake.value * 1000) / this.maxDelegatableStake.value;
+      this.saturationBuffer.value = (this.delegatedStake.value * BUFFER_MAX) / this.maxDelegatableStake.value;
     } else {
-      this.saturationBUFFER.value = 1000;
-      this.status.value = 1;
+      this.saturationBuffer.value = BUFFER_MAX;
+      this.status.value = NOT_DELEGATABLE_STATUS;
     }
   }
 
