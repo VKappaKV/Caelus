@@ -1,14 +1,7 @@
 /* eslint-disable import/no-cycle */
 import { Contract } from '@algorandfoundation/tealscript';
 import { CaelusValidatorPool } from './CaelusValidator.algo';
-import {
-  ALGORAND_BASE_FEE,
-  BURN_COOLDOWN,
-  FLASH_LOAN_FEE,
-  SCALE,
-  SnitchInfo,
-  VALIDATOR_POOL_CONTRACT_MBR,
-} from './constants.algo';
+import { ALGORAND_BASE_FEE, BURN_COOLDOWN, FLASH_LOAN_FEE, SCALE, VALIDATOR_POOL_CONTRACT_MBR } from './constants.algo';
 
 /**
  * CaelusAdmin is the main contract handling the Caelus protocol. It acts as Factory contract by deploying the Validator
@@ -453,30 +446,6 @@ export class CaelusAdmin extends Contract {
   }
 
   /**
-   * Used to check the behavior of a Validator App
-   *
-   * @param {AppID} appToCheck - Validator AppID to snitch
-   * @param {SnitchInfo} params - SnitchInfo object containing the informations to check
-   * @returns {boolean} result of the snitch if successfull -> true
-   */
-  snitchCheck(appToCheck: AppID, params: SnitchInfo): boolean {
-    assert(this.isPool(appToCheck));
-    assert(this.isPool(params.recipient) || params.recipient.address === this.app.address);
-
-    const result = sendMethodCall<typeof CaelusValidatorPool.prototype.getSnitched, boolean>({
-      applicationID: appToCheck,
-      methodArgs: [params],
-    });
-
-    this.snitchValidatorEvent.log({
-      request: params,
-      result: result,
-    });
-
-    return result;
-  }
-
-  /**
    * Follow up operation called by the snitched App to perform restaking of the delegated Algo clawed back
    *
    * @param {AppID} snitchedApp - The AppID of the validator to snitch
@@ -631,11 +600,6 @@ export class CaelusAdmin extends Contract {
 
   snitchQueueEvent = new EventLogger<{
     queue: StaticArray<AppID, 5>;
-  }>();
-
-  snitchValidatorEvent = new EventLogger<{
-    request: SnitchInfo;
-    result: boolean;
   }>();
 
   flashLoanEvent = new EventLogger<{

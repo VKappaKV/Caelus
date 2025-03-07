@@ -118,41 +118,6 @@
       ]
     },
     {
-      "name": "performanceCheck",
-      "args": [],
-      "returns": {
-        "type": "bool"
-      },
-      "events": [
-        {
-          "name": "delinquencyEvent",
-          "args": [
-            {
-              "name": "app",
-              "type": "uint64"
-            },
-            {
-              "name": "operator",
-              "type": "address"
-            },
-            {
-              "name": "stakeAtRisk",
-              "type": "uint64"
-            },
-            {
-              "name": "delinquencyScore",
-              "type": "uint64"
-            },
-            {
-              "name": "status",
-              "type": "uint64"
-            }
-          ],
-          "desc": ""
-        }
-      ]
-    },
-    {
       "name": "solveDelinquency",
       "args": [
         {
@@ -258,7 +223,23 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "snitchValidatorEvent",
+          "args": [
+            {
+              "name": "request",
+              "type": "(bool,bool,bool,uint64,bool,uint64)"
+            },
+            {
+              "name": "result",
+              "type": "bool"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "getSnitched",
@@ -589,6 +570,20 @@
         {
           "name": "payout",
           "type": "uint64"
+        }
+      ],
+      "desc": ""
+    },
+    {
+      "name": "snitchValidatorEvent",
+      "args": [
+        {
+          "name": "request",
+          "type": "(bool,bool,bool,uint64,bool,uint64)"
+        },
+        {
+          "name": "result",
+          "type": "bool"
         }
       ],
       "desc": ""

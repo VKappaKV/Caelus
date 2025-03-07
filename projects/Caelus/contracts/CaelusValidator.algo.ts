@@ -188,50 +188,6 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
-  performanceCheck(): boolean {
-    if (!this.app.address.incentiveEligible) {
-      this.setDelinquency();
-
-      this.delinquencyEvent.log({
-        app: this.app,
-        operator: this.operatorAddress.value,
-        stakeAtRisk: this.delegatedStake.value,
-        delinquencyScore: this.delinquencyScore.value,
-        status: this.status.value,
-      });
-
-      return true;
-    }
-    // check to not make performanceChecks be stacked in close proximity calls
-    assert(
-      globals.round - this.lastDelinquencyReport.value > this.getExpectedProposalsDelta() / 2,
-      'Wait at least half the proposal expected time between Performance checks'
-    );
-    const deltaWithLatestProposal = globals.round - this.app.address.lastProposed;
-    const isPerformingAsExpected = this.getExpectedProposalsDelta() > deltaWithLatestProposal;
-    const isPerformingAsTolerated = this.getToleratedProposalDelta() > deltaWithLatestProposal;
-    if (isPerformingAsExpected && isPerformingAsTolerated) {
-      return false;
-    }
-    if (!isPerformingAsTolerated) {
-      this.delinquencyScore.value += 5;
-    } else if (!isPerformingAsExpected) {
-      this.delinquencyScore.value +=
-        this.lastDelinquencyReport.value > this.lastRewardReport.value || this.delinquencyScore.value > 5 ? 2 : 1;
-    }
-    this.setDelinquencyOnThresholdCheck();
-    this.lastDelinquencyReport.value = globals.round;
-
-    this.delinquencyEvent.log({
-      app: this.app,
-      operator: this.operatorAddress.value,
-      stakeAtRisk: this.delegatedStake.value,
-      delinquencyScore: this.delinquencyScore.value,
-      status: this.status.value,
-    });
-    return true;
-  }
-
   // call this method if Account has been flagged as delinquent wait fixed amount of time before resetting it and expects payment if necessary (?)
   solveDelinquency(block: uint64): void {
     assert(this.status.value !== 2, 'Account is not delinquent');
@@ -335,86 +291,31 @@ export class CaelusValidatorPool extends Contract {
   // calls to another Validator getSnitched method. If successfull it will increase performanceCounter
   snitchValidator(appToSnitch: AppID, params: SnitchInfo): void {
     assert(this.status.value !== 2);
-    const result = sendMethodCall<typeof CaelusAdmin.prototype.snitchCheck, boolean>({
+    const result = sendMethodCall<typeof CaelusValidatorPool.prototype.getSnitched, boolean>({
       applicationID: appToSnitch,
-      methodArgs: [appToSnitch, params],
+      methodArgs: [params],
     });
     if (result) {
       this.performanceCounter.value += 1;
     }
     this.updateDelegationFactors();
+
+    this.snitchValidatorEvent.log({ request: params, result: result });
   }
 
-  // make the checks required
   getSnitched(checks: SnitchInfo): boolean {
-    assert(this.txn.sender === this.creatorContractAppID.value.address);
-    // maybe its better to check that checks.delinquency and checks.stakeAmount are mutually exclusive
     let result = false;
-    let amount = 0;
+
     if (checks.performanceCheck) {
-      result = this.performanceCheck();
+      result = result || this.performanceCheck();
     }
-    if (checks.stakeAmountCheck && this.app.address.balance > MAX_STAKE_PER_ACCOUNT) {
-      this.setDelinquency();
-      result = true;
+    if (checks.stakeAmountCheck) {
+      result = result || this.checkStakeOnSnitch(checks.recipient, checks.split, checks.max);
     }
-    // in this case a validator pool being delinquent has its delegation factor fixed to MAX = 0 & saturationBUFFER to 1000
-    if (checks.delinquentCheck && this.status.value === 2) {
-      // check if delinquent & still has some ASA not burned, in that case procede to call burn
-      result = this.delegatedStake.value > 0 || this.app.address.assetBalance(this.tokenId.value) > 0;
-      if (this.app.address.assetBalance(this.tokenId.value) > 0) {
-        sendMethodCall<typeof CaelusAdmin.prototype.burnToDelinquentValidator>({
-          applicationID: this.creatorContractAppID.value,
-          methodArgs: [
-            {
-              xferAsset: this.tokenId.value,
-              assetReceiver: this.creatorContractAppID.value.address,
-              assetAmount: this.app.address.assetBalance(this.tokenId.value),
-            },
-            this.app,
-            this.operatorCommit.value,
-          ],
-        });
-      }
-      amount += this.delegatedStake.value > 0 ? this.delegatedStake.value : 0;
-      this.delegatedStake.value -= amount;
+    if (checks.delinquentCheck) {
+      result = result || this.checkDelinquencyOnSnitch();
     }
-    if (checks.stakeAmountCheck && this.saturationBUFFER.value > 1000) {
-      amount = this.delegatedStake.value - this.maxDelegatableStake.value;
-      this.delegatedStake.value -= amount;
-      result = true;
-    }
-    assert(amount <= this.delegatedStake.value);
-    const isDelegatable = (checks.recipient.globalState('status') as uint64) === 0;
-    if (checks.split && amount > checks.max && isDelegatable) {
-      const toRecipient = amount - checks.max;
-      amount -= toRecipient;
-      sendMethodCall<typeof CaelusAdmin.prototype.reStakeFromSnitch, void>({
-        applicationID: checks.recipient,
-        methodArgs: [
-          this.app,
-          checks.recipient,
-          {
-            receiver: this.creatorContractAppID.value.address,
-            amount: toRecipient,
-          },
-        ],
-      });
-    }
-    sendMethodCall<typeof CaelusAdmin.prototype.reStakeFromSnitch, void>({
-      applicationID: this.creatorContractAppID.value,
-      methodArgs: [
-        this.app,
-        this.creatorContractAppID.value,
-        {
-          receiver: this.creatorContractAppID.value.address,
-          amount: amount,
-        },
-      ],
-    });
-    if (this.status.value !== 2) {
-      this.updateDelegationFactors();
-    }
+    if (this.status.value !== 2) this.updateDelegationFactors();
     return result;
   }
 
@@ -567,16 +468,114 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
+  @abi.readonly
+  getEligibilityFlag(): boolean {
+    return this.app.address.incentiveEligible;
+  }
+
+  private performanceCheck(): boolean {
+    if (!this.app.address.incentiveEligible) {
+      this.setDelinquency();
+
+      this.delinquencyEvent.log({
+        app: this.app,
+        operator: this.operatorAddress.value,
+        stakeAtRisk: this.delegatedStake.value,
+        delinquencyScore: this.delinquencyScore.value,
+        status: this.status.value,
+      });
+
+      return true;
+    }
+    // check to not make performanceChecks be stacked in close proximity calls
+    assert(
+      globals.round - this.lastDelinquencyReport.value > this.getExpectedProposalsDelta() / 2,
+      'Wait at least half the proposal expected time between Performance checks'
+    );
+    const deltaWithLatestProposal = globals.round - this.app.address.lastProposed;
+    const isPerformingAsExpected = this.getExpectedProposalsDelta() > deltaWithLatestProposal;
+    const isPerformingAsTolerated = this.getToleratedProposalDelta() > deltaWithLatestProposal;
+    if (isPerformingAsExpected && isPerformingAsTolerated) {
+      return false;
+    }
+    if (!isPerformingAsTolerated) {
+      this.delinquencyScore.value += 5;
+    } else if (!isPerformingAsExpected) {
+      this.delinquencyScore.value +=
+        this.lastDelinquencyReport.value > this.lastRewardReport.value || this.delinquencyScore.value > 5 ? 2 : 1;
+    }
+    this.setDelinquencyOnThresholdCheck();
+    this.lastDelinquencyReport.value = globals.round;
+
+    this.delinquencyEvent.log({
+      app: this.app,
+      operator: this.operatorAddress.value,
+      stakeAtRisk: this.delegatedStake.value,
+      delinquencyScore: this.delinquencyScore.value,
+      status: this.status.value,
+    });
+    return true;
+  }
+
+  private checkStakeOnSnitch(recipient: AppID, split: boolean, max: uint64): boolean {
+    const hasMoreThanMax = this.app.address.balance > MAX_STAKE_PER_ACCOUNT;
+    if (hasMoreThanMax) this.setDelinquency();
+    const hasMoreThanDelegatable = this.saturationBUFFER.value > 1000;
+    if (hasMoreThanDelegatable) {
+      const amount = this.delegatedStake.value - this.maxDelegatableStake.value;
+      this.delegatedStake.value -= amount;
+      const reStakeAmount = split ? amount - max : amount;
+      sendMethodCall<typeof CaelusAdmin.prototype.reStakeFromSnitch>({
+        applicationID: this.creatorContractAppID.value,
+        methodArgs: [
+          this.app,
+          recipient,
+          {
+            receiver: this.creatorContractAppID.value.address,
+            amount: reStakeAmount,
+          },
+        ],
+      });
+      if (amount - max > 0)
+        sendMethodCall<typeof CaelusAdmin.prototype.reStakeFromSnitch>({
+          applicationID: this.creatorContractAppID.value,
+          methodArgs: [
+            this.app,
+            this.creatorContractAppID.value,
+            {
+              receiver: this.creatorContractAppID.value.address,
+              amount: amount - max,
+            },
+          ],
+        });
+    }
+
+    return hasMoreThanMax || hasMoreThanDelegatable;
+  }
+
+  private checkDelinquencyOnSnitch(): boolean {
+    if (this.status.value !== 2) return false;
+    if (this.app.address.assetBalance(this.tokenId.value) === 0) return false;
+    sendMethodCall<typeof CaelusAdmin.prototype.burnToDelinquentValidator>({
+      applicationID: this.creatorContractAppID.value,
+      methodArgs: [
+        {
+          xferAsset: this.tokenId.value,
+          assetReceiver: this.creatorContractAppID.value.address,
+          assetAmount: this.app.address.assetBalance(this.tokenId.value),
+        },
+        this.app,
+        0, // must be kept 0 because the operator commit is already removed from the TotalStake on setDelinquency, this is a follow up call to ensure all his LST balance have been burned
+      ],
+    });
+    return true;
+  }
+
   private getGoOnlineFeeAmount(): uint64 {
     if (!this.getEligibilityFlag()) {
       return globals.payoutsGoOnlineFee;
     }
     return 0;
-  }
-
-  @abi.readonly
-  getEligibilityFlag(): boolean {
-    return this.app.address.incentiveEligible;
   }
 
   private setDelinquencyOnThresholdCheck(): void {
@@ -593,9 +592,6 @@ export class CaelusValidatorPool extends Contract {
   }
 
   private setDelinquency(): void {
-    this.performanceCounter.value = 0;
-    this.updateDelegationFactors();
-    this.status.value = 2;
     sendMethodCall<typeof CaelusAdmin.prototype.burnToDelinquentValidator>({
       applicationID: this.creatorContractAppID.value,
       methodArgs: [
@@ -608,6 +604,14 @@ export class CaelusValidatorPool extends Contract {
         this.operatorCommit.value,
       ],
     });
+    sendPayment({
+      receiver: this.creatorContractAppID.value.address,
+      amount: this.delegatedStake.value,
+    });
+    this.delegatedStake.value = 0;
+    this.performanceCounter.value = 0;
+    this.updateDelegationFactors();
+    this.status.value = 2;
   }
 
   private fixDelinquencyScore(): void {
@@ -737,5 +741,10 @@ export class CaelusValidatorPool extends Contract {
     app: AppID;
     block: uint64;
     payout: uint64;
+  }>();
+
+  snitchValidatorEvent = new EventLogger<{
+    request: SnitchInfo;
+    result: boolean;
   }>();
 }

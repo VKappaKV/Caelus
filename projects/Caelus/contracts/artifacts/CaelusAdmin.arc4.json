@@ -392,42 +392,6 @@
       }
     },
     {
-      "name": "snitchCheck",
-      "desc": "Used to check the behavior of a Validator App",
-      "args": [
-        {
-          "name": "appToCheck",
-          "type": "uint64",
-          "desc": "Validator AppID to snitch"
-        },
-        {
-          "name": "params",
-          "type": "(bool,bool,bool,uint64,bool,uint64)",
-          "desc": "SnitchInfo object containing the informations to check"
-        }
-      ],
-      "returns": {
-        "type": "bool",
-        "desc": "boolean result of the snitch if successfull - true"
-      },
-      "events": [
-        {
-          "name": "snitchValidatorEvent",
-          "args": [
-            {
-              "name": "request",
-              "type": "(bool,bool,bool,uint64,bool,uint64)"
-            },
-            {
-              "name": "result",
-              "type": "bool"
-            }
-          ],
-          "desc": ""
-        }
-      ]
-    },
-    {
       "name": "reStakeFromSnitch",
       "desc": "Follow up operation called by the snitched App to perform restaking of the delegated Algo clawed back",
       "args": [
@@ -580,20 +544,6 @@
         {
           "name": "queue",
           "type": "uint64[5]"
-        }
-      ],
-      "desc": ""
-    },
-    {
-      "name": "snitchValidatorEvent",
-      "args": [
-        {
-          "name": "request",
-          "type": "(bool,bool,bool,uint64,bool,uint64)"
-        },
-        {
-          "name": "result",
-          "type": "bool"
         }
       ],
       "desc": ""
