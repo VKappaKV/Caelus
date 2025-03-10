@@ -8,9 +8,12 @@ import {
   FLASH_LOAN_FEE,
   LOCKED,
   NEUTRAL_STATUS,
+  PROTOCOL_COMMISSION,
   SCALE,
   UPDATABLE,
   VALIDATOR_POOL_CONTRACT_MBR,
+  VEST_TIER_4,
+  VEST_TIER_5,
 } from './constants.algo';
 
 /**
@@ -46,6 +49,8 @@ export class CaelusAdmin extends Contract {
     key: 'pool_contract_lock_flag',
   });
 
+  protocolFee = GlobalStateKey<uint64>({ key: 'protocol_fee' });
+
   totalStake = GlobalStateKey<uint64>({ key: 'total_stake' });
 
   pegRatio = GlobalStateKey<uint64>({ key: 'peg_ratio' });
@@ -54,7 +59,7 @@ export class CaelusAdmin extends Contract {
 
   vestId = GlobalStateKey<AssetID>({ key: 'vest_id' });
 
-  stVestId = GlobalStateKey<AssetID>({ key: 'staked_vest_id' });
+  tiers = GlobalStateKey<uint64[]>({ key: 'tiers' });
 
   tokenCirculatingSupply = GlobalStateKey<uint64>({
     key: 'circulating_supply',
@@ -75,6 +80,7 @@ export class CaelusAdmin extends Contract {
     this.manager.value = this.app.creator;
     this.validatorPoolContractVersion.value = 0;
     this.validatorPoolContractCost.value = VALIDATOR_POOL_CONTRACT_MBR;
+    this.protocolFee.value = PROTOCOL_COMMISSION;
 
     this.totalStake.value = 0;
     this.pegRatio.value = 1 * SCALE;
@@ -85,6 +91,8 @@ export class CaelusAdmin extends Contract {
     this.highestBidder.value = AppID.zeroIndex;
 
     this.burnQueue.value = [];
+
+    this.tiers.value = [VEST_TIER_4, VEST_TIER_5];
 
     this.lastExhaustBlock.value = 0;
   }
@@ -112,10 +120,22 @@ export class CaelusAdmin extends Contract {
     }
   }
 
-  MANAGER_updateVestTokensID(vestID: AssetID, stVestID: AssetID): void {
+  MANAGER_updateVestTokensID(vestID: AssetID): void {
     assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
     this.vestId.value = vestID;
-    this.stVestId.value = stVestID;
+  }
+
+  MANAGER_changeVestTier(amounts: uint64[]): void {
+    assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
+    this.tiers.value = amounts;
+  }
+
+  getVestTier(amount: uint64): uint64 {
+    if (amount < this.tiers.value[0]) return 0;
+    for (let i = 0; i < this.tiers.value.length; i += 1) {
+      if (amount < this.tiers.value[i]) return i + 1;
+    }
+    return this.tiers.value.length;
   }
 
   MANAGER_changeManager(manager: Address): void {
@@ -123,9 +143,13 @@ export class CaelusAdmin extends Contract {
     this.manager.value = manager;
   }
 
+  MANAGER_changeProtocolFee(amount: uint64): void {
+    assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
+    this.protocolFee.value = amount;
+  }
+
   MANAGER_lockContract(): void {
     assert(this.txn.sender === this.manager.value);
-
     this.poolContractLock.value = LOCKED;
   }
 
@@ -252,7 +276,7 @@ export class CaelusAdmin extends Contract {
       this.doAxfer(burnTxn.sender, amountLeft, this.tokenId.value);
       this.lastExhaustBlock.value = globals.round;
     }
-    this.tokenCirculatingSupply.value -= burnTxn.assetAmount - amountLeft;
+    this.tokenCirculatingSupply.value = this.tokenCirculatingSupply.value - (burnTxn.assetAmount - amountLeft);
     this.totalStake.value -= burning;
 
     this.burnEvent.log({
@@ -291,9 +315,7 @@ export class CaelusAdmin extends Contract {
     this.tokenCirculatingSupply.value += amountToMint;
   }
 
-  // burn & send to operator; amount is the LST amount of commit to burn
-  // this burn method for the operator directly burns vAlgo taking Algo from the validator contract of the operator, reducing his commit
-  burnValidatorCommit(appToBurnFrom: AppID, amount: uint64): void {
+  removeValidatorCommit(appToBurnFrom: AppID, amount: uint64): void {
     this.isPool(appToBurnFrom);
     verifyTxn(this.txn, {
       sender: appToBurnFrom.globalState('operator') as Address,
@@ -303,7 +325,6 @@ export class CaelusAdmin extends Contract {
       applicationID: appToBurnFrom,
       methodArgs: [toBurn, amount],
     });
-    this.totalStake.value -= toBurn;
     this.tokenCirculatingSupply.value -= amount;
   }
 
@@ -342,7 +363,7 @@ export class CaelusAdmin extends Contract {
       }
     }
     amountToUpdate = this.getBurnAmount(toBurn - amtBurned);
-    this.tokenCirculatingSupply.value -= burnTxn.assetAmount - amountToUpdate;
+    this.tokenCirculatingSupply.value = this.tokenCirculatingSupply.value - (burnTxn.assetAmount - amountToUpdate);
     this.totalStake.value -= amtBurned;
     this.totalStake.value -= amountOperator;
     if (amountToUpdate > 0) {
@@ -394,14 +415,17 @@ export class CaelusAdmin extends Contract {
   // No assert call to avoid future P2P spam.
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
+    const isOnLatestVersion =
+      (validatorAppID.globalState('validator_pool_version') as uint64) === this.validatorPoolContractVersion.value;
+    assert(isOnLatestVersion, 'cannot bid if not on latest version');
     const isDelegatable = (validatorAppID.globalState('status') as uint64) === NEUTRAL_STATUS;
+    assert(isDelegatable, 'only bid delegatable Apps');
     if (!this.isPool(this.highestBidder.value)) {
       this.highestBidder.value = validatorAppID;
       return;
     }
     const challengerBuffer = validatorAppID.globalState('saturation_buffer') as uint64;
     const highestBuffer = this.highestBidder.value.globalState('saturation_buffer') as uint64;
-    assert(isDelegatable, 'only bid delegatable Apps');
     if (challengerBuffer > highestBuffer) {
       this.highestBidder.value = validatorAppID;
     }
@@ -412,8 +436,10 @@ export class CaelusAdmin extends Contract {
     });
   }
 
-  setTotalStakeOnRewards(proposer: AppID, block: uint64, amount: uint64): void {
+  declareRewards(proposer: AppID, block: uint64, rewardPay: PayTxn): void {
     assert(blocks[block].proposer === proposer.address);
+    assert(rewardPay.receiver === this.app.address);
+    const amount = rewardPay.amount - wideRatio([this.protocolFee.value, rewardPay.amount], [100]);
     this.totalStake.value += amount;
   }
 
@@ -432,7 +458,7 @@ export class CaelusAdmin extends Contract {
     });
   }
 
-  // used to set new validator inside the burn queue || burn Prio
+  // used to set new validator inside the burn queue
   snitchToBurn(app: AppID): void {
     assert(this.isPool(app));
     const satSnitch = app.globalState('saturation_buffer') as uint64;
