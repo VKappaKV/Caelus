@@ -57,7 +57,7 @@ export class CaelusAdmin extends Contract {
 
   tokenId = GlobalStateKey<AssetID>({ key: 'token_id' });
 
-  vestId = GlobalStateKey<AssetID>({ key: 'vest_id' });
+  boostTokenID = GlobalStateKey<AssetID>({ key: 'boost_token_id' });
 
   tiers = GlobalStateKey<uint64[]>({ key: 'tiers' });
 
@@ -120,17 +120,17 @@ export class CaelusAdmin extends Contract {
     }
   }
 
-  MANAGER_updateVestTokensID(vestID: AssetID): void {
+  MANAGER_updateBoostTokenID(boostTokenID: AssetID): void {
     assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
-    this.vestId.value = vestID;
+    this.boostTokenID.value = boostTokenID;
   }
 
-  MANAGER_changeVestTier(amounts: uint64[]): void {
+  MANAGER_changeBoostTier(amounts: uint64[]): void {
     assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
     this.tiers.value = amounts;
   }
 
-  getVestTier(amount: uint64): uint64 {
+  getBoostTier(amount: uint64): uint64 {
     if (amount < this.tiers.value[0]) return 0;
     for (let i = 0; i < this.tiers.value.length; i += 1) {
       if (amount < this.tiers.value[i]) return i + 1;
@@ -145,6 +145,7 @@ export class CaelusAdmin extends Contract {
 
   MANAGER_changeProtocolFee(amount: uint64): void {
     assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
+    assert(amount <= 100, 'amount is meant as percentage, cannot be more than 100');
     this.protocolFee.value = amount;
   }
 

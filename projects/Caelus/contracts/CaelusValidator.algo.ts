@@ -35,7 +35,7 @@ export class CaelusValidatorPool extends Contract {
 
   tokenId = GlobalStateKey<AssetID>({ key: 'token_id' });
 
-  vestID = GlobalStateKey<AssetID>({ key: 'vest_id' });
+  boostTokenID = GlobalStateKey<AssetID>({ key: 'boost_token_id' });
 
   // Operator specific params
 
@@ -484,6 +484,7 @@ export class CaelusValidatorPool extends Contract {
   migrateToPool(newPool: AppID): void {
     assert(newPool.creator === this.app.creator, 'new pool has to be a pool created by the admin contract');
     assert(this.txn.sender === this.operatorAddress.value, 'only the operator can migrate to a new pool');
+    assert(this.status.value === DELINQUENCY_STATUS, 'cannot migrate if delinquent');
 
     sendMethodCall<typeof CaelusValidatorPool.prototype.mergeStateOnMigration>({
       applicationID: newPool,
@@ -695,9 +696,8 @@ export class CaelusValidatorPool extends Contract {
     if (this.operatorCommit.value > globals.payoutsMinBalance && this.status.value === 0) {
       this.maxDelegatableStake.value = this.operatorCommit.value;
 
-      // boost commit with VEST tier: tier 4 is a 50% increase and tier 5 is a 100% increase
-      const vestBoost = (this.getTierVEST() * this.operatorCommit.value) / 2;
-      this.maxDelegatableStake.value += vestBoost;
+      const tokenBoost = (this.getTier() * this.operatorCommit.value) / 2;
+      this.maxDelegatableStake.value += tokenBoost;
 
       // add in the performance counter to increase delegatable amount, increases of 10k delegatable stake per multiples of 5 for performanceCounter
       this.maxDelegatableStake.value += PERFORMANCE_STAKE_INCREASE * (this.performanceCounter.value / PERFORMANCE_STEP);
@@ -722,19 +722,15 @@ export class CaelusValidatorPool extends Contract {
     }
   }
 
-  private getVESTid(): void {
-    this.creatorContractAppID.value.globalState('vest_id') as AssetID;
-  }
-
-  private getTierVEST(): uint64 {
-    if (!this.vestID.exists) {
-      this.getVESTid();
+  private getTier(): uint64 {
+    if (!this.boostTokenID.exists) {
+      this.creatorContractAppID.value.globalState('boost_token_id') as AssetID;
     }
-    const ownedVEST = this.operatorAddress.value.assetBalance(this.vestID.value);
-    if (ownedVEST === 0) return 0;
-    const getTier = sendMethodCall<typeof CaelusAdmin.prototype.getVestTier, uint64>({
+    const ownedToken = this.operatorAddress.value.assetBalance(this.boostTokenID.value);
+    if (ownedToken === 0) return 0;
+    const getTier = sendMethodCall<typeof CaelusAdmin.prototype.getBoostTier, uint64>({
       applicationID: this.creatorContractAppID.value,
-      methodArgs: [ownedVEST],
+      methodArgs: [ownedToken],
     });
     return getTier;
   }
