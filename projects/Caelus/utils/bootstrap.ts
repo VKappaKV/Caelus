@@ -4,7 +4,7 @@ import * as algokit from '@algorandfoundation/algokit-utils';
 import { consoleLogger } from '@algorandfoundation/algokit-utils/types/logging';
 import { Config } from '@algorandfoundation/algokit-utils';
 import { OnSchemaBreak, OnUpdate } from '@algorandfoundation/algokit-utils/types/app';
-import algosdk, { ABIMethod } from 'algosdk';
+import algosdk from 'algosdk';
 import { CaelusAdminClient, CaelusAdminFactory } from '../contracts/clients/CaelusAdminClient';
 import { CaelusValidatorPoolFactory } from '../contracts/clients/CaelusValidatorPoolClient';
 import { MNEMONIC } from '../env';
@@ -204,16 +204,7 @@ export async function adminSetup(APP_ID: bigint) {
     decimals: 6,
   });
 
-  const stakedDummyIDtxn = await algorand.send.assetCreate({
-    sender: testAccount.addr,
-    signer: testAccount,
-    assetName: 'staked_dummy',
-    unitName: 'stDUM',
-    total: 10_000_000_000_000_000n,
-    decimals: 6,
-  });
-
-  await adminClient.send.managerUpdateVestTokensId({ args: [dummyIDtxn.assetId, stakedDummyIDtxn.assetId] });
+  await adminClient.send.managerChangeBoostTier({ args: [[dummyIDtxn.assetId]] });
 }
 
 export async function addValidator(APP_ID: bigint) {

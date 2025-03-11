@@ -322,10 +322,12 @@ export class CaelusAdmin extends Contract {
       sender: appToBurnFrom.globalState('operator') as Address,
     });
     const toBurn = this.getBurnAmount(amount);
+
     sendMethodCall<typeof CaelusValidatorPool.prototype.removeFromOperatorCommit, void>({
       applicationID: appToBurnFrom,
       methodArgs: [toBurn, amount],
     });
+
     this.tokenCirculatingSupply.value -= amount;
   }
 

@@ -218,7 +218,7 @@
         },
         {
           "name": "params",
-          "type": "(bool,bool,bool,uint64,bool,uint64)"
+          "type": "(bool,bool,bool,bool,uint64,bool,uint64)"
         }
       ],
       "returns": {
@@ -230,7 +230,7 @@
           "args": [
             {
               "name": "request",
-              "type": "(bool,bool,bool,uint64,bool,uint64)"
+              "type": "(bool,bool,bool,bool,uint64,bool,uint64)"
             },
             {
               "name": "result",
@@ -246,7 +246,7 @@
       "args": [
         {
           "name": "checks",
-          "type": "(bool,bool,bool,uint64,bool,uint64)"
+          "type": "(bool,bool,bool,bool,uint64,bool,uint64)"
         }
       ],
       "returns": {
@@ -275,44 +275,6 @@
       "returns": {
         "type": "void"
       }
-    },
-    {
-      "name": "claimLeftAlgo",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "deleteApplication",
-      "args": [],
-      "returns": {
-        "type": "void"
-      },
-      "events": [
-        {
-          "name": "validatorCloseEvent",
-          "args": [
-            {
-              "name": "app",
-              "type": "uint64"
-            },
-            {
-              "name": "operator",
-              "type": "address"
-            },
-            {
-              "name": "returnedStake",
-              "type": "uint64"
-            },
-            {
-              "name": "operatorStake",
-              "type": "uint64"
-            }
-          ],
-          "desc": ""
-        }
-      ]
     },
     {
       "name": "goOnline",
@@ -421,6 +383,88 @@
       "returns": {
         "type": "bool"
       }
+    },
+    {
+      "name": "migrateToPool",
+      "args": [
+        {
+          "name": "newPool",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "mergeStateOnMigration",
+      "args": [
+        {
+          "name": "from",
+          "type": "uint64"
+        },
+        {
+          "name": "opCommit",
+          "type": "uint64"
+        },
+        {
+          "name": "delegatedAmount",
+          "type": "uint64"
+        },
+        {
+          "name": "performanceCounter",
+          "type": "uint64"
+        },
+        {
+          "name": "stakeTxn",
+          "type": "pay"
+        },
+        {
+          "name": "lstTxn",
+          "type": "axfer"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "claimLeftAlgo",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "deleteApplication",
+      "args": [],
+      "returns": {
+        "type": "void"
+      },
+      "events": [
+        {
+          "name": "validatorCloseEvent",
+          "args": [
+            {
+              "name": "app",
+              "type": "uint64"
+            },
+            {
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "name": "returnedStake",
+              "type": "uint64"
+            },
+            {
+              "name": "operatorStake",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     }
   ],
   "events": [
@@ -579,7 +623,7 @@
       "args": [
         {
           "name": "request",
-          "type": "(bool,bool,bool,uint64,bool,uint64)"
+          "type": "(bool,bool,bool,bool,uint64,bool,uint64)"
         },
         {
           "name": "result",

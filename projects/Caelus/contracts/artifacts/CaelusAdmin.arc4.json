@@ -24,19 +24,39 @@
       }
     },
     {
-      "name": "MANAGER_updateVestTokensID",
+      "name": "MANAGER_updateBoostTokenID",
       "args": [
         {
-          "name": "vestID",
-          "type": "uint64"
-        },
-        {
-          "name": "stVestID",
+          "name": "boostTokenID",
           "type": "uint64"
         }
       ],
       "returns": {
         "type": "void"
+      }
+    },
+    {
+      "name": "MANAGER_changeBoostTier",
+      "args": [
+        {
+          "name": "amounts",
+          "type": "uint64[]"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "getBoostTier",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "uint64"
       }
     },
     {
@@ -47,6 +67,25 @@
           "type": "address"
         }
       ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "MANAGER_changeProtocolFee",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "MANAGER_lockContract",
+      "args": [],
       "returns": {
         "type": "void"
       }
@@ -204,7 +243,7 @@
       }
     },
     {
-      "name": "burnValidatorCommit",
+      "name": "removeValidatorCommit",
       "args": [
         {
           "name": "appToBurnFrom",
@@ -320,7 +359,7 @@
       ]
     },
     {
-      "name": "setTotalStakeOnRewards",
+      "name": "declareRewards",
       "args": [
         {
           "name": "proposer",
@@ -331,8 +370,8 @@
           "type": "uint64"
         },
         {
-          "name": "amount",
-          "type": "uint64"
+          "name": "rewardPay",
+          "type": "pay"
         }
       ],
       "returns": {
