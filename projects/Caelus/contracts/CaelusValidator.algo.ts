@@ -318,23 +318,22 @@ export class CaelusValidatorPool extends Contract {
   }
 
   flashloan(amount: uint64, receiver: Address): void {
-    if (this.repaid.value) {
-      this.balanceCheckpoint.value = this.app.address.balance;
-      this.repaid.value = false;
-    }
     assert(this.txn.sender === this.creatorContractAppID.value.address, 'Caller must be the Caelus Admin Contract');
 
+    if (!this.balanceCheckpoint.exists) {
+      this.balanceCheckpoint.value = this.app.address.balance;
+    }
     sendPayment({
       receiver: receiver,
       amount: amount,
     });
 
-    // top level Caelus Admin checks that checkBalance is called within the outer group before sending the flashloan txn
+    // top level Caelus Admin checks that `checkBalance()` is called within the outer group before sending the flashloan txn
   }
 
   checkBalance(): void {
     assert(this.balanceCheckpoint.value === this.app.address.balance);
-    this.repaid.value = true;
+    this.balanceCheckpoint.delete();
   }
 
   /**

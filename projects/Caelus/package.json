@@ -1,5 +1,5 @@
 {
-  "name": "Caelus",
+  "name": "caelus",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -13,8 +13,9 @@
     "execute": "ts-node utils/execute.ts"
   },
   "dependencies": {
-    "@algorandfoundation/algokit-utils": "^7.0.1",
-    "algosdk": "^2.7.0",
+    "@algorandfoundation/algokit-subscriber": "^3.1.0",
+    "@algorandfoundation/algokit-utils": "^8.0.0",
+    "algosdk": "^3.0.0",
     "dotenv": "^16.4.7",
     "save-dev": "^0.0.1-security",
     "ts-node": "^10.9.2"

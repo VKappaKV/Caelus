@@ -41,7 +41,6 @@ const algorand = algokit.AlgorandClient.fromConfig({
     port: INDEXER_PORT,
   },
 });
-
 // const algorand = algokit.AlgorandClient.fromConfig({
 //   algodConfig: {
 //     server: 'http://localhost',
