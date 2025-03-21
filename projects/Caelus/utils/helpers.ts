@@ -119,13 +119,18 @@ export async function validatorOptIntoLST(poolApp: bigint) {
   console.log(`Opted into LST: ${tx.txIds}`);
 }
 
+export async function reportRewards(client: CaelusValidatorPoolClient, block: bigint) {
+  const tx = await client.send.reportRewards({
+    args: [block],
+    extraFee: (1000).microAlgos(),
+    populateAppCallResources: true,
+    firstValidRound: block,
+  });
+  console.log(`Reported rewards: ${tx.txIds}`);
+}
+
 export async function deleteApp(poolApp: bigint) {
   const { testAccount } = await getAccount();
-  const client = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
-    appId: poolApp,
-    defaultSender: testAccount.addr,
-    defaultSigner: testAccount.signer,
-  });
 
   const tx = await algorand.send.appDelete({
     sender: testAccount.addr,
