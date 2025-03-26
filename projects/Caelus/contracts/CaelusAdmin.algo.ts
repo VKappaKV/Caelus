@@ -23,8 +23,6 @@ import {
  * There are two key mechanisms in the protocol: bid and snitch.
  *
  * Both the bid and snitch are continous running auction leveraged to provide a priority queue to the protocol.
- * Anyone can then call the contract to execute a snitch check on a Validator, this is used to verify the correct behavior
- * of the Validator contract, whatever it is participating correctly or other things.
  *
  * Finally the Admin contract can be used to route a FlashLoan request using the Algo balance of the validators.
  */
@@ -97,9 +95,17 @@ export class CaelusAdmin extends Contract {
     this.lastExhaustBlock.value = 0;
   }
 
+  /**
+   * Temporary method to update the application. This method will be removed in the future.
+   * Here to improve open beta testing iterations. Planned to be removed on mainnet launch.
+   */
   updateApplication(): void {
     assert(this.txn.sender === this.manager.value);
   }
+
+  /**
+   * MANAGER METHODS
+   */
 
   MANAGER_createToken(): void {
     assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
@@ -129,6 +135,12 @@ export class CaelusAdmin extends Contract {
     assert(this.txn.sender === this.manager.value, 'only the manager can call this method');
     this.tiers.value = amounts;
   }
+
+  /**
+   * The getBoostTier method is needed to be kept public so that on state update Validator Pool can fetch their current tier.
+   * @param {uint64} amount  - The amount of the boost token to calculate the boost tier for
+   * @returns {uint64} - The boost tier for the given amount
+   */
 
   getBoostTier(amount: uint64): uint64 {
     if (amount < this.tiers.value[0]) return 0;
@@ -179,6 +191,10 @@ export class CaelusAdmin extends Contract {
     this.validatorPoolContractApprovalProgram.replace(offset, data);
   }
 
+  /**
+   * Factory method to spawn new Validator Pool Contracts.
+   * @param {PayTxn} mbrPay - The MBR amount can vary depending on the version of the Validator Pool Contract. The mbrPay amount has to cover the cost of the Validator Pool Contract.
+   */
   addValidator(mbrPay: PayTxn): void {
     verifyPayTxn(mbrPay, {
       receiver: this.app.address,
@@ -207,6 +223,9 @@ export class CaelusAdmin extends Contract {
     });
   }
 
+  /**
+   * On Mint the Algo deposited by the user are kept in the Admin Contract Account balance waiting for the highest bidder to claim them.
+   */
   mintRequest(mintTxn: PayTxn): void {
     verifyPayTxn(mintTxn, {
       receiver: this.app.address,
@@ -225,6 +244,13 @@ export class CaelusAdmin extends Contract {
     });
   }
 
+  /**
+   * On Burn the contract gradually checks where to take Algo from, first in the idle Admin balance, then from the burn queue.
+   * In case the amount of Algo exceeds the current queue max amount the remaining vAlgo are sent back to the user.
+   * This situation triggers the exhaust flag, that will prevent the contract from burning Algo for the next 5 blocks.
+   * The Cooldown period is necessary to ensure that the queue is filled with the Validators more fit for the burn.
+   * This to disallow possible spam looping of burning to target from specific pools.
+   */
   burnRequest(burnTxn: AssetTransferTxn, burnTo: Address): void {
     verifyAssetTransferTxn(burnTxn, {
       xferAsset: this.tokenId.value,
@@ -285,13 +311,12 @@ export class CaelusAdmin extends Contract {
       amount: burnTxn.assetAmount - amountLeft,
       output: burning,
     });
-    // totalStake --
-    // vALGO circ supply --
-    // take burn queue
-    // iterate and subtract from the request the amount you can take, stop when order is filled
-    // if the order is not filled send back the remaining amount of vALGO
   }
 
+  /**
+   * Specific method to mint the LST for the Validator Pool Contract.
+   * The mint is done by the Admin Contract and the LST is sent to the Validator Pool Contract.
+   */
   mintValidatorCommit(validatorAppID: AppID, stakeCommit: PayTxn): void {
     assert(this.isPool(validatorAppID));
     const operatorAddress = validatorAppID.globalState('operator') as Address;
@@ -316,6 +341,11 @@ export class CaelusAdmin extends Contract {
     this.tokenCirculatingSupply.value += amountToMint;
   }
 
+  /**
+   * Specific method to remove from the operator commit in the Validator Pool Contract.
+   * The @param {amount} amount - is the Algo amount requested.
+   * The Validator Pool Contract will send the vAlgo to the operator address.
+   */
   removeValidatorCommit(appToBurnFrom: AppID, amount: uint64): void {
     this.isPool(appToBurnFrom);
     verifyTxn(this.txn, {
@@ -331,13 +361,12 @@ export class CaelusAdmin extends Contract {
     this.tokenCirculatingSupply.value -= amount;
   }
 
-  // when operator is delinquent set up burn of his LST amount in the App Account
-  // burn & send to validator app
+  /**
+   * On Delinquency Validators SHOULD not have vAlgo in their balance.
+   * It's first called when deliquency is set, can be called again if the entire vAlgo amount is not burned.
+   * The vAlgo will be turned to Algo and added to the operator commit
+   */
   burnToDelinquentValidator(burnTxn: AssetTransferTxn, validatorAppID: AppID, amountOperator: uint64): void {
-    // check that app is delinquent
-    // check that app is pool
-    // init burn request for the amount sent
-    // reduce tot circ supply of vALGO
     this.isPool(validatorAppID);
     assert(globals.round - this.lastExhaustBlock.value > BURN_COOLDOWN, "can only burn if we're not exhausted");
     verifyAssetTransferTxn(burnTxn, {
@@ -389,11 +418,10 @@ export class CaelusAdmin extends Contract {
     });
   }
 
-  // when operator clears delinquency remint the LST burned
+  /**
+   * When Delinquency is solved the operator will mint his commit back into vAlgo.
+   */
   reMintDelinquentCommit(app: AppID): void {
-    // get amount and check with operator commit
-    // check that app is not delinquent anymore & his vAlgo amount is 0
-    // send vAlgo amount corresponding to the current peg for the operatorCommit amount
     this.isPool(app);
     assert((app.globalState('status') as uint64) !== DELINQUENCY_STATUS, 'must solve delinquency first');
     const amount = app.globalState('operator_commit') as uint64;
@@ -414,8 +442,9 @@ export class CaelusAdmin extends Contract {
     });
   }
 
-  // called to bid new validator as highest bidder
-  // No assert call to avoid future P2P spam.
+  /**
+   * Bid Validator App, highest bidder should have the lowest saturation buffer value.
+   */
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
     const isOnLatestVersion =
@@ -461,7 +490,9 @@ export class CaelusAdmin extends Contract {
     });
   }
 
-  // used to set new validator inside the burn queue
+  /**
+   * Push new Validator App to the burn queue. If the saturation buffer is higher than the current lowest in the queue, the new App will be snitched.
+   */
   snitchToBurn(app: AppID): void {
     assert(this.isPool(app));
     const satSnitch = app.globalState('saturation_buffer') as uint64;
@@ -485,9 +516,6 @@ export class CaelusAdmin extends Contract {
     this.snitchQueueEvent.log({
       queue: this.burnQueue.value,
     });
-    // for loop on the queue of addresses checking saturation vs minPrio
-    // iterate and check
-    // if higher -> replace
   }
 
   multiSnitchToBurn(apps: AppID[]): void {
@@ -527,6 +555,15 @@ export class CaelusAdmin extends Contract {
     }
   }
 
+  /**
+   * Algo balances in the Validator Pool Contracts sit idle, but can be efficiently use for flashloans.
+   * This creates a new route of revenue for the protocol.
+   * The method checks that each flashloan call is repaid through the subsequent checkBalance method call.
+   *
+   * @param payFeeTxn - FlashLoan fee payment; the fee is flat and grows with demand for the flashloan service
+   * @param amounts - The amount of Algo to take from each app, the value has to be correlated to the app in the appToInclude array at the same index
+   * @param appToInclude - The AppID of the Validator Pool Contracts to execute the flashloan request on
+   */
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
     this.getFLcounter();
     this.flashLoanCounter.value += appToInclude.length;
