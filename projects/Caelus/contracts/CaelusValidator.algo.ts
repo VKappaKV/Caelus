@@ -76,7 +76,7 @@ export class CaelusValidatorPool extends Contract {
    * @param {AppID} creatingContract - ApplicationID for the creator contract (CaelusAdminContract)
    * @param {Address} operatorAddress - Address of the node operator used to sign online/offline txns and participate in auctions
    * @param {uint64} contractVersion - Approval Program version for the node contract, stored in the CaelusAdminContract
-   * TODO UPDATE
+   * @param {AssetID} tokenId - AssetID of the LST token
    */
 
   createApplication(
@@ -107,14 +107,8 @@ export class CaelusValidatorPool extends Contract {
   }
 
   optIntoLST(): void {
-    verifyTxn(this.txn, {
-      sender: this.operatorAddress.value,
-    });
-
     assert(!this.app.address.isOptedInToAsset(this.tokenId.value), 'already opted in tokenId');
-
     const lst = this.creatorContractAppID.value.globalState('token_id') as AssetID;
-
     sendAssetTransfer({
       assetReceiver: this.app.address,
       xferAsset: lst,
@@ -151,8 +145,8 @@ export class CaelusValidatorPool extends Contract {
 
   /**
    *  Used by the node operator to remove from his stake amount for the node
-   * @param {uint64} claimRequest - amount claimed by the node operator to be removed from the contract balance and subtracted from the operator_commit counter
-   * @throws {Error} if the sender isn't the node operator or if the total commit by the node operator goes below the min threshold for rewards eligibility
+   * @param {uint64} claimRequest - amount claimed by the node operator to be removed from the operator_commit counter and moved into delegated stake
+   * @param {uint64} claimRequestLST - amount of LST to be sent back to the node operator
    */
   removeFromOperatorCommit(claimRequest: uint64, claimRequestLST: uint64): void {
     assert(this.txn.sender === this.creatorContractAppID.value.address);
@@ -185,13 +179,23 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
-  // call this method if Account has been flagged as delinquent wait fixed amount of time before resetting it and expects payment if necessary (?)
+  /**
+   * Delinquent Validators need to propose a valid block to clear up their delinquency status.
+   *
+   * This method should be called when the delinquency score is below the threshold and the operator has proposed a block.
+   *
+   * @param block - block number of the block proposed by the node operator while the account was in delinquency
+   */
   solveDelinquency(block: uint64): void {
     assert(this.status.value !== DELINQUENCY_STATUS, 'Account is not delinquent');
     assert(this.txn.sender === this.operatorAddress.value, 'Only the Node Operator can clear up Delinquency');
     assert(
       this.delegatedStake.value === 0,
-      'Before clearing up delinquency all the delegated stake must be redistributed'
+      'Before clearing up delinquency all the delegated stake must have been redistributed'
+    );
+    assert(
+      this.app.address.assetBalance(this.tokenId.value) === 0,
+      'Before clearing up delinquency all the LST must have been burned'
     );
     assert(blocks[block].proposer === this.app.address, 'the solving block must be proposed by this account');
     assert(this.lastDelinquencyReport.value < block); // validator has to win a proposal sooner than latest delinquency report to clear up delinquency
@@ -210,10 +214,17 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
-  // In a hypothetical where a block proposer proposed two blocks s/he should always report the blocks from the oldest block first. We should do this in the SDK.
-  // No loss of funds if this doesn't happen, but they don't end up recorded as rewards, instead going to the dust fund.
+  /**
+   * Called by the node operator to report the rewards of a block proposed by the contract account.
+   *
+   * @param {uint64} block - Block number of the block proposed by the node operator
+   *
+   *  WHEN CRAFTING TXN THE BLOCK ROUND NEEDS TO BE INCLUDED AS FIRST VALID
+   */
   reportRewards(block: uint64): void {
-    assert(blocks[block].proposer === this.app.address); // NOTE THAT IN SDK WHEN CRAFTING TXN BLOCK NEEDS TO BE INCLUDED IN FIRST VALID TO NOW RANGE
+    assert(blocks[block].proposer === this.app.address);
+    // In a hypothetical where a block proposer proposed two blocks s/he should always report the blocks from the oldest block first.
+    // No loss of funds if this doesn't happen, but they don't end up recorded as rewards, instead goes to the dust fund.
     assert(block > this.lastRewardReport.value);
     const isOperatorReportTime = globals.round - block < OPERATOR_REPORT_MAX_TIME;
     const report = blocks[block].proposerPayout;
@@ -254,7 +265,11 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
-  // called by the auction contract to assign stake to the node contract
+  /**
+   * Receive delegated stake and update the delegation factors.
+   *
+   * @param {PayTxn} txnWithStake - Payment transaction to the contract account with the delegated stake
+   */
   addStake(txnWithStake: PayTxn): void {
     verifyPayTxn(txnWithStake, {
       sender: this.creatorContractAppID.value.address,
@@ -264,7 +279,11 @@ export class CaelusValidatorPool extends Contract {
     this.updateDelegationFactors();
   }
 
-  // called by the auction contract at burn
+  /**
+   *
+   * @param {uint64} amountRequested - amount of Algo to be burned
+   * @param {Address} receiverBurn - address of the receiver of the burn transaction triggered on the Caelus Admin contract
+   */
   burnStake(amountRequested: uint64, receiverBurn: Address): void {
     assert(
       this.txn.sender === this.creatorContractAppID.value.address,
@@ -283,7 +302,11 @@ export class CaelusValidatorPool extends Contract {
     this.updateDelegationFactors();
   }
 
-  // calls to another Validator getSnitched method. If successfull it will increase performanceCounter
+  /**
+   * Snitch another Validator Contract. A valid snitch will improve the performance counter.
+   * @param {AppID} appToSnitch - ApplicationID of the validator to be snitched
+   * @param {SnitchInfo} params - parameters to check for the validator (For example: performanceCheck, stakeAmountCheck, delinquentCheck, versionCheck)
+   */
   snitchValidator(appToSnitch: AppID, params: SnitchInfo): void {
     assert(this.status.value !== DELINQUENCY_STATUS);
     const result = sendMethodCall<typeof CaelusValidatorPool.prototype.getSnitched, boolean>({
@@ -362,14 +385,10 @@ export class CaelusValidatorPool extends Contract {
       this.txn.sender === this.operatorAddress.value,
       'Only the Node Operator can register online with participation key'
     );
-
-    // Check that contract balance is at least 30k Algo and less than MAX_STAKE_PER_ACCOUNT
     assert(
       this.app.address.balance >= globals.payoutsMinBalance && this.app.address.balance <= MAX_STAKE_PER_ACCOUNT,
       'Contract needs 30k Algo as minimum balance for rewards eligibility and at most 50M Algo'
     );
-
-    // Check that operator commit to the contract balance is at least 30k Algo
     assert(
       this.operatorCommit.value >= globals.payoutsMinBalance,
       'Operator commit must be higher than minimum balance for rewards eligibility'
@@ -480,6 +499,11 @@ export class CaelusValidatorPool extends Contract {
     return true;
   }
 
+  /**
+   * Migrate the validator pool to a new pool. Useful to migrate this validator pool to a new version of the contract without losing the state.
+   *
+   * @param {AppID} newPool - ApplicationID of the new pool to migrate to
+   */
   migrateToPool(newPool: AppID): void {
     assert(newPool.creator === this.app.creator, 'new pool has to be a pool created by the admin contract');
     assert(this.txn.sender === this.operatorAddress.value, 'only the operator can migrate to a new pool');
@@ -502,6 +526,9 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
+  /**
+   * Receiving call from the new pool to merge the state of the old pool into the new pool.
+   */
   mergeStateOnMigration(
     from: AppID,
     opCommit: uint64,
@@ -531,17 +558,21 @@ export class CaelusValidatorPool extends Contract {
     this.updateDelegationFactors();
   }
 
-  // used by anyone to clear up remaining Algo outside of stake counters
+  /**
+   * Used by anyone to clear up remaining Algo outside of stake counters back to the Caelus Admin contract to be redistributed
+   */
   claimLeftAlgo(): void {
     const dust =
       this.app.address.balance - this.operatorCommit.value - this.delegatedStake.value - this.app.address.minBalance;
-    const manager = this.creatorContractAppID.value.globalState('manager') as Address;
     sendPayment({
-      receiver: manager,
+      receiver: this.creatorContractAppID.value.address,
       amount: dust,
     });
   }
 
+  /**
+   * Node operator can close the Validator and get back his stake. Delegated stake is put back into the Caelus Admin contract.
+   */
   deleteApplication(): void {
     assert(this.status.value !== DELINQUENCY_STATUS, 'Account is delinquent. Solve Delinquency state before closing');
     assert(this.txn.sender === this.operatorAddress.value, 'Only the node operator can close the node');

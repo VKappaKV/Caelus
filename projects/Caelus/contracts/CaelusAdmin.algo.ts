@@ -192,6 +192,10 @@ export class CaelusAdmin extends Contract {
   }
 
   /**
+   * ARC4 PUBLIC METHODS
+   */
+
+  /**
    * Factory method to spawn new Validator Pool Contracts.
    * @param {PayTxn} mbrPay - The MBR amount can vary depending on the version of the Validator Pool Contract. The mbrPay amount has to cover the cost of the Validator Pool Contract.
    */
@@ -619,6 +623,10 @@ export class CaelusAdmin extends Contract {
     assert(assetId === this.tokenId.value, 'invalid asset id');
     return this.tokenCirculatingSupply.value;
   }
+
+  /**
+   * SUBROUTINES
+   */
 
   private calculateLSTRatio(): void {
     if (this.tokenCirculatingSupply.value === 0) {
