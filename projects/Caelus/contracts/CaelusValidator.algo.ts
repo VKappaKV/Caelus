@@ -106,6 +106,10 @@ export class CaelusValidatorPool extends Contract {
     this.repaid.value = true;
   }
 
+  /**
+   * ARC4 PUBLIC METHODS
+   */
+
   optIntoLST(): void {
     assert(!this.app.address.isOptedInToAsset(this.tokenId.value), 'already opted in tokenId');
     const lst = this.creatorContractAppID.value.globalState('token_id') as AssetID;
@@ -584,6 +588,10 @@ export class CaelusValidatorPool extends Contract {
       operatorStake: this.operatorCommit.value,
     });
   }
+
+  /**
+   * SUBROUTINES
+   */
 
   private checkStakeOnSnitch(recipient: AppID, split: boolean, max: uint64): boolean {
     const hasMoreThanMax = this.app.address.balance > MAX_STAKE_PER_ACCOUNT;

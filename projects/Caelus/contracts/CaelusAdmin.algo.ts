@@ -347,7 +347,7 @@ export class CaelusAdmin extends Contract {
 
   /**
    * Specific method to remove from the operator commit in the Validator Pool Contract.
-   * The @param {amount} amount - is the Algo amount requested.
+   *
    * The Validator Pool Contract will send the vAlgo to the operator address.
    */
   removeValidatorCommit(appToBurnFrom: AppID, amount: uint64): void {
@@ -564,9 +564,9 @@ export class CaelusAdmin extends Contract {
    * This creates a new route of revenue for the protocol.
    * The method checks that each flashloan call is repaid through the subsequent checkBalance method call.
    *
-   * @param payFeeTxn - FlashLoan fee payment; the fee is flat and grows with demand for the flashloan service
-   * @param amounts - The amount of Algo to take from each app, the value has to be correlated to the app in the appToInclude array at the same index
-   * @param appToInclude - The AppID of the Validator Pool Contracts to execute the flashloan request on
+   * @param {PayTxn} payFeeTxn - FlashLoan fee payment; the fee is flat and grows with demand for the flashloan service
+   * @param {uint64[]} amounts - The amount of Algo to take from each app, the value has to be correlated to the app in the appToInclude array at the same index
+   * @param {AppID} appToInclude - The AppID of the Validator Pool Contracts to execute the flashloan request on
    */
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
     this.getFLcounter();

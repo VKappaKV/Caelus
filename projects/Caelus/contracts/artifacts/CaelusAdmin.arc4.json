@@ -11,6 +11,7 @@
     },
     {
       "name": "updateApplication",
+      "desc": "Temporary method to update the application. This method will be removed in the future.\nHere to improve open beta testing iterations. Planned to be removed on mainnet launch.",
       "args": [],
       "returns": {
         "type": "void"
@@ -18,6 +19,7 @@
     },
     {
       "name": "MANAGER_createToken",
+      "desc": "MANAGER METHODS",
       "args": [],
       "returns": {
         "type": "void"
@@ -49,14 +51,17 @@
     },
     {
       "name": "getBoostTier",
+      "desc": "The getBoostTier method is needed to be kept public so that on state update Validator Pool can fetch their current tier.",
       "args": [
         {
           "name": "amount",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "The amount of the boost token to calculate the boost tier for"
         }
       ],
       "returns": {
-        "type": "uint64"
+        "type": "uint64",
+        "desc": "uint64 - The boost tier for the given amount"
       }
     },
     {
@@ -132,6 +137,7 @@
     },
     {
       "name": "addValidator",
+      "desc": "ARC4 PUBLIC METHODS",
       "args": [
         {
           "name": "mbrPay",
@@ -160,6 +166,7 @@
     },
     {
       "name": "mintRequest",
+      "desc": "On Mint the Algo deposited by the user are kept in the Admin Contract Account balance waiting for the highest bidder to claim them.",
       "args": [
         {
           "name": "mintTxn",
@@ -192,6 +199,7 @@
     },
     {
       "name": "burnRequest",
+      "desc": "On Burn the contract gradually checks where to take Algo from, first in the idle Admin balance, then from the burn queue.\nIn case the amount of Algo exceeds the current queue max amount the remaining vAlgo are sent back to the user.\nThis situation triggers the exhaust flag, that will prevent the contract from burning Algo for the next 5 blocks.\nThe Cooldown period is necessary to ensure that the queue is filled with the Validators more fit for the burn.\nThis to disallow possible spam looping of burning to target from specific pools.",
       "args": [
         {
           "name": "burnTxn",
@@ -228,6 +236,7 @@
     },
     {
       "name": "mintValidatorCommit",
+      "desc": "Specific method to mint the LST for the Validator Pool Contract.\nThe mint is done by the Admin Contract and the LST is sent to the Validator Pool Contract.",
       "args": [
         {
           "name": "validatorAppID",
@@ -244,6 +253,7 @@
     },
     {
       "name": "removeValidatorCommit",
+      "desc": "Specific method to remove from the operator commit in the Validator Pool Contract.\n\n\nThe Validator Pool Contract will send the vAlgo to the operator address.",
       "args": [
         {
           "name": "appToBurnFrom",
@@ -260,6 +270,7 @@
     },
     {
       "name": "burnToDelinquentValidator",
+      "desc": "On Delinquency Validators SHOULD not have vAlgo in their balance.\nIt's first called when deliquency is set, can be called again if the entire vAlgo amount is not burned.\nThe vAlgo will be turned to Algo and added to the operator commit",
       "args": [
         {
           "name": "burnTxn",
@@ -300,6 +311,7 @@
     },
     {
       "name": "reMintDelinquentCommit",
+      "desc": "When Delinquency is solved the operator will mint his commit back into vAlgo.",
       "args": [
         {
           "name": "app",
@@ -332,6 +344,7 @@
     },
     {
       "name": "bid",
+      "desc": "Bid Validator App, highest bidder should have the lowest saturation buffer value.",
       "args": [
         {
           "name": "validatorAppID",
@@ -396,6 +409,7 @@
     },
     {
       "name": "snitchToBurn",
+      "desc": "Push new Validator App to the burn queue. If the saturation buffer is higher than the current lowest in the queue, the new App will be snitched.",
       "args": [
         {
           "name": "app",
@@ -456,18 +470,22 @@
     },
     {
       "name": "makeFlashLoanRequest",
+      "desc": "Algo balances in the Validator Pool Contracts sit idle, but can be efficiently use for flashloans.\nThis creates a new route of revenue for the protocol.\nThe method checks that each flashloan call is repaid through the subsequent checkBalance method call.",
       "args": [
         {
           "name": "payFeeTxn",
-          "type": "pay"
+          "type": "pay",
+          "desc": "FlashLoan fee payment; the fee is flat and grows with demand for the flashloan service"
         },
         {
           "name": "amounts",
-          "type": "uint64[]"
+          "type": "uint64[]",
+          "desc": "The amount of Algo to take from each app, the value has to be correlated to the app in the appToInclude array at the same index"
         },
         {
           "name": "appToInclude",
-          "type": "uint64[]"
+          "type": "uint64[]",
+          "desc": "The AppID of the Validator Pool Contracts to execute the flashloan request on"
         }
       ],
       "returns": {

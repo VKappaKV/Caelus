@@ -19,11 +19,12 @@
         {
           "name": "contractVersion",
           "type": "uint64",
-          "desc": "Approval Program version for the node contract, stored in the CaelusAdminContract\nTODO UPDATE"
+          "desc": "Approval Program version for the node contract, stored in the CaelusAdminContract"
         },
         {
           "name": "tokenId",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "AssetID of the LST token"
         }
       ],
       "returns": {
@@ -32,6 +33,7 @@
     },
     {
       "name": "optIntoLST",
+      "desc": "ARC4 PUBLIC METHODS",
       "args": [],
       "returns": {
         "type": "void"
@@ -82,11 +84,12 @@
         {
           "name": "claimRequest",
           "type": "uint64",
-          "desc": "amount claimed by the node operator to be removed from the contract balance and subtracted from the operator_commit counter"
+          "desc": "amount claimed by the node operator to be removed from the operator_commit counter and moved into delegated stake"
         },
         {
           "name": "claimRequestLST",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "amount of LST to be sent back to the node operator"
         }
       ],
       "returns": {
@@ -119,10 +122,12 @@
     },
     {
       "name": "solveDelinquency",
+      "desc": "Delinquent Validators need to propose a valid block to clear up their delinquency status.\n\n\nThis method should be called when the delinquency score is below the threshold and the operator has proposed a block.",
       "args": [
         {
           "name": "block",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "block number of the block proposed by the node operator while the account was in delinquency"
         }
       ],
       "returns": {
@@ -151,10 +156,12 @@
     },
     {
       "name": "reportRewards",
+      "desc": "Called by the node operator to report the rewards of a block proposed by the contract account.",
       "args": [
         {
           "name": "block",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "Block number of the block proposed by the node operator\n\n\n WHEN CRAFTING TXN THE BLOCK ROUND NEEDS TO BE INCLUDED AS FIRST VALID"
         }
       ],
       "returns": {
@@ -183,10 +190,12 @@
     },
     {
       "name": "addStake",
+      "desc": "Receive delegated stake and update the delegation factors.",
       "args": [
         {
           "name": "txnWithStake",
-          "type": "pay"
+          "type": "pay",
+          "desc": "Payment transaction to the contract account with the delegated stake"
         }
       ],
       "returns": {
@@ -198,11 +207,13 @@
       "args": [
         {
           "name": "amountRequested",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "amount of Algo to be burned"
         },
         {
           "name": "receiverBurn",
-          "type": "address"
+          "type": "address",
+          "desc": "address of the receiver of the burn transaction triggered on the Caelus Admin contract"
         }
       ],
       "returns": {
@@ -211,14 +222,17 @@
     },
     {
       "name": "snitchValidator",
+      "desc": "Snitch another Validator Contract. A valid snitch will improve the performance counter.",
       "args": [
         {
           "name": "appToSnitch",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "ApplicationID of the validator to be snitched"
         },
         {
           "name": "params",
-          "type": "(bool,bool,bool,bool,uint64,bool,uint64)"
+          "type": "(bool,bool,bool,bool,uint64,bool,uint64)",
+          "desc": "parameters to check for the validator (For example: performanceCheck, stakeAmountCheck, delinquentCheck, versionCheck)"
         }
       ],
       "returns": {
@@ -386,10 +400,12 @@
     },
     {
       "name": "migrateToPool",
+      "desc": "Migrate the validator pool to a new pool. Useful to migrate this validator pool to a new version of the contract without losing the state.",
       "args": [
         {
           "name": "newPool",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "ApplicationID of the new pool to migrate to"
         }
       ],
       "returns": {
@@ -398,6 +414,7 @@
     },
     {
       "name": "mergeStateOnMigration",
+      "desc": "Receiving call from the new pool to merge the state of the old pool into the new pool.",
       "args": [
         {
           "name": "from",
@@ -430,6 +447,7 @@
     },
     {
       "name": "claimLeftAlgo",
+      "desc": "Used by anyone to clear up remaining Algo outside of stake counters back to the Caelus Admin contract to be redistributed",
       "args": [],
       "returns": {
         "type": "void"
@@ -437,6 +455,7 @@
     },
     {
       "name": "deleteApplication",
+      "desc": "Node operator can close the Validator and get back his stake. Delegated stake is put back into the Caelus Admin contract.",
       "args": [],
       "returns": {
         "type": "void"

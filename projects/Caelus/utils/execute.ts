@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { Config } from '@algorandfoundation/algokit-utils';
-import { addValidator, adminSetup, deploy, validatorSetup, test, update } from './bootstrap';
+import { addValidator, adminSetup, deploy, validatorSetup, update } from './bootstrap';
 import { deleteApp, mint, mintOperatorCommit, validatorOptIntoLST } from './helpers';
 
 Config.configure({
