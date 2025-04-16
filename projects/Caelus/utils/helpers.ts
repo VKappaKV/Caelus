@@ -1,63 +1,16 @@
-import * as algokit from '@algorandfoundation/algokit-utils';
-// import { consoleLogger } from '@algorandfoundation/algokit-utils/types/logging';
-// import { Config } from '@algorandfoundation/algokit-utils';
+/* eslint-disable no-console */
 import algosdk from 'algosdk';
 import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
 import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
-import { MNEMONIC } from '../env';
-
-/* eslint-disable no-console */
-
-// const algorand = algokit.AlgorandClient.fromConfig({
-//   algodConfig: {
-//     server: 'http://localhost',
-//     token: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//     port: 4001,
-//   },
-//   indexerConfig: {
-//     server: 'http://localhost',
-//     token: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//     port: 8980,
-//   },
-// });
-
-const ALGOD_ENDPOINT = 'https://fnet-api.4160.nodely.dev';
-const ALGOD_TOKEN = '';
-const ALGOD_PORT = 443;
-
-const algorand = algokit.AlgorandClient.fromConfig({
-  algodConfig: {
-    server: ALGOD_ENDPOINT,
-    token: ALGOD_TOKEN,
-    port: ALGOD_PORT,
-  },
-});
-
-/**
- * Change manually after Deploying
- */
-
-const getAccount = async () => {
-  // const testAccount = await algorand.account.fromKmd(
-  //   'lora-dev',
-  //   (account) => account.address === 'NYSW5ZHRHQX6P7MVKPLXVQOP7X7KNHJL74VHRMKW5TAJLQAZGO2R3UAF7E'
-  // );
-
-  const testAccount = algorand.account.fromMnemonic(MNEMONIC);
-
-  const random = algorand.account.random();
-
-  return { testAccount, random };
-};
-
-const APP_ID = 1002n;
+import { getAccount } from './bootstrap';
+import { algorand } from './network';
 
 // ADMIN METHODS
 
-export async function mint() {
+export async function mint(adminAppId: bigint) {
   const { testAccount } = await getAccount();
   const client = algorand.client.getTypedAppClientById(CaelusAdminClient, {
-    appId: APP_ID,
+    appId: adminAppId,
     defaultSender: testAccount.addr,
     defaultSigner: testAccount.signer,
   });
@@ -99,7 +52,48 @@ export async function mintOperatorCommit(admin: bigint, pool: bigint) {
   console.log(`Minted operator commit to pool ${pool}, txn: ${mintTxn.groupId}`);
 }
 
-// export async function burn() {}
+export async function burn(adminAppId: bigint, amount: bigint) {
+  const { testAccount } = await getAccount();
+  const client = algorand.client.getTypedAppClientById(CaelusAdminClient, {
+    appId: adminAppId,
+    defaultSender: testAccount.addr,
+    defaultSigner: testAccount.signer,
+  });
+  const asset = await client.state.global.tokenId();
+  if (!asset) {
+    throw new Error('No asset found');
+  }
+  const axfer = await algorand.createTransaction.assetTransfer({
+    sender: testAccount.addr,
+    receiver: client.appAddress,
+    assetId: asset,
+    amount,
+    signer: testAccount.signer,
+  });
+
+  const burnTxn = await client.send.burnRequest({
+    args: [axfer, testAccount.addr.toString()],
+    populateAppCallResources: true,
+    extraFee: (5000).microAlgos(),
+  });
+  console.log(`Burned: ${burnTxn.txIds}`);
+}
+
+export async function removeOperatorCommit(pool: bigint, adminAppId: bigint, amount: bigint) {
+  const { testAccount } = await getAccount();
+  const client = algorand.client.getTypedAppClientById(CaelusAdminClient, {
+    appId: adminAppId,
+    defaultSender: testAccount.addr,
+    defaultSigner: testAccount.signer,
+  });
+
+  const burnTxn = await client.send.removeValidatorCommit({
+    args: [pool, amount],
+    populateAppCallResources: true,
+    extraFee: (2000).microAlgos(),
+  });
+  console.log(`Removed operator commit from pool ${pool}, txn: ${burnTxn.txIds}`);
+}
 
 // VALIDATOR METHODS
 

@@ -773,7 +773,6 @@ export class CaelusValidatorPool extends Contract {
     return getTier;
   }
 
-  // Let's check the params, probably talk to either nullun or AF, before going live cause of probabilistic nature of ALGO.
   private getToleratedProposalDelta(): uint64 {
     return this.getExpectedProposalsDelta() * 3;
   }

@@ -8,6 +8,7 @@ import algosdk from 'algosdk';
 import { CaelusAdminClient, CaelusAdminFactory } from '../contracts/clients/CaelusAdminClient';
 import { CaelusValidatorPoolFactory } from '../contracts/clients/CaelusValidatorPoolClient';
 import { MNEMONIC } from '../env';
+import { algorand } from './network';
 
 Config.configure({
   debug: true,
@@ -21,49 +22,7 @@ Config.configure({
  *
  */
 
-const ALGOD_ENDPOINT = 'https://fnet-api.4160.nodely.dev';
-const ALGOD_TOKEN = '';
-const ALGOD_PORT = 443;
-
-const INDEXER_ENDPOINT = 'https://fnet-idx.4160.nodely.io:443';
-const INDEXER_TOKEN = '';
-const INDEXER_PORT = 443;
-
-const algorand = algokit.AlgorandClient.fromConfig({
-  algodConfig: {
-    server: ALGOD_ENDPOINT,
-    token: ALGOD_TOKEN,
-    port: ALGOD_PORT,
-  },
-  indexerConfig: {
-    server: INDEXER_ENDPOINT,
-    token: INDEXER_TOKEN,
-    port: INDEXER_PORT,
-  },
-});
-// const algorand = algokit.AlgorandClient.fromConfig({
-//   algodConfig: {
-//     server: 'http://localhost',
-//     token: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//     port: 4001,
-//   },
-//   indexerConfig: {
-//     server: 'http://localhost',
-//     token: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//     port: 8980,
-//   },
-// });
-
-/**
- * Change manually after Deploying
- */
-
-const getAccount = async () => {
-  // const testAccount = await algorand.account.fromKmd(
-  //   'lora-dev',
-  //   (account) => account.address === 'NYSW5ZHRHQX6P7MVKPLXVQOP7X7KNHJL74VHRMKW5TAJLQAZGO2R3UAF7E'
-  // );
-
+export const getAccount = async () => {
   const testAccount = algorand.account.fromMnemonic(MNEMONIC);
 
   const random = algorand.account.random();
@@ -160,21 +119,6 @@ export async function update(APP_ID: bigint) {
     populateAppCallResources: true,
   });
 }
-
-// export async function updateFix(APP_ID: bigint) {
-//   const { testAccount } = await getAccount();
-
-//   const adminFactory = algorand.client.getTypedAppFactory(CaelusAdminFactory, {
-//     defaultSender: testAccount.addr,
-//     defaultSigner: testAccount.signer,
-//   });
-
-//   const adminApprovalProgram = await adminFactory.appFactory.compile();
-
-//   const updateTxn = await
-
-//   await
-// }
 
 export async function adminSetup(APP_ID: bigint) {
   const { testAccount } = await getAccount();

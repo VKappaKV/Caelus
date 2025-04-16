@@ -43,8 +43,8 @@ Config.configure({
       addValidator(16328303n);
       break;
     case 'test':
-      console.log('EXECUTING SPAM');
-      mint();
+      console.log('EXECUTING MINT');
+      mint(16328303n);
       break;
     case 'mintOperator':
       console.log('EXECUTING OPERATOR MINT');
