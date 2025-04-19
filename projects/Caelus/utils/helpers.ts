@@ -113,7 +113,14 @@ export async function validatorOptIntoLST(poolApp: bigint) {
   console.log(`Opted into LST: ${tx.txIds}`);
 }
 
-export async function reportRewards(client: CaelusValidatorPoolClient, block: bigint) {
+export async function reportRewards(poolApp: bigint, block: bigint) {
+  const { testAccount } = await getAccount();
+  const client = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
+    appId: poolApp,
+    defaultSender: testAccount,
+    defaultSigner: testAccount.signer,
+  });
+
   const tx = await client.send.reportRewards({
     args: [block],
     extraFee: (1000).microAlgos(),
@@ -121,6 +128,24 @@ export async function reportRewards(client: CaelusValidatorPoolClient, block: bi
     firstValidRound: block,
   });
   console.log(`Reported rewards: ${tx.txIds}`);
+}
+
+export async function solveDelinquency(poolApp: bigint, block: bigint) {
+  const { testAccount } = await getAccount();
+  const client = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
+    appId: poolApp,
+    defaultSender: testAccount,
+    defaultSigner: testAccount.signer,
+  });
+
+  const tx = await client.send.reportRewards({
+    args: [block],
+    populateAppCallResources: true,
+    extraFee: (2000).microAlgos(),
+    firstValidRound: block,
+  });
+
+  console.log(`Reported block to solve delinquency at: ${tx.txIds}`);
 }
 
 export async function deleteApp(poolApp: bigint) {

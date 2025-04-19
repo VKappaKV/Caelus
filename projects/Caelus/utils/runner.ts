@@ -15,10 +15,6 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
 
   const { testAccount } = await getAccount(); // check in bootstrap.ts change this to your account through env.ts
 
-  // const myValidator = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
-  //   appId: myAppId,
-  //   defaultSigner: testAccount.signer,
-  // });
   const admin = algorand.client.getTypedAppClientById(CaelusAdminClient, {
     appId: adminAppId,
     defaultSigner: testAccount.signer,
@@ -86,17 +82,25 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
 };
 
 const onPayouts = async (tx: SubscribedTransaction, myAppId: bigint) => {
+  if (!tx) {
+    console.log('No transaction found');
+    return;
+  }
   console.log('Payout detected', tx);
   const client = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
     appId: myAppId,
   });
   const appAddress = client.appAddress.toString();
   if (tx.paymentTransaction?.receiver === appAddress) {
-    await reportRewards(client, tx.confirmedRound!);
+    await reportRewards(myAppId, tx.confirmedRound!);
   }
 };
 
 const onBidTracking = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bigint) => {
+  if (!tx) {
+    console.log('No transaction found');
+    return;
+  }
   const myValidator = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
     appId: myAppId,
   });
@@ -111,7 +115,12 @@ const onBidTracking = async (tx: SubscribedTransaction, adminAppId: bigint, myAp
   const bufferOfTopBidder = await topBidderClient.state.global.saturationBuffer();
   const bufferOfMyApp = await myValidator.state.global.saturationBuffer();
 
-  if (bufferOfTopBidder! > bufferOfMyApp!) {
+  if (bufferOfTopBidder === undefined || bufferOfMyApp === undefined) {
+    console.log('Buffer of top bidder or my app is undefined');
+    return;
+  }
+
+  if (bufferOfTopBidder > bufferOfMyApp) {
     console.log('Will outbid current top bidder');
     await admin.send.bid({ args: [myAppId], populateAppCallResources: true });
   }
@@ -145,7 +154,11 @@ const onBurn = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bi
     appId: myAppId,
   });
   const currentQueue = (await admin.state.global.burnQueue()).asByteArray();
-  const queue = uint8ArrayToBigIntArray(currentQueue!);
+  if (currentQueue === undefined) {
+    console.log('Burn queue is undefined');
+    return;
+  }
+  const queue = uint8ArrayToBigIntArray(currentQueue);
   for (let i = 0; i < queue.length; i += 1) {
     if (queue[i] === 0n) {
       await admin.send.snitchToBurn({ args: [myAppId], populateAppCallResources: true });
@@ -156,7 +169,11 @@ const onBurn = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bi
     });
     const burningValidatorBuffer = await burningValidatorClient.state.global.saturationBuffer();
     const myValidatorBuffer = await client.state.global.saturationBuffer();
-    if (burningValidatorBuffer! < myValidatorBuffer!) {
+    if (burningValidatorBuffer === undefined || myValidatorBuffer === undefined) {
+      console.log('Buffer of burning validator or my app is undefined');
+      return;
+    }
+    if (burningValidatorBuffer < myValidatorBuffer) {
       await admin.send.snitchToBurn({ args: [myAppId], populateAppCallResources: true });
       break;
     }

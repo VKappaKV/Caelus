@@ -2,6 +2,7 @@
 import { Config } from '@algorandfoundation/algokit-utils';
 import { addValidator, adminSetup, deploy, validatorSetup, update } from './bootstrap';
 import { deleteApp, mint, mintOperatorCommit, validatorOptIntoLST } from './helpers';
+import { runner } from './runner';
 
 Config.configure({
   debug: true,
@@ -57,6 +58,10 @@ Config.configure({
     case 'delete':
       console.log('EXECUTING VALIDATOR POOL DELETE');
       deleteApp(16328320n);
+      break;
+    case 'runner':
+      console.log('EXECUTING RUNNER');
+      runner(16328320n, BigInt(process.argv[3]), BigInt(process.argv[4]));
       break;
     default:
       console.log('DEFAULT, WHAT?');
