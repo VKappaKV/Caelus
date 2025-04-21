@@ -452,7 +452,7 @@ export class CaelusAdmin extends Contract {
   bid(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID));
     const isOnLatestVersion =
-      (validatorAppID.globalState('validator_pool_version') as uint64) === this.validatorPoolContractVersion.value;
+      (validatorAppID.globalState('contract_version') as uint64) === this.validatorPoolContractVersion.value;
     assert(isOnLatestVersion, 'cannot bid if not on latest version');
     const isDelegatable = (validatorAppID.globalState('status') as uint64) === NEUTRAL_STATUS;
     assert(isDelegatable, 'only bid delegatable Apps');

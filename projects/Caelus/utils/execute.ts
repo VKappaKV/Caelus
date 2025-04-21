@@ -5,7 +5,7 @@ import { deleteApp, mint, mintOperatorCommit, validatorOptIntoLST } from './help
 import { runner } from './runner';
 
 const ADMIN_APP_ID = 16328303n;
-const VALIDATOR_APP_ID = 16328320n;
+const VALIDATOR_APP_ID = 16345311n;
 
 Config.configure({
   debug: true,
