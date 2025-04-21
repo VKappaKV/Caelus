@@ -4,6 +4,9 @@ import { addValidator, adminSetup, deploy, validatorSetup, update } from './boot
 import { deleteApp, mint, mintOperatorCommit, validatorOptIntoLST } from './helpers';
 import { runner } from './runner';
 
+const ADMIN_APP_ID = 16328303n;
+const VALIDATOR_APP_ID = 16328320n;
+
 Config.configure({
   debug: true,
   traceAll: true,
@@ -29,39 +32,39 @@ Config.configure({
       break;
     case 'update':
       console.log(`EXECUTING UPDATE...`);
-      update(16328303n);
+      update(ADMIN_APP_ID);
       break;
     case 'admin':
       console.log(`EXECUTING ADMIN SET UP...`);
-      adminSetup(1002n);
+      adminSetup(ADMIN_APP_ID);
       break;
     case 'validator':
       console.log(`EXECUTING VALIDATOR SET UP...`);
-      validatorSetup(16328303n);
+      validatorSetup(ADMIN_APP_ID);
       break;
     case 'spawn':
       console.log(`EXECUTING SPAWN...`);
-      addValidator(16328303n);
+      addValidator(ADMIN_APP_ID);
       break;
     case 'test':
       console.log('EXECUTING MINT');
-      mint(16328303n);
+      mint(ADMIN_APP_ID);
       break;
     case 'mintOperator':
       console.log('EXECUTING OPERATOR MINT');
-      mintOperatorCommit(16328303n, 16328320n);
+      mintOperatorCommit(ADMIN_APP_ID, VALIDATOR_APP_ID);
       break;
     case 'poolOptIn':
       console.log('EXECUTING VALIDATOR POOL OPT IN');
-      validatorOptIntoLST(16328320n);
+      validatorOptIntoLST(VALIDATOR_APP_ID);
       break;
     case 'delete':
       console.log('EXECUTING VALIDATOR POOL DELETE');
-      deleteApp(16328320n);
+      deleteApp(VALIDATOR_APP_ID);
       break;
     case 'runner':
       console.log('EXECUTING RUNNER');
-      runner(16328320n, BigInt(process.argv[3]), BigInt(process.argv[4]));
+      runner(ADMIN_APP_ID, BigInt(process.argv[3]), BigInt(process.argv[4]));
       break;
     default:
       console.log('DEFAULT, WHAT?');
