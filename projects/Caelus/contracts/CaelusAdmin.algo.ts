@@ -277,6 +277,13 @@ export class CaelusAdmin extends Contract {
     }
 
     if (burning === amountToBurn) {
+      this.tokenCirculatingSupply.value = this.tokenCirculatingSupply.value - burnTxn.assetAmount;
+      this.totalStake.value -= burning;
+      this.burnEvent.log({
+        filled: true,
+        amount: burnTxn.assetAmount,
+        output: burning,
+      });
       return;
     }
 

@@ -4,8 +4,8 @@ import { addValidator, adminSetup, deploy, validatorSetup, update } from './boot
 import { deleteApp, mint, mintOperatorCommit, validatorOptIntoLST } from './helpers';
 import { runner } from './runner';
 
-const ADMIN_APP_ID = 16328303n;
-const VALIDATOR_APP_ID = 16345311n;
+const ADMIN_APP_ID = 16345557n;
+const VALIDATOR_APP_ID = 16345588n;
 
 Config.configure({
   debug: true,
@@ -21,7 +21,7 @@ Config.configure({
       });
       await validatorSetup(app);
       await new Promise((f) => {
-        setTimeout(f, 1000);
+        setTimeout(f, 2000);
       });
       await addValidator(app);
       break;

@@ -62,7 +62,7 @@ export async function deploy(): Promise<bigint> {
 
   const appDeployer = await algorand.appDeployer.deploy({
     metadata: {
-      name: 'Caelus',
+      name: 'Vestguard',
       version: '1.0.0',
       deletable: false,
       updatable: true,
@@ -72,8 +72,8 @@ export async function deploy(): Promise<bigint> {
       approvalProgram: adminApprovalProgram.compiledApproval?.compiledBase64ToBytes!,
       clearStateProgram: adminApprovalProgram.compiledClear?.compiledBase64ToBytes!,
       schema: {
-        globalInts: 12,
-        globalByteSlices: 2,
+        globalInts: 13,
+        globalByteSlices: 3,
         localInts: 0,
         localByteSlices: 0,
       },
