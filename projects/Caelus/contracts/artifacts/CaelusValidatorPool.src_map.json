@@ -13401,261 +13401,273 @@
     "teal": 3473,
     "source": "contracts\\CaelusValidator.algo.ts:763",
     "pc": [
-      3049
+      3049,
+      3050
+    ]
+  },
+  {
+    "teal": 3477,
+    "source": "contracts\\CaelusValidator.algo.ts:764",
+    "pc": [
+      3051
     ]
   },
   {
     "teal": 3478,
     "source": "contracts\\CaelusValidator.algo.ts:764",
     "pc": [
-      3050,
-      3051,
-      3052
-    ]
-  },
-  {
-    "teal": 3479,
-    "source": "contracts\\CaelusValidator.algo.ts:764",
-    "pc": [
-      3053,
-      3054
-    ]
-  },
-  {
-    "teal": 3480,
-    "source": "contracts\\CaelusValidator.algo.ts:764",
-    "pc": [
-      3055
-    ]
-  },
-  {
-    "teal": 3481,
-    "source": "contracts\\CaelusValidator.algo.ts:764",
-    "pc": [
-      3056
-    ]
-  },
-  {
-    "teal": 3482,
-    "source": "contracts\\CaelusValidator.algo.ts:764",
-    "pc": [
-      3057
+      3052,
+      3053
     ]
   },
   {
     "teal": 3483,
-    "source": "contracts\\CaelusValidator.algo.ts:764",
+    "source": "contracts\\CaelusValidator.algo.ts:765",
     "pc": [
-      3058
+      3054,
+      3055,
+      3056
     ]
   },
   {
     "teal": 3484,
-    "source": "contracts\\CaelusValidator.algo.ts:764",
+    "source": "contracts\\CaelusValidator.algo.ts:765",
     "pc": [
-      3059,
-      3060,
+      3057,
+      3058
+    ]
+  },
+  {
+    "teal": 3485,
+    "source": "contracts\\CaelusValidator.algo.ts:765",
+    "pc": [
+      3059
+    ]
+  },
+  {
+    "teal": 3486,
+    "source": "contracts\\CaelusValidator.algo.ts:765",
+    "pc": [
+      3060
+    ]
+  },
+  {
+    "teal": 3487,
+    "source": "contracts\\CaelusValidator.algo.ts:765",
+    "pc": [
       3061
     ]
   },
   {
-    "teal": 3489,
+    "teal": 3488,
     "source": "contracts\\CaelusValidator.algo.ts:765",
     "pc": [
       3062
     ]
   },
   {
-    "teal": 3490,
+    "teal": 3489,
     "source": "contracts\\CaelusValidator.algo.ts:765",
     "pc": [
-      3063
-    ]
-  },
-  {
-    "teal": 3491,
-    "source": "contracts\\CaelusValidator.algo.ts:765",
-    "pc": [
+      3063,
       3064,
       3065
     ]
   },
   {
-    "teal": 3492,
-    "source": "contracts\\CaelusValidator.algo.ts:765",
+    "teal": 3494,
+    "source": "contracts\\CaelusValidator.algo.ts:766",
     "pc": [
-      3066
-    ]
-  },
-  {
-    "teal": 3495,
-    "source": "contracts\\CaelusValidator.algo.ts:765",
-    "errorMessage": "global state value does not exist: this.creatorContractAppID.value.globalState('boost_token_id')",
-    "pc": [
+      3066,
       3067
     ]
   },
   {
-    "teal": 3500,
-    "source": "contracts\\CaelusValidator.algo.ts:767",
+    "teal": 3495,
+    "source": "contracts\\CaelusValidator.algo.ts:766",
     "pc": [
-      3068,
+      3068
+    ]
+  },
+  {
+    "teal": 3496,
+    "source": "contracts\\CaelusValidator.algo.ts:766",
+    "pc": [
       3069
     ]
   },
   {
-    "teal": 3501,
-    "source": "contracts\\CaelusValidator.algo.ts:767",
+    "teal": 3497,
+    "source": "contracts\\CaelusValidator.algo.ts:766",
     "pc": [
-      3070
+      3070,
+      3071
     ]
   },
   {
-    "teal": 3502,
-    "source": "contracts\\CaelusValidator.algo.ts:767",
+    "teal": 3498,
+    "source": "contracts\\CaelusValidator.algo.ts:766",
     "pc": [
-      3071,
       3072
     ]
   },
   {
-    "teal": 3503,
-    "source": "contracts\\CaelusValidator.algo.ts:767",
+    "teal": 3501,
+    "source": "contracts\\CaelusValidator.algo.ts:766",
+    "errorMessage": "global state value does not exist: this.creatorContractAppID.value.globalState('boost_token_id')",
     "pc": [
       3073
     ]
   },
   {
-    "teal": 3504,
-    "source": "contracts\\CaelusValidator.algo.ts:767",
+    "teal": 3502,
+    "source": "contracts\\CaelusValidator.algo.ts:766",
     "pc": [
-      3074,
-      3075
+      3074
     ]
   },
   {
-    "teal": 3505,
-    "source": "contracts\\CaelusValidator.algo.ts:767",
+    "teal": 3507,
+    "source": "contracts\\CaelusValidator.algo.ts:768",
     "pc": [
+      3075,
       3076
     ]
   },
   {
-    "teal": 3506,
-    "source": "contracts\\CaelusValidator.algo.ts:767",
+    "teal": 3508,
+    "source": "contracts\\CaelusValidator.algo.ts:768",
     "pc": [
-      3077,
-      3078
+      3077
     ]
   },
   {
-    "teal": 3511,
+    "teal": 3509,
     "source": "contracts\\CaelusValidator.algo.ts:768",
     "pc": [
-      3079,
-      3080
+      3078,
+      3079
     ]
   },
   {
-    "teal": 3512,
-    "source": "contracts\\CaelusValidator.algo.ts:768",
+    "teal": 3514,
+    "source": "contracts\\CaelusValidator.algo.ts:769",
     "pc": [
+      3080,
       3081
     ]
   },
   {
-    "teal": 3513,
-    "source": "contracts\\CaelusValidator.algo.ts:768",
+    "teal": 3515,
+    "source": "contracts\\CaelusValidator.algo.ts:769",
     "pc": [
       3082
     ]
   },
   {
-    "teal": 3514,
-    "source": "contracts\\CaelusValidator.algo.ts:768",
+    "teal": 3516,
+    "source": "contracts\\CaelusValidator.algo.ts:769",
     "pc": [
-      3083,
-      3084,
-      3085
+      3083
     ]
   },
   {
-    "teal": 3519,
-    "source": "contracts\\CaelusValidator.algo.ts:768",
+    "teal": 3517,
+    "source": "contracts\\CaelusValidator.algo.ts:769",
     "pc": [
+      3084,
+      3085,
       3086
     ]
   },
   {
-    "teal": 3520,
-    "source": "contracts\\CaelusValidator.algo.ts:768",
+    "teal": 3522,
+    "source": "contracts\\CaelusValidator.algo.ts:769",
     "pc": [
-      3087,
-      3088,
-      3089
+      3087
     ]
   },
   {
-    "teal": 3528,
+    "teal": 3523,
     "source": "contracts\\CaelusValidator.algo.ts:769",
     "pc": [
+      3088,
+      3089,
       3090
     ]
   },
   {
-    "teal": 3529,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
+    "teal": 3528,
+    "source": "contracts\\CaelusValidator.algo.ts:770",
     "pc": [
-      3091
+      3091,
+      3092
     ]
   },
   {
-    "teal": 3530,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
+    "teal": 3529,
+    "source": "contracts\\CaelusValidator.algo.ts:770",
     "pc": [
-      3092,
       3093
     ]
   },
   {
-    "teal": 3531,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
+    "teal": 3530,
+    "source": "contracts\\CaelusValidator.algo.ts:770",
     "pc": [
       3094,
-      3095,
-      3096,
-      3097,
-      3098,
-      3099
+      3095
+    ]
+  },
+  {
+    "teal": 3531,
+    "source": "contracts\\CaelusValidator.algo.ts:770",
+    "pc": [
+      3096
     ]
   },
   {
     "teal": 3532,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
+    "source": "contracts\\CaelusValidator.algo.ts:770",
+    "pc": [
+      3097,
+      3098
+    ]
+  },
+  {
+    "teal": 3533,
+    "source": "contracts\\CaelusValidator.algo.ts:770",
+    "pc": [
+      3099
+    ]
+  },
+  {
+    "teal": 3534,
+    "source": "contracts\\CaelusValidator.algo.ts:770",
     "pc": [
       3100,
       3101
     ]
   },
   {
-    "teal": 3536,
-    "source": "contracts\\CaelusValidator.algo.ts:770",
+    "teal": 3539,
+    "source": "contracts\\CaelusValidator.algo.ts:771",
     "pc": [
-      3102
-    ]
-  },
-  {
-    "teal": 3537,
-    "source": "contracts\\CaelusValidator.algo.ts:770",
-    "pc": [
+      3102,
       3103
     ]
   },
   {
-    "teal": 3538,
-    "source": "contracts\\CaelusValidator.algo.ts:770",
+    "teal": 3540,
+    "source": "contracts\\CaelusValidator.algo.ts:771",
     "pc": [
-      3104,
+      3104
+    ]
+  },
+  {
+    "teal": 3541,
+    "source": "contracts\\CaelusValidator.algo.ts:771",
+    "pc": [
       3105
     ]
   },
@@ -13664,102 +13676,84 @@
     "source": "contracts\\CaelusValidator.algo.ts:771",
     "pc": [
       3106,
-      3107
-    ]
-  },
-  {
-    "teal": 3543,
-    "source": "contracts\\CaelusValidator.algo.ts:771",
-    "pc": [
+      3107,
       3108
     ]
   },
   {
-    "teal": 3544,
+    "teal": 3547,
     "source": "contracts\\CaelusValidator.algo.ts:771",
     "pc": [
-      3109,
-      3110
-    ]
-  },
-  {
-    "teal": 3547,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
-    "pc": [
-      3111
+      3109
     ]
   },
   {
     "teal": 3548,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
+    "source": "contracts\\CaelusValidator.algo.ts:771",
     "pc": [
-      3112,
+      3110,
+      3111,
+      3112
+    ]
+  },
+  {
+    "teal": 3556,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
+    "pc": [
       3113
     ]
   },
   {
-    "teal": 3551,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
+    "teal": 3557,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
     "pc": [
       3114
     ]
   },
   {
-    "teal": 3552,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
+    "teal": 3558,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
     "pc": [
       3115,
       3116
     ]
   },
   {
-    "teal": 3553,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
+    "teal": 3559,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
     "pc": [
-      3117
-    ]
-  },
-  {
-    "teal": 3554,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
-    "pc": [
-      3118
-    ]
-  },
-  {
-    "teal": 3555,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
-    "pc": [
+      3117,
+      3118,
       3119,
-      3120
-    ]
-  },
-  {
-    "teal": 3556,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
-    "pc": [
+      3120,
       3121,
-      3122,
-      3123
+      3122
     ]
   },
   {
-    "teal": 3557,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
+    "teal": 3560,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
     "pc": [
+      3123,
       3124
     ]
   },
   {
-    "teal": 3558,
-    "source": "contracts\\CaelusValidator.algo.ts:769",
+    "teal": 3564,
+    "source": "contracts\\CaelusValidator.algo.ts:773",
     "pc": [
-      3125,
+      3125
+    ]
+  },
+  {
+    "teal": 3565,
+    "source": "contracts\\CaelusValidator.algo.ts:773",
+    "pc": [
       3126
     ]
   },
   {
-    "teal": 3562,
+    "teal": 3566,
     "source": "contracts\\CaelusValidator.algo.ts:773",
     "pc": [
       3127,
@@ -13767,71 +13761,83 @@
     ]
   },
   {
-    "teal": 3566,
-    "source": "contracts\\CaelusValidator.algo.ts:763",
+    "teal": 3570,
+    "source": "contracts\\CaelusValidator.algo.ts:774",
     "pc": [
       3129,
       3130
     ]
   },
   {
-    "teal": 3569,
-    "source": "contracts\\CaelusValidator.algo.ts:763",
+    "teal": 3571,
+    "source": "contracts\\CaelusValidator.algo.ts:774",
     "pc": [
-      3131,
-      3132
+      3131
     ]
   },
   {
-    "teal": 3570,
-    "source": "contracts\\CaelusValidator.algo.ts:763",
+    "teal": 3572,
+    "source": "contracts\\CaelusValidator.algo.ts:774",
     "pc": [
+      3132,
       3133
     ]
   },
   {
-    "teal": 3574,
-    "source": "contracts\\CaelusValidator.algo.ts:776",
+    "teal": 3575,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
     "pc": [
-      3134,
+      3134
+    ]
+  },
+  {
+    "teal": 3576,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
+    "pc": [
       3135,
       3136
     ]
   },
   {
-    "teal": 3578,
-    "source": "contracts\\CaelusValidator.algo.ts:777",
+    "teal": 3579,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
     "pc": [
-      3137,
+      3137
+    ]
+  },
+  {
+    "teal": 3580,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
+    "pc": [
       3138,
       3139
     ]
   },
   {
-    "teal": 3579,
-    "source": "contracts\\CaelusValidator.algo.ts:777",
+    "teal": 3581,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
     "pc": [
-      3140,
+      3140
+    ]
+  },
+  {
+    "teal": 3582,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
+    "pc": [
       3141
     ]
   },
   {
-    "teal": 3580,
-    "source": "contracts\\CaelusValidator.algo.ts:777",
+    "teal": 3583,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
     "pc": [
-      3142
-    ]
-  },
-  {
-    "teal": 3581,
-    "source": "contracts\\CaelusValidator.algo.ts:776",
-    "pc": [
+      3142,
       3143
     ]
   },
   {
-    "teal": 3585,
-    "source": "contracts\\CaelusValidator.algo.ts:780",
+    "teal": 3584,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
     "pc": [
       3144,
       3145,
@@ -13839,382 +13845,424 @@
     ]
   },
   {
-    "teal": 3588,
-    "source": "contracts\\CaelusValidator.algo.ts:780",
+    "teal": 3585,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
     "pc": [
       3147
     ]
   },
   {
-    "teal": 3589,
-    "source": "contracts\\CaelusValidator.algo.ts:780",
+    "teal": 3586,
+    "source": "contracts\\CaelusValidator.algo.ts:772",
     "pc": [
       3148,
       3149
     ]
   },
   {
-    "teal": 3593,
-    "source": "contracts\\CaelusValidator.algo.ts:781",
+    "teal": 3590,
+    "source": "contracts\\CaelusValidator.algo.ts:776",
     "pc": [
-      3150
+      3150,
+      3151
     ]
   },
   {
     "teal": 3594,
-    "source": "contracts\\CaelusValidator.algo.ts:781",
+    "source": "contracts\\CaelusValidator.algo.ts:763",
     "pc": [
-      3151,
-      3152
+      3152,
+      3153
+    ]
+  },
+  {
+    "teal": 3597,
+    "source": "contracts\\CaelusValidator.algo.ts:763",
+    "pc": [
+      3154,
+      3155
     ]
   },
   {
     "teal": 3598,
-    "source": "contracts\\CaelusValidator.algo.ts:782",
+    "source": "contracts\\CaelusValidator.algo.ts:763",
     "pc": [
-      3153,
-      3154
-    ]
-  },
-  {
-    "teal": 3599,
-    "source": "contracts\\CaelusValidator.algo.ts:782",
-    "pc": [
-      3155,
       3156
     ]
   },
   {
-    "teal": 3600,
-    "source": "contracts\\CaelusValidator.algo.ts:782",
+    "teal": 3602,
+    "source": "contracts\\CaelusValidator.algo.ts:779",
     "pc": [
       3157,
-      3158
+      3158,
+      3159
     ]
   },
   {
-    "teal": 3604,
-    "source": "contracts\\CaelusValidator.algo.ts:783",
+    "teal": 3606,
+    "source": "contracts\\CaelusValidator.algo.ts:780",
     "pc": [
-      3159,
-      3160
-    ]
-  },
-  {
-    "teal": 3605,
-    "source": "contracts\\CaelusValidator.algo.ts:783",
-    "pc": [
+      3160,
       3161,
       3162
     ]
   },
   {
-    "teal": 3606,
-    "source": "contracts\\CaelusValidator.algo.ts:783",
+    "teal": 3607,
+    "source": "contracts\\CaelusValidator.algo.ts:780",
     "pc": [
-      3163
+      3163,
+      3164
     ]
   },
   {
-    "teal": 3607,
-    "source": "contracts\\CaelusValidator.algo.ts:783",
+    "teal": 3608,
+    "source": "contracts\\CaelusValidator.algo.ts:780",
     "pc": [
-      3164,
       3165
     ]
   },
   {
-    "teal": 3611,
-    "source": "contracts\\CaelusValidator.algo.ts:784",
+    "teal": 3609,
+    "source": "contracts\\CaelusValidator.algo.ts:779",
     "pc": [
-      3166,
-      3167
+      3166
     ]
   },
   {
-    "teal": 3612,
-    "source": "contracts\\CaelusValidator.algo.ts:784",
+    "teal": 3613,
+    "source": "contracts\\CaelusValidator.algo.ts:783",
     "pc": [
+      3167,
       3168,
       3169
     ]
   },
   {
-    "teal": 3613,
-    "source": "contracts\\CaelusValidator.algo.ts:784",
+    "teal": 3616,
+    "source": "contracts\\CaelusValidator.algo.ts:783",
     "pc": [
       3170
     ]
   },
   {
-    "teal": 3616,
-    "source": "contracts\\CaelusValidator.algo.ts:780",
+    "teal": 3617,
+    "source": "contracts\\CaelusValidator.algo.ts:783",
     "pc": [
       3171,
       3172
     ]
   },
   {
-    "teal": 3619,
-    "source": "contracts\\CaelusValidator.algo.ts:780",
+    "teal": 3621,
+    "source": "contracts\\CaelusValidator.algo.ts:784",
     "pc": [
-      3173,
-      3174
+      3173
     ]
   },
   {
-    "teal": 3620,
-    "source": "contracts\\CaelusValidator.algo.ts:780",
+    "teal": 3622,
+    "source": "contracts\\CaelusValidator.algo.ts:784",
     "pc": [
+      3174,
       3175
     ]
   },
   {
-    "teal": 3623,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "teal": 3626,
+    "source": "contracts\\CaelusValidator.algo.ts:785",
     "pc": [
       3176,
-      3177,
+      3177
+    ]
+  },
+  {
+    "teal": 3627,
+    "source": "contracts\\CaelusValidator.algo.ts:785",
+    "pc": [
       3178,
-      3179,
+      3179
+    ]
+  },
+  {
+    "teal": 3628,
+    "source": "contracts\\CaelusValidator.algo.ts:785",
+    "pc": [
       3180,
       3181
     ]
   },
   {
-    "teal": 3624,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "teal": 3632,
+    "source": "contracts\\CaelusValidator.algo.ts:786",
     "pc": [
       3182,
-      3183,
-      3184
+      3183
     ]
   },
   {
-    "teal": 3625,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "teal": 3633,
+    "source": "contracts\\CaelusValidator.algo.ts:786",
     "pc": [
-      3185,
-      3186,
+      3184,
+      3185
+    ]
+  },
+  {
+    "teal": 3634,
+    "source": "contracts\\CaelusValidator.algo.ts:786",
+    "pc": [
+      3186
+    ]
+  },
+  {
+    "teal": 3635,
+    "source": "contracts\\CaelusValidator.algo.ts:786",
+    "pc": [
       3187,
       3188
     ]
   },
   {
-    "teal": 3628,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
-    "errorMessage": "this contract does not implement the given ABI method for create NoOp",
+    "teal": 3639,
+    "source": "contracts\\CaelusValidator.algo.ts:787",
     "pc": [
-      3189
+      3189,
+      3190
     ]
   },
   {
-    "teal": 3631,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "teal": 3640,
+    "source": "contracts\\CaelusValidator.algo.ts:787",
     "pc": [
-      3190,
       3191,
-      3192,
-      3193,
+      3192
+    ]
+  },
+  {
+    "teal": 3641,
+    "source": "contracts\\CaelusValidator.algo.ts:787",
+    "pc": [
+      3193
+    ]
+  },
+  {
+    "teal": 3644,
+    "source": "contracts\\CaelusValidator.algo.ts:783",
+    "pc": [
       3194,
       3195
     ]
   },
   {
-    "teal": 3632,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "teal": 3647,
+    "source": "contracts\\CaelusValidator.algo.ts:783",
     "pc": [
       3196,
-      3197,
-      3198,
-      3199,
-      3200,
-      3201
+      3197
     ]
   },
   {
-    "teal": 3633,
+    "teal": 3648,
+    "source": "contracts\\CaelusValidator.algo.ts:783",
+    "pc": [
+      3198
+    ]
+  },
+  {
+    "teal": 3651,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
+      3199,
+      3200,
+      3201,
       3202,
       3203,
-      3204,
+      3204
+    ]
+  },
+  {
+    "teal": 3652,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
       3205,
       3206,
       3207
     ]
   },
   {
-    "teal": 3634,
+    "teal": 3653,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
       3208,
       3209,
       3210,
-      3211,
-      3212,
-      3213
+      3211
     ]
   },
   {
-    "teal": 3635,
+    "teal": 3656,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "errorMessage": "this contract does not implement the given ABI method for create NoOp",
+    "pc": [
+      3212
+    ]
+  },
+  {
+    "teal": 3659,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
+      3213,
       3214,
       3215,
       3216,
       3217,
-      3218,
-      3219
+      3218
     ]
   },
   {
-    "teal": 3636,
+    "teal": 3660,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
+      3219,
       3220,
       3221,
       3222,
       3223,
-      3224,
-      3225
+      3224
     ]
   },
   {
-    "teal": 3637,
+    "teal": 3661,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
+      3225,
       3226,
       3227,
       3228,
       3229,
-      3230,
-      3231
+      3230
     ]
   },
   {
-    "teal": 3638,
+    "teal": 3662,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
+      3231,
       3232,
       3233,
       3234,
       3235,
-      3236,
-      3237
+      3236
     ]
   },
   {
-    "teal": 3639,
+    "teal": 3663,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
+      3237,
       3238,
-      3239
-    ]
-  },
-  {
-    "teal": 3640,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
-    "pc": [
+      3239,
       3240,
       3241,
-      3242,
+      3242
+    ]
+  },
+  {
+    "teal": 3664,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
       3243,
       3244,
-      3245
-    ]
-  },
-  {
-    "teal": 3641,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
-    "pc": [
+      3245,
       3246,
       3247,
-      3248,
+      3248
+    ]
+  },
+  {
+    "teal": 3665,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
       3249,
       3250,
-      3251
-    ]
-  },
-  {
-    "teal": 3642,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
-    "pc": [
+      3251,
       3252,
       3253,
-      3254,
+      3254
+    ]
+  },
+  {
+    "teal": 3666,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
       3255,
       3256,
-      3257
-    ]
-  },
-  {
-    "teal": 3643,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
-    "pc": [
+      3257,
       3258,
       3259,
-      3260,
-      3261,
-      3262,
-      3263
+      3260
     ]
   },
   {
-    "teal": 3644,
+    "teal": 3667,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
+      3261,
+      3262
+    ]
+  },
+  {
+    "teal": 3668,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
+      3263,
       3264,
       3265,
       3266,
       3267,
-      3268,
-      3269
+      3268
     ]
   },
   {
-    "teal": 3645,
+    "teal": 3669,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
+      3269,
       3270,
       3271,
       3272,
       3273,
-      3274,
-      3275
+      3274
     ]
   },
   {
-    "teal": 3646,
+    "teal": 3670,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
+      3275,
       3276,
-      3277
-    ]
-  },
-  {
-    "teal": 3647,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
-    "pc": [
+      3277,
       3278,
       3279,
-      3280,
-      3281,
-      3282,
-      3283
+      3280
     ]
   },
   {
-    "teal": 3648,
+    "teal": 3671,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
+      3281,
+      3282,
+      3283,
       3284,
       3285,
       3286
     ]
   },
   {
-    "teal": 3649,
+    "teal": 3672,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "pc": [
       3287,
@@ -14222,24 +14270,54 @@
       3289,
       3290,
       3291,
-      3292,
+      3292
+    ]
+  },
+  {
+    "teal": 3673,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
       3293,
       3294,
       3295,
       3296,
       3297,
-      3298,
+      3298
+    ]
+  },
+  {
+    "teal": 3674,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
       3299,
-      3300,
+      3300
+    ]
+  },
+  {
+    "teal": 3675,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
       3301,
       3302,
       3303,
       3304,
       3305,
-      3306,
+      3306
+    ]
+  },
+  {
+    "teal": 3676,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
       3307,
       3308,
-      3309,
+      3309
+    ]
+  },
+  {
+    "teal": 3677,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
       3310,
       3311,
       3312,
@@ -14252,54 +14330,77 @@
       3319,
       3320,
       3321,
-      3322
-    ]
-  },
-  {
-    "teal": 3652,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
-    "errorMessage": "this contract does not implement the given ABI method for call NoOp",
-    "pc": [
-      3323
-    ]
-  },
-  {
-    "teal": 3655,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
-    "pc": [
+      3322,
+      3323,
       3324,
       3325,
       3326,
       3327,
       3328,
-      3329
-    ]
-  },
-  {
-    "teal": 3656,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
-    "pc": [
+      3329,
       3330,
       3331,
-      3332
-    ]
-  },
-  {
-    "teal": 3657,
-    "source": "contracts\\CaelusValidator.algo.ts:27",
-    "pc": [
+      3332,
       3333,
       3334,
       3335,
-      3336
+      3336,
+      3337,
+      3338,
+      3339,
+      3340,
+      3341,
+      3342,
+      3343,
+      3344,
+      3345
     ]
   },
   {
-    "teal": 3660,
+    "teal": 3680,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "errorMessage": "this contract does not implement the given ABI method for call NoOp",
+    "pc": [
+      3346
+    ]
+  },
+  {
+    "teal": 3683,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
+      3347,
+      3348,
+      3349,
+      3350,
+      3351,
+      3352
+    ]
+  },
+  {
+    "teal": 3684,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
+      3353,
+      3354,
+      3355
+    ]
+  },
+  {
+    "teal": 3685,
+    "source": "contracts\\CaelusValidator.algo.ts:27",
+    "pc": [
+      3356,
+      3357,
+      3358,
+      3359
+    ]
+  },
+  {
+    "teal": 3688,
     "source": "contracts\\CaelusValidator.algo.ts:27",
     "errorMessage": "this contract does not implement the given ABI method for call DeleteApplication",
     "pc": [
-      3337
+      3360
     ]
   }
 ]

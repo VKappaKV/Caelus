@@ -70,7 +70,7 @@ export async function solveDelinquency(poolApp: bigint, block: bigint) {
     defaultSigner: testAccount.signer,
   });
 
-  const tx = await client.send.reportRewards({
+  await client.send.reportRewards({
     args: [block],
     populateAppCallResources: true,
     extraFee: (2000).microAlgos(),

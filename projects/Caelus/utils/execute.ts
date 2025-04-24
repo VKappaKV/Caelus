@@ -6,8 +6,8 @@ import { validatorOptIntoLST, deleteApp, goOnline } from './validator';
 import { runner } from './runner';
 import { getPartKey } from './partkey';
 
-const ADMIN_APP_ID = 16345557n;
-const VALIDATOR_APP_ID = 16345588n;
+const ADMIN_APP_ID = 16345897n;
+const VALIDATOR_APP_ID = 16345933n;
 
 Config.configure({
   debug: true,

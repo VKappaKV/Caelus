@@ -511,7 +511,7 @@ export class CaelusValidatorPool extends Contract {
   migrateToPool(newPool: AppID): void {
     assert(newPool.creator === this.app.creator, 'new pool has to be a pool created by the admin contract');
     assert(this.txn.sender === this.operatorAddress.value, 'only the operator can migrate to a new pool');
-    assert(this.status.value === DELINQUENCY_STATUS, 'cannot migrate if delinquent');
+    assert(this.status.value !== DELINQUENCY_STATUS, 'cannot migrate if delinquent');
 
     sendMethodCall<typeof CaelusValidatorPool.prototype.mergeStateOnMigration>({
       applicationID: newPool,
@@ -761,9 +761,12 @@ export class CaelusValidatorPool extends Contract {
   }
 
   private getTier(): uint64 {
+    let boostToken = AssetID.zeroIndex;
     if (!this.boostTokenID.exists) {
-      this.creatorContractAppID.value.globalState('boost_token_id') as AssetID;
+      this.boostTokenID.value = this.creatorContractAppID.value.globalState('boost_token_id') as AssetID;
     }
+    boostToken = this.boostTokenID.value;
+    if (boostToken === AssetID.zeroIndex) return 0;
     const ownedToken = this.operatorAddress.value.assetBalance(this.boostTokenID.value);
     if (ownedToken === 0) return 0;
     const getTier = sendMethodCall<typeof CaelusAdmin.prototype.getBoostTier, uint64>({
