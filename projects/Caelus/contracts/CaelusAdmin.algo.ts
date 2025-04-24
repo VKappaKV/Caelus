@@ -277,8 +277,7 @@ export class CaelusAdmin extends Contract {
     }
 
     if (burning === amountToBurn) {
-      this.tokenCirculatingSupply.value = this.tokenCirculatingSupply.value - burnTxn.assetAmount;
-      this.totalStake.value -= burning;
+      this.downSupplyCounters(amountToBurn, burnTxn.assetAmount);
       this.burnEvent.log({
         filled: true,
         amount: burnTxn.assetAmount,
@@ -288,6 +287,14 @@ export class CaelusAdmin extends Contract {
     }
 
     if (this.queueIsEmpty()) {
+      const amountLeft = this.getMintAmount(amountToBurn - burning);
+      this.doAxfer(burnTxn.sender, amountLeft, this.tokenId.value);
+      this.downSupplyCounters(burning, burnTxn.assetAmount - amountLeft);
+      this.burnEvent.log({
+        filled: false,
+        amount: burnTxn.assetAmount - amountLeft,
+        output: burning,
+      });
       return;
     }
 
@@ -309,13 +316,13 @@ export class CaelusAdmin extends Contract {
       }
     }
 
-    const amountLeft = this.getBurnAmount(amountToBurn - burning);
+    const amountLeft = this.getMintAmount(amountToBurn - burning);
     if (amountLeft > 0) {
       this.doAxfer(burnTxn.sender, amountLeft, this.tokenId.value);
       this.lastExhaustBlock.value = globals.round;
     }
-    this.tokenCirculatingSupply.value = this.tokenCirculatingSupply.value - (burnTxn.assetAmount - amountLeft);
-    this.totalStake.value -= burning;
+
+    this.downSupplyCounters(burning, burnTxn.assetAmount - amountLeft);
 
     this.burnEvent.log({
       filled: amountLeft > 0,
@@ -348,8 +355,7 @@ export class CaelusAdmin extends Contract {
 
     const amountToMint = this.getMintAmount(stakeCommit.amount);
     this.doAxfer(validatorAppID.address, amountToMint, this.tokenId.value);
-    this.totalStake.value += stakeCommit.amount;
-    this.tokenCirculatingSupply.value += amountToMint;
+    this.upSupplyCounters(stakeCommit.amount, amountToMint);
   }
 
   /**
@@ -406,9 +412,9 @@ export class CaelusAdmin extends Contract {
       }
     }
     amountToUpdate = this.getBurnAmount(toBurn - amtBurned);
-    this.tokenCirculatingSupply.value = this.tokenCirculatingSupply.value - (burnTxn.assetAmount - amountToUpdate);
-    this.totalStake.value -= amtBurned;
-    this.totalStake.value -= amountOperator;
+
+    this.downSupplyCounters(amtBurned + amountOperator, burnTxn.assetAmount - amountToUpdate);
+
     if (amountToUpdate > 0) {
       this.doAxfer(burnTxn.sender, amountToUpdate, this.tokenId.value);
     }
@@ -443,8 +449,7 @@ export class CaelusAdmin extends Contract {
     const amountToMint = this.getMintAmount(amount);
     this.doAxfer(app.address, amountToMint, this.tokenId.value);
 
-    this.totalStake.value += amount;
-    this.tokenCirculatingSupply.value += amountToMint;
+    this.upSupplyCounters(amount, amountToMint);
 
     this.mintEvent.log({
       instant: true,
@@ -484,6 +489,7 @@ export class CaelusAdmin extends Contract {
     assert(rewardPay.receiver === this.app.address);
     const amount = rewardPay.amount - wideRatio([this.protocolFee.value, rewardPay.amount], [100]);
     this.totalStake.value += amount;
+    this.upSupplyCounters(amount, 0);
   }
 
   // called to send the Algo used to mint vALGO to the highest bidder
@@ -650,6 +656,16 @@ export class CaelusAdmin extends Contract {
   private getBurnAmount(amount: uint64): uint64 {
     this.calculateLSTRatio();
     return wideRatio([amount, this.pegRatio.value], [SCALE]);
+  }
+
+  private upSupplyCounters(stake: uint64, supply: uint64): void {
+    this.totalStake.value += stake;
+    this.tokenCirculatingSupply.value += supply;
+  }
+
+  private downSupplyCounters(stake: uint64, supply: uint64): void {
+    this.totalStake.value -= stake;
+    this.tokenCirculatingSupply.value -= supply;
   }
 
   private doBurnTxn(target: AppID, args: [uint64, Address]): void {

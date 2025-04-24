@@ -1,8 +1,10 @@
 /* eslint-disable no-console */
 import { Config } from '@algorandfoundation/algokit-utils';
 import { addValidator, adminSetup, deploy, validatorSetup, update } from './bootstrap';
-import { deleteApp, mint, mintOperatorCommit, validatorOptIntoLST } from './helpers';
+import { mint, mintOperatorCommit } from './admin';
+import { validatorOptIntoLST, deleteApp, goOnline } from './validator';
 import { runner } from './runner';
+import { getPartKey } from './partkey';
 
 const ADMIN_APP_ID = 16345557n;
 const VALIDATOR_APP_ID = 16345588n;
@@ -20,10 +22,7 @@ Config.configure({
         setTimeout(f, 1000);
       });
       await validatorSetup(app);
-      await new Promise((f) => {
-        setTimeout(f, 2000);
-      });
-      await addValidator(app);
+      // after this change ADMIN APP ID with new instance
       break;
     }
     case 'deploy':
@@ -58,6 +57,20 @@ Config.configure({
       console.log('EXECUTING VALIDATOR POOL OPT IN');
       validatorOptIntoLST(VALIDATOR_APP_ID);
       break;
+    case 'goOnline': {
+      console.log('EXECUTING GO ONLINE');
+      const partKey = getPartKey();
+      goOnline(
+        VALIDATOR_APP_ID,
+        partKey.votingKey,
+        partKey.selectionKey,
+        partKey.stateProofKey,
+        partKey.firstRound,
+        partKey.lastRound,
+        partKey.keyDilution
+      );
+      break;
+    }
     case 'delete':
       console.log('EXECUTING VALIDATOR POOL DELETE');
       deleteApp(VALIDATOR_APP_ID);

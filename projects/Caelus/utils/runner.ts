@@ -5,7 +5,7 @@ import { AlgorandSubscriber } from '@algorandfoundation/algokit-subscriber';
 import { TransactionType } from 'algosdk';
 import { SubscribedTransaction } from '@algorandfoundation/algokit-subscriber/types/subscription';
 import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
-import { reportRewards } from './helpers';
+import { reportRewards } from './validator';
 import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
 import { getAccount } from './bootstrap';
 import { algorand } from './network';

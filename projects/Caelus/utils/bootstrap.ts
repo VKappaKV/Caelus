@@ -29,26 +29,6 @@ export const getAccount = async () => {
 
   return { testAccount, random };
 };
-
-export const test = async () => {
-  const { testAccount, random } = await getAccount();
-
-  for (let i = 0; i < 320; i += 1) {
-    await new Promise((f) => {
-      setTimeout(f, 3000);
-    });
-
-    const pay = await algorand.send.payment({
-      sender: testAccount.addr,
-      signer: testAccount,
-      receiver: random.addr,
-      amount: (1000000).microAlgo(),
-    });
-
-    console.log('CONFIRMATION OF TEST IS : ', pay.txIds);
-  }
-};
-
 export async function deploy(): Promise<bigint> {
   // change with other wallet depending on your network
   const { testAccount } = await getAccount();
@@ -147,7 +127,11 @@ export async function adminSetup(APP_ID: bigint) {
     decimals: 6,
   });
 
-  await adminClient.send.managerChangeBoostTier({ args: [[dummyIDtxn.assetId]] });
+  await adminClient.send.managerUpdateBoostTokenId({
+    args: [dummyIDtxn.assetId],
+    extraFee: algokit.microAlgos(1000),
+    populateAppCallResources: true,
+  });
 }
 
 export async function addValidator(APP_ID: bigint) {

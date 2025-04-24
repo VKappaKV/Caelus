@@ -1,11 +1,7 @@
-/* eslint-disable no-console */
-import algosdk from 'algosdk';
-import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
-import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
-import { getAccount } from './bootstrap';
+import * as algokit from '@algorandfoundation/algokit-utils';
 import { algorand } from './network';
-
-// ADMIN METHODS
+import { getAccount } from './bootstrap';
+import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
 
 export async function mint(adminAppId: bigint) {
   const { testAccount } = await getAccount();
@@ -93,71 +89,4 @@ export async function removeOperatorCommit(pool: bigint, adminAppId: bigint, amo
     extraFee: (2000).microAlgos(),
   });
   console.log(`Removed operator commit from pool ${pool}, txn: ${burnTxn.txIds}`);
-}
-
-// VALIDATOR METHODS
-
-export async function validatorOptIntoLST(poolApp: bigint) {
-  const { testAccount } = await getAccount();
-  const client = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
-    appId: poolApp,
-    defaultSender: testAccount.addr,
-    defaultSigner: testAccount.signer,
-  });
-  await algorand.send.payment({
-    sender: testAccount.addr,
-    receiver: client.appAddress,
-    amount: (0.2).algos(),
-  });
-  const tx = await client.send.optIntoLst({ args: [], extraFee: (1000).microAlgos(), populateAppCallResources: true });
-  console.log(`Opted into LST: ${tx.txIds}`);
-}
-
-export async function reportRewards(poolApp: bigint, block: bigint) {
-  const { testAccount } = await getAccount();
-  const client = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
-    appId: poolApp,
-    defaultSender: testAccount,
-    defaultSigner: testAccount.signer,
-  });
-
-  const tx = await client.send.reportRewards({
-    args: [block],
-    extraFee: (1000).microAlgos(),
-    populateAppCallResources: true,
-    firstValidRound: block,
-  });
-  console.log(`Reported rewards: ${tx.txIds}`);
-}
-
-export async function solveDelinquency(poolApp: bigint, block: bigint) {
-  const { testAccount } = await getAccount();
-  const client = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
-    appId: poolApp,
-    defaultSender: testAccount,
-    defaultSigner: testAccount.signer,
-  });
-
-  const tx = await client.send.reportRewards({
-    args: [block],
-    populateAppCallResources: true,
-    extraFee: (2000).microAlgos(),
-    firstValidRound: block,
-  });
-
-  console.log(`Reported block to solve delinquency at: ${tx.txIds}`);
-}
-
-export async function deleteApp(poolApp: bigint) {
-  const { testAccount } = await getAccount();
-
-  const tx = await algorand.send.appDelete({
-    sender: testAccount.addr,
-    appId: poolApp,
-    signer: testAccount,
-    populateAppCallResources: true,
-    onComplete: algosdk.OnApplicationComplete.DeleteApplicationOC,
-  });
-
-  console.log(`executed : ${tx.txIds}`);
 }
