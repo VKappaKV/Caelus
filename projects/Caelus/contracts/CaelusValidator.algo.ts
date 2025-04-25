@@ -102,6 +102,8 @@ export class CaelusValidatorPool extends Contract {
     this.saturationBuffer.value = 0;
     this.performanceCounter.value = 0;
     this.delinquencyScore.value = 0;
+    this.lastRewardReport.value = 0;
+    this.lastDelinquencyReport.value = 0;
 
     this.repaid.value = true;
   }
@@ -121,7 +123,7 @@ export class CaelusValidatorPool extends Contract {
   }
 
   /**
-   *  Used by the Caelus Admin to send the correct amount into the operator commit
+   *  followup operation called by the Caelus Admin to send the correct amount into the operator commit
    *
    * @param {PayTxn} opStake - node operator stake commitment
    */
@@ -270,6 +272,8 @@ export class CaelusValidatorPool extends Contract {
   }
 
   /**
+   * FOLLOWUP OPERATION CALLED BY THE CAELUS ADMIN TO SEND THE DELEGATED STAKE TO THE NODE OPERATOR
+   *
    * Receive delegated stake and update the delegation factors.
    *
    * @param {PayTxn} txnWithStake - Payment transaction to the contract account with the delegated stake
@@ -284,6 +288,7 @@ export class CaelusValidatorPool extends Contract {
   }
 
   /**
+   * FOLLOWUP OPERATION CALLED BY THE CAELUS ADMIN TO CLAWBACK THE DELEGATED STAKE ON BURN OPERATION
    *
    * @param {uint64} amountRequested - amount of Algo to be burned
    * @param {Address} receiverBurn - address of the receiver of the burn transaction triggered on the Caelus Admin contract
@@ -459,50 +464,6 @@ export class CaelusValidatorPool extends Contract {
     return this.app.address.incentiveEligible;
   }
 
-  private performanceCheck(): boolean {
-    if (!this.app.address.incentiveEligible) {
-      this.setDelinquency();
-
-      this.delinquencyEvent.log({
-        app: this.app,
-        operator: this.operatorAddress.value,
-        stakeAtRisk: this.delegatedStake.value,
-        delinquencyScore: this.delinquencyScore.value,
-        status: this.status.value,
-      });
-
-      return true;
-    }
-    // check to not make performanceChecks be stacked in close proximity calls
-    assert(
-      globals.round - this.lastDelinquencyReport.value > this.getExpectedProposalsDelta() / 2,
-      'Wait at least half the proposal expected time between Performance checks'
-    );
-    const deltaWithLatestProposal = globals.round - this.app.address.lastProposed;
-    const isPerformingAsExpected = this.getExpectedProposalsDelta() > deltaWithLatestProposal;
-    const isPerformingAsTolerated = this.getToleratedProposalDelta() > deltaWithLatestProposal;
-    if (isPerformingAsExpected && isPerformingAsTolerated) {
-      return false;
-    }
-    if (!isPerformingAsTolerated) {
-      this.delinquencyScore.value += 5;
-    } else if (!isPerformingAsExpected) {
-      this.delinquencyScore.value +=
-        this.lastDelinquencyReport.value > this.lastRewardReport.value || this.delinquencyScore.value > 5 ? 2 : 1;
-    }
-    this.setDelinquencyOnThresholdCheck();
-    this.lastDelinquencyReport.value = globals.round;
-
-    this.delinquencyEvent.log({
-      app: this.app,
-      operator: this.operatorAddress.value,
-      stakeAtRisk: this.delegatedStake.value,
-      delinquencyScore: this.delinquencyScore.value,
-      status: this.status.value,
-    });
-    return true;
-  }
-
   /**
    * Migrate the validator pool to a new pool. Useful to migrate this validator pool to a new version of the contract without losing the state.
    *
@@ -528,10 +489,15 @@ export class CaelusValidatorPool extends Contract {
         },
       ],
     });
+
+    this.goOffline();
+    this.operatorCommit.value = 0;
+    this.delegatedStake.value = 0;
+    this.performanceCounter.value = 0;
   }
 
   /**
-   * Receiving call from the new pool to merge the state of the old pool into the new pool.
+   * FOLLOWUP OPERATION Receiving call from the old pool to merge the state into the new pool.
    */
   mergeStateOnMigration(
     from: AppID,
@@ -592,6 +558,50 @@ export class CaelusValidatorPool extends Contract {
   /**
    * SUBROUTINES
    */
+
+  private performanceCheck(): boolean {
+    if (!this.app.address.incentiveEligible) {
+      this.setDelinquency();
+
+      this.delinquencyEvent.log({
+        app: this.app,
+        operator: this.operatorAddress.value,
+        stakeAtRisk: this.delegatedStake.value,
+        delinquencyScore: this.delinquencyScore.value,
+        status: this.status.value,
+      });
+
+      return true;
+    }
+    // check to not make performanceChecks be stacked in close proximity calls
+    assert(
+      globals.round - this.lastDelinquencyReport.value > this.getExpectedProposalsDelta() / 2,
+      'Wait at least half the proposal expected time between Performance checks'
+    );
+    const deltaWithLatestProposal = globals.round - this.app.address.lastProposed;
+    const isPerformingAsExpected = this.getExpectedProposalsDelta() > deltaWithLatestProposal;
+    const isPerformingAsTolerated = this.getToleratedProposalDelta() > deltaWithLatestProposal;
+    if (isPerformingAsExpected && isPerformingAsTolerated) {
+      return false;
+    }
+    if (!isPerformingAsTolerated) {
+      this.delinquencyScore.value += 5;
+    } else if (!isPerformingAsExpected) {
+      this.delinquencyScore.value +=
+        this.lastDelinquencyReport.value > this.lastRewardReport.value || this.delinquencyScore.value > 5 ? 2 : 1;
+    }
+    this.setDelinquencyOnThresholdCheck();
+    this.lastDelinquencyReport.value = globals.round;
+
+    this.delinquencyEvent.log({
+      app: this.app,
+      operator: this.operatorAddress.value,
+      stakeAtRisk: this.delegatedStake.value,
+      delinquencyScore: this.delinquencyScore.value,
+      status: this.status.value,
+    });
+    return true;
+  }
 
   private checkStakeOnSnitch(recipient: AppID, split: boolean, max: uint64): boolean {
     const hasMoreThanMax = this.app.address.balance > MAX_STAKE_PER_ACCOUNT;
@@ -731,7 +741,7 @@ export class CaelusValidatorPool extends Contract {
       'Account is delinquent. Solve Delinquency state before updating parameters'
     );
     // start counting from the operator commit
-    if (this.operatorCommit.value > globals.payoutsMinBalance && this.status.value === 0) {
+    if (this.operatorCommit.value > globals.payoutsMinBalance) {
       this.maxDelegatableStake.value = this.operatorCommit.value;
 
       const tokenBoost = (this.getTier() * this.operatorCommit.value) / 2;
@@ -755,7 +765,7 @@ export class CaelusValidatorPool extends Contract {
     if (this.maxDelegatableStake.value > 0) {
       this.saturationBuffer.value = (this.delegatedStake.value * BUFFER_MAX) / this.maxDelegatableStake.value;
     } else {
-      this.saturationBuffer.value = BUFFER_MAX;
+      this.saturationBuffer.value = BUFFER_MAX; // When the maxDelegatableStake is 0, the saturation buffer is set to 1000
       this.status.value = NOT_DELEGATABLE_STATUS;
     }
   }
@@ -767,7 +777,8 @@ export class CaelusValidatorPool extends Contract {
     }
     boostToken = this.boostTokenID.value;
     if (boostToken === AssetID.zeroIndex) return 0;
-    const ownedToken = this.operatorAddress.value.assetBalance(this.boostTokenID.value);
+    if (this.operatorAddress.value.isOptedInToAsset(boostToken)) return 0;
+    const ownedToken = this.operatorAddress.value.assetBalance(boostToken);
     if (ownedToken === 0) return 0;
     const getTier = sendMethodCall<typeof CaelusAdmin.prototype.getBoostTier, uint64>({
       applicationID: this.creatorContractAppID.value,

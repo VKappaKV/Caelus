@@ -41,7 +41,7 @@
     },
     {
       "name": "addToOperatorCommit",
-      "desc": "Used by the Caelus Admin to send the correct amount into the operator commit",
+      "desc": "followup operation called by the Caelus Admin to send the correct amount into the operator commit",
       "args": [
         {
           "name": "opStake",
@@ -190,7 +190,7 @@
     },
     {
       "name": "addStake",
-      "desc": "Receive delegated stake and update the delegation factors.",
+      "desc": "FOLLOWUP OPERATION CALLED BY THE CAELUS ADMIN TO SEND THE DELEGATED STAKE TO THE NODE OPERATOR\n\n\nReceive delegated stake and update the delegation factors.",
       "args": [
         {
           "name": "txnWithStake",
@@ -204,6 +204,7 @@
     },
     {
       "name": "burnStake",
+      "desc": "FOLLOWUP OPERATION CALLED BY THE CAELUS ADMIN TO CLAWBACK THE DELEGATED STAKE ON BURN OPERATION",
       "args": [
         {
           "name": "amountRequested",
@@ -414,7 +415,7 @@
     },
     {
       "name": "mergeStateOnMigration",
-      "desc": "Receiving call from the new pool to merge the state of the old pool into the new pool.",
+      "desc": "FOLLOWUP OPERATION Receiving call from the old pool to merge the state into the new pool.",
       "args": [
         {
           "name": "from",

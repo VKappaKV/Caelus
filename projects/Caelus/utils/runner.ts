@@ -5,15 +5,16 @@ import { AlgorandSubscriber } from '@algorandfoundation/algokit-subscriber';
 import { TransactionType } from 'algosdk';
 import { SubscribedTransaction } from '@algorandfoundation/algokit-subscriber/types/subscription';
 import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
-import { reportRewards } from './validator';
+import { reportRewards } from './helpers/validator';
 import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
-import { getAccount } from './bootstrap';
-import { algorand } from './network';
+import { getAccount } from './execute';
+import { algorand, FEE_SINK_ADDRESS } from './helpers/network';
+import { snitch } from './helpers/admin';
 
 export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: bigint) => {
   let currentWatermark = watermark;
 
-  const { testAccount } = await getAccount(); // check in bootstrap.ts change this to your account through env.ts
+  const { testAccount } = await getAccount(); // check in bootstrap.ts change this to your account, mnemonics are expected to be in ../env.ts
 
   const admin = algorand.client.getTypedAppClientById(CaelusAdminClient, {
     appId: adminAppId,
@@ -30,7 +31,7 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
         {
           name: 'payouts',
           filter: {
-            sender: 'FEESINK7OJKODDB5ZB4W2SRYPUSTOTK65UDCUYZ5DB4BW3VOHDHGO6JUNE', // mainnet fee sink address 'Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA'
+            sender: FEE_SINK_ADDRESS,
             type: TransactionType.pay,
           },
         },
@@ -105,6 +106,9 @@ const onPayouts = async (tx: SubscribedTransaction, myAppId: bigint) => {
   });
   const appAddress = client.appAddress.toString();
   if (tx.paymentTransaction?.receiver === appAddress) {
+    await new Promise((f) => {
+      setTimeout(f, 10000);
+    });
     await reportRewards(myAppId, tx.confirmedRound!);
   }
 };
@@ -207,10 +211,8 @@ const onBurn = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bi
       return;
     }
     if (burningValidatorBuffer < myValidatorBuffer) {
-      await admin.send.snitchToBurn({ args: [myAppId], populateAppCallResources: true });
+      await snitch(adminAppId, myAppId);
       break;
     }
   }
 };
-
-// export const trackValidatorPerformances = async (myAppId: bigint, watermark: bigint) => {}; // if I track it on each payout it might be too much, maybe move this to just a frontend

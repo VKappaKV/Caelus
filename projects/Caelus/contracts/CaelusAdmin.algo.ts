@@ -379,6 +379,8 @@ export class CaelusAdmin extends Contract {
   }
 
   /**
+   * FOLLOWUP OPERATION CALLED BY THE VALIDATOR POOL CONTRACT EITHER ON DELINQUENCY OR ON SNITCH
+   *
    * On Delinquency Validators SHOULD not have vAlgo in their balance.
    * It's first called when deliquency is set, can be called again if the entire vAlgo amount is not burned.
    * The vAlgo will be turned to Algo and added to the operator commit
@@ -436,6 +438,8 @@ export class CaelusAdmin extends Contract {
   }
 
   /**
+   * FOLLOWUP OPERATION CALLED BY THE VALIDATOR POOL CONTRACT WHEN DELINQUENCY IS SOLVED
+   *
    * When Delinquency is solved the operator will mint his commit back into vAlgo.
    */
   reMintDelinquentCommit(app: AppID): void {
@@ -484,6 +488,12 @@ export class CaelusAdmin extends Contract {
     });
   }
 
+  /**
+   * The method is called by the Validator Pool Contract to declare the rewards.
+   *
+   * It doesn't utilize stricter checks on call since as long as the rewardPay is sent to the Admin contract we welcome free money to the protocol >:)
+   * There's no other state getting changed aside from the totalStake
+   */
   declareRewards(proposer: AppID, block: uint64, rewardPay: PayTxn): void {
     assert(blocks[block].proposer === proposer.address);
     assert(rewardPay.receiver === this.app.address);

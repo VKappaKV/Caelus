@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-console */
 import * as algokit from '@algorandfoundation/algokit-utils';
@@ -5,10 +6,10 @@ import { consoleLogger } from '@algorandfoundation/algokit-utils/types/logging';
 import { Config } from '@algorandfoundation/algokit-utils';
 import { OnSchemaBreak, OnUpdate } from '@algorandfoundation/algokit-utils/types/app';
 import algosdk from 'algosdk';
-import { CaelusAdminClient, CaelusAdminFactory } from '../contracts/clients/CaelusAdminClient';
-import { CaelusValidatorPoolFactory } from '../contracts/clients/CaelusValidatorPoolClient';
-import { MNEMONIC } from '../env';
+import { CaelusAdminClient, CaelusAdminFactory } from '../../contracts/clients/CaelusAdminClient';
+import { CaelusValidatorPoolFactory } from '../../contracts/clients/CaelusValidatorPoolClient';
 import { algorand } from './network';
+import { getAccount } from '../execute';
 
 Config.configure({
   debug: true,
@@ -22,13 +23,6 @@ Config.configure({
  *
  */
 
-export const getAccount = async () => {
-  const testAccount = algorand.account.fromMnemonic(MNEMONIC);
-
-  const random = algorand.account.random();
-
-  return { testAccount, random };
-};
 export async function deploy(): Promise<bigint> {
   // change with other wallet depending on your network
   const { testAccount } = await getAccount();
@@ -132,26 +126,6 @@ export async function adminSetup(APP_ID: bigint) {
     extraFee: algokit.microAlgos(1000),
     populateAppCallResources: true,
   });
-}
-
-export async function addValidator(APP_ID: bigint) {
-  const { testAccount } = await getAccount();
-
-  const adminClient = algorand.client.getTypedAppClientById(CaelusAdminClient, {
-    appId: APP_ID,
-    defaultSender: testAccount.addr,
-    defaultSigner: testAccount.signer,
-  });
-  const group = adminClient.newGroup();
-
-  const pay = await algorand.createTransaction.payment({
-    sender: testAccount.addr,
-    receiver: adminClient.appAddress,
-    amount: (1120500).microAlgo(),
-  });
-  group.addValidator({ args: [pay], extraFee: algokit.microAlgos(1000) });
-
-  group.send({ populateAppCallResources: true });
 }
 
 export async function updatePoolProgram(adminFactory: CaelusAdminClient, program: Uint8Array) {

@@ -270,7 +270,7 @@
     },
     {
       "name": "burnToDelinquentValidator",
-      "desc": "On Delinquency Validators SHOULD not have vAlgo in their balance.\nIt's first called when deliquency is set, can be called again if the entire vAlgo amount is not burned.\nThe vAlgo will be turned to Algo and added to the operator commit",
+      "desc": "FOLLOWUP OPERATION CALLED BY THE VALIDATOR POOL CONTRACT EITHER ON DELINQUENCY OR ON SNITCH\n\n\nOn Delinquency Validators SHOULD not have vAlgo in their balance.\nIt's first called when deliquency is set, can be called again if the entire vAlgo amount is not burned.\nThe vAlgo will be turned to Algo and added to the operator commit",
       "args": [
         {
           "name": "burnTxn",
@@ -311,7 +311,7 @@
     },
     {
       "name": "reMintDelinquentCommit",
-      "desc": "When Delinquency is solved the operator will mint his commit back into vAlgo.",
+      "desc": "FOLLOWUP OPERATION CALLED BY THE VALIDATOR POOL CONTRACT WHEN DELINQUENCY IS SOLVED\n\n\nWhen Delinquency is solved the operator will mint his commit back into vAlgo.",
       "args": [
         {
           "name": "app",
@@ -373,6 +373,7 @@
     },
     {
       "name": "declareRewards",
+      "desc": "The method is called by the Validator Pool Contract to declare the rewards.\n\n\nIt doesn't utilize stricter checks on call since as long as the rewardPay is sent to the Admin contract we welcome free money to the protocol :)\nThere's no other state getting changed aside from the totalStake",
       "args": [
         {
           "name": "proposer",

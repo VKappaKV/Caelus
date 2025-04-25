@@ -1,13 +1,33 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable no-console */
 import { Config } from '@algorandfoundation/algokit-utils';
-import { addValidator, adminSetup, deploy, validatorSetup, update } from './bootstrap';
-import { mint, mintOperatorCommit } from './admin';
-import { validatorOptIntoLST, deleteApp, goOnline } from './validator';
+import * as dotenv from 'dotenv';
+import { adminSetup, deploy, validatorSetup, update } from './helpers/bootstrap';
+import { mint, mintOperatorCommit, addValidator } from './helpers/admin';
+import { validatorOptIntoLST, deleteApp, goOnline } from './helpers/validator';
 import { runner } from './runner';
-import { getPartKey } from './partkey';
+import { getPartKey } from './helpers/partkey';
+import { algorand } from './helpers/network';
+import { updateEnvVariable } from './envManager';
 
-const ADMIN_APP_ID = 16345897n;
-const VALIDATOR_APP_ID = 16345933n;
+dotenv.config();
+
+const { ADMIN_APP_ID, VALIDATOR_APP_ID, MNEMONIC } = process.env;
+
+if (!ADMIN_APP_ID || !VALIDATOR_APP_ID || !MNEMONIC) {
+  throw new Error('apps or mnemonics are missing in .env');
+}
+
+export const getAccount = async () => {
+  const testAccount = algorand.account.fromMnemonic(MNEMONIC);
+
+  const random = algorand.account.random();
+
+  return { testAccount, random };
+};
+
+const adminAppId = BigInt(ADMIN_APP_ID);
+const validatorAppId = BigInt(VALIDATOR_APP_ID);
 
 Config.configure({
   debug: true,
@@ -17,6 +37,7 @@ Config.configure({
   switch (process.argv[2]) {
     case 'bootstrap': {
       const app = await deploy();
+      updateEnvVariable('ADMIN_APP_ID', app.toString());
       await adminSetup(app);
       await new Promise((f) => {
         setTimeout(f, 1000);
@@ -31,37 +52,37 @@ Config.configure({
       break;
     case 'update':
       console.log(`EXECUTING UPDATE...`);
-      update(ADMIN_APP_ID);
+      update(adminAppId);
       break;
     case 'admin':
       console.log(`EXECUTING ADMIN SET UP...`);
-      adminSetup(ADMIN_APP_ID);
+      adminSetup(adminAppId);
       break;
     case 'validator':
       console.log(`EXECUTING VALIDATOR SET UP...`);
-      validatorSetup(ADMIN_APP_ID);
+      validatorSetup(adminAppId);
       break;
     case 'spawn':
       console.log(`EXECUTING SPAWN...`);
-      addValidator(ADMIN_APP_ID);
+      addValidator(adminAppId);
       break;
     case 'test':
       console.log('EXECUTING MINT');
-      mint(ADMIN_APP_ID);
+      mint(adminAppId);
       break;
     case 'mintOperator':
       console.log('EXECUTING OPERATOR MINT');
-      mintOperatorCommit(ADMIN_APP_ID, VALIDATOR_APP_ID);
+      mintOperatorCommit(adminAppId, validatorAppId);
       break;
     case 'poolOptIn':
       console.log('EXECUTING VALIDATOR POOL OPT IN');
-      validatorOptIntoLST(VALIDATOR_APP_ID);
+      validatorOptIntoLST(validatorAppId);
       break;
     case 'goOnline': {
       console.log('EXECUTING GO ONLINE');
       const partKey = getPartKey();
       goOnline(
-        VALIDATOR_APP_ID,
+        validatorAppId,
         partKey.votingKey,
         partKey.selectionKey,
         partKey.stateProofKey,
@@ -73,11 +94,11 @@ Config.configure({
     }
     case 'delete':
       console.log('EXECUTING VALIDATOR POOL DELETE');
-      deleteApp(VALIDATOR_APP_ID);
+      deleteApp(validatorAppId);
       break;
     case 'runner':
       console.log('EXECUTING RUNNER');
-      runner(ADMIN_APP_ID, BigInt(process.argv[3]), BigInt(process.argv[4]));
+      runner(adminAppId, BigInt(process.argv[3]), BigInt(process.argv[4]));
       break;
     default:
       console.log('DEFAULT, WHAT?');

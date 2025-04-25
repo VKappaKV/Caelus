@@ -10,13 +10,15 @@
     "test": "npm run build && jest",
     "lint": "eslint . --ext .ts",
     "fix": "eslint . --ext .ts --fix",
-    "execute": "ts-node utils/execute.ts"
+    "execute": "ts-node utils/execute.ts",
+    "cli": "ts-node utils/cli.ts"
   },
   "dependencies": {
     "@algorandfoundation/algokit-subscriber": "^3.1.0",
     "@algorandfoundation/algokit-utils": "^8.0.0",
     "algosdk": "^3.0.0",
     "dotenv": "^16.4.7",
+    "inquirer": "^12.6.0",
     "save-dev": "^0.0.1-security",
     "ts-node": "^10.9.2"
   },
@@ -25,6 +27,7 @@
     "@algorandfoundation/tealscript": "^0.105.5",
     "@jest/globals": "^29.5.0",
     "@joe-p/algokit-generate-component": "^0.2.0",
+    "@types/inquirer": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0 || ^8.2.0",

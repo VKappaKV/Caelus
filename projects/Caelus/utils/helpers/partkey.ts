@@ -16,7 +16,6 @@ type PartKey = {
   stateProofKey: Uint8Array;
 };
 
-// Function to decode base64 string to Uint8Array
 function decodeBase64ToUint8Array(base64: string): Uint8Array {
   const binaryString = atob(base64);
   const len = binaryString.length;
@@ -27,7 +26,6 @@ function decodeBase64ToUint8Array(base64: string): Uint8Array {
   return bytes;
 }
 
-// Main function to convert the input data into partKey object
 function createPartKey(input: InputData) {
   const partKey = {
     firstRound: input['First round'],
@@ -42,16 +40,27 @@ function createPartKey(input: InputData) {
 }
 
 // Example usage
-const exampleInput: InputData = {
-  'First round': 7751926n,
-  'Last round': 12751926n,
-  'Key dilution': 2237n,
-  'Selection key': 'CeM6sx8K2+c+s7akrgSB9eFjF8/h7ch65jA9bdRu8fE=',
-  'Voting key': 'cJ7GYm7+GDiklr6rUGDwiBsBvNXMkC9o9dWcOhv/CBw=',
-  'State proof key': 'nhZULqq44dZeVogamW9JQO1qB/DfNt8n7uiiQAm0aeYT4ypRCzsrTGVzUQKMV/PscRq2LAbHYN37WRkDXG9tsQ==',
+// const keyInput: InputData = {
+//   'First round': 7751926n,
+//   'Last round': 12751926n,
+//   'Key dilution': 2237n,
+//   'Selection key': 'CeM6sx8K2+c+s7akrgSB9eFjF8/h7ch65jA9bdRu8fE=',
+//   'Voting key': 'cJ7GYm7+GDiklr6rUGDwiBsBvNXMkC9o9dWcOhv/CBw=',
+//   'State proof key': 'nhZULqq44dZeVogamW9JQO1qB/DfNt8n7uiiQAm0aeYT4ypRCzsrTGVzUQKMV/PscRq2LAbHYN37WRkDXG9tsQ==',
+// };
+
+// fill with your own values
+
+const keyInput: InputData = {
+  'First round': 0n,
+  'Last round': 0n,
+  'Key dilution': 0n,
+  'Selection key': '',
+  'Voting key': '',
+  'State proof key': '',
 };
 
 export const getPartKey = () => {
-  const partKey: PartKey = createPartKey(exampleInput);
+  const partKey: PartKey = createPartKey(keyInput);
   return partKey;
 };
