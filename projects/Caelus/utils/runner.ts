@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
@@ -7,7 +8,7 @@ import { SubscribedTransaction } from '@algorandfoundation/algokit-subscriber/ty
 import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
 import { reportRewards } from './helpers/validator';
 import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
-import { getAccount } from './execute';
+import { getAccount } from './cli';
 import { algorand, FEE_SINK_ADDRESS } from './helpers/network';
 import { snitch } from './helpers/admin';
 

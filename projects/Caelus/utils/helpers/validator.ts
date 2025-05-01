@@ -3,7 +3,7 @@
 // import * as algokit from '@algorandfoundation/algokit-utils';
 import algosdk from 'algosdk';
 import { algorand } from './network';
-import { getAccount } from '../execute';
+import { getAccount } from '../cli';
 import { CaelusValidatorPoolClient } from '../../contracts/clients/CaelusValidatorPoolClient';
 
 /**

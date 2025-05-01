@@ -298,8 +298,9 @@ export class CaelusAdmin extends Contract {
       return;
     }
 
-    assert(globals.round - this.lastExhaustBlock.value > BURN_COOLDOWN, 'wait at least 5 blocks since Exhaust Block');
-
+    if (!this.queueIsFull()) {
+      assert(globals.round - this.lastExhaustBlock.value > BURN_COOLDOWN, 'wait at least 5 blocks since Exhaust Block');
+    }
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
       const currentTargetInQueue = this.burnQueue.value[i];
       if (this.isPool(currentTargetInQueue)) {
@@ -700,6 +701,15 @@ export class CaelusAdmin extends Contract {
   private queueIsEmpty(): boolean {
     for (let i = 0; i < this.burnQueue.value.length; i += 1) {
       if (this.burnQueue.value[i] !== AppID.zeroIndex) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private queueIsFull(): boolean {
+    for (let i = 0; i < this.burnQueue.value.length; i += 1) {
+      if (this.burnQueue.value[i] === AppID.zeroIndex) {
         return false;
       }
     }

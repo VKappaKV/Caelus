@@ -9,7 +9,7 @@ import algosdk from 'algosdk';
 import { CaelusAdminClient, CaelusAdminFactory } from '../../contracts/clients/CaelusAdminClient';
 import { CaelusValidatorPoolFactory } from '../../contracts/clients/CaelusValidatorPoolClient';
 import { algorand } from './network';
-import { getAccount } from '../execute';
+import { getAccount } from '../cli';
 
 Config.configure({
   debug: true,

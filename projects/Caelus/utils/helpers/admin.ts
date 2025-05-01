@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 import * as algokit from '@algorandfoundation/algokit-utils';
 import { algorand } from './network';
-import { getAccount } from '../execute';
+import { getAccount } from '../cli';
 import { CaelusAdminClient } from '../../contracts/clients/CaelusAdminClient';
 
 export async function addValidator(APP_ID: bigint) {
@@ -25,7 +25,7 @@ export async function addValidator(APP_ID: bigint) {
   group.send({ populateAppCallResources: true });
 }
 
-export async function mint(adminAppId: bigint) {
+export async function mint(adminAppId: bigint, amount: number) {
   const { testAccount } = await getAccount();
   const client = algorand.client.getTypedAppClientById(CaelusAdminClient, {
     appId: adminAppId,
@@ -35,7 +35,7 @@ export async function mint(adminAppId: bigint) {
   const pay = await algorand.createTransaction.payment({
     sender: testAccount.addr,
     receiver: client.appAddress,
-    amount: (100).algos(),
+    amount: amount.algos(),
   });
 
   const mintTxn = await client.send.mintRequest({
@@ -47,7 +47,7 @@ export async function mint(adminAppId: bigint) {
   console.log(`Minted: ${mintTxn.txIds}`);
 }
 
-export async function mintOperatorCommit(admin: bigint, pool: bigint) {
+export async function mintOperatorCommit(admin: bigint, pool: bigint, amount: number) {
   const { testAccount } = await getAccount();
 
   const client = algorand.client.getTypedAppClientById(CaelusAdminClient, {
@@ -58,7 +58,7 @@ export async function mintOperatorCommit(admin: bigint, pool: bigint) {
   const pay = await algorand.createTransaction.payment({
     sender: testAccount.addr,
     receiver: client.appAddress,
-    amount: (100_000).algos(),
+    amount: amount.algos(),
   });
 
   const mintTxn = await client.send.mintValidatorCommit({
@@ -97,7 +97,7 @@ export async function burn(adminAppId: bigint, amount: bigint) {
   console.log(`Burned: ${burnTxn.txIds}`);
 }
 
-export async function removeOperatorCommit(pool: bigint, adminAppId: bigint, amount: bigint) {
+export async function removeOperatorCommit(pool: bigint, adminAppId: bigint, amount: number) {
   const { testAccount } = await getAccount();
   const client = algorand.client.getTypedAppClientById(CaelusAdminClient, {
     appId: adminAppId,
