@@ -3,5 +3,10 @@
     "@algorandfoundation/algokit-subscriber": "^3.1.0",
     "@algorandfoundation/algokit-utils": "^8.2.2",
     "algosdk": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^22.15.3"
   }
 }

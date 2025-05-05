@@ -6,12 +6,15 @@ For Vestguard documentation, go to TBD (gitbook link)
 
 ## Usage
 
-To bootstrap the contract starting from the admin contract.
+Add .env file with the mnemoncs and default applicaiton IDs: MNEMONIC, ADMIN_APP_ID, VALIDATOR_APP_ID.
 
-run 'npm run execute bootstrap'.
+run 'npm run CLI'.
 
-Change the constants at the top of the execute.ts file to the current AppID you want to test on.
+From there your options will be listed and will prompt you to give additional details if needed
+
+- Bootstrap: use it to deploy the protocol from inception.
+- Settings: use it to set up your default Application IDs. Admin and Validator. It will look for the .env file first.
 
 ### Node Runners
 
-run 'npm run execute runner {your validator AppID} {Block number to start tracking from}
+- Init Runner Script: requires the Application IDs & the block number to start tracking from
