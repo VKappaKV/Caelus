@@ -36,10 +36,8 @@ export async function reportRewards(poolApp: bigint, block: bigint) {
 
   const tx = await client.send.reportRewards({
     args: [block],
-    extraFee: (1000).microAlgos(),
+    extraFee: (2000).microAlgos(),
     populateAppCallResources: true,
-    firstValidRound: block - 100n,
-    lastValidRound: block + 1000n,
   });
   console.log(`Reported rewards: ${tx.txIds}`);
 }
@@ -56,14 +54,14 @@ export async function solveDelinquency(poolApp: bigint, block: bigint) {
     args: [block],
     populateAppCallResources: true,
     extraFee: (2000).microAlgos(),
-    firstValidRound: block - 100n,
-    lastValidRound: block + 1000n,
+    firstValidRound: block,
+    lastValidRound: block + 300n,
   });
 
   const solveTxn = await client.send.solveDelinquency({
     args: [block],
     populateAppCallResources: true,
-    extraFee: (1000).microAlgos(),
+    extraFee: (3000).microAlgos(),
   });
 
   console.log(`Reported block to solve delinquency at: ${solveTxn.txIds}`);
@@ -215,6 +213,7 @@ export async function deleteApp(poolApp: bigint) {
     appId: poolApp,
     signer: testAccount,
     populateAppCallResources: true,
+    extraFee: (2000).microAlgos(),
     onComplete: algosdk.OnApplicationComplete.DeleteApplicationOC,
   });
 

@@ -236,7 +236,7 @@ export class CaelusValidatorPool extends Contract {
     const report = blocks[block].proposerPayout;
     const takeFee = wideRatio([report, VALIDATOR_COMMISSION], [100]);
 
-    if (this.getToleratedProposalDelta() < globals.round - this.lastRewardReport.value) {
+    if (this.getExpectedProposalsDelta() > globals.round - this.lastRewardReport.value) {
       this.performanceCounter.value += 1;
     }
     this.fixDelinquencyScore();
@@ -579,8 +579,8 @@ export class CaelusValidatorPool extends Contract {
       'Wait at least half the proposal expected time between Performance checks'
     );
     const deltaWithLatestProposal = globals.round - this.app.address.lastProposed;
-    const isPerformingAsExpected = this.getExpectedProposalsDelta() > deltaWithLatestProposal;
-    const isPerformingAsTolerated = this.getToleratedProposalDelta() > deltaWithLatestProposal;
+    const isPerformingAsExpected = deltaWithLatestProposal < this.getExpectedProposalsDelta();
+    const isPerformingAsTolerated = deltaWithLatestProposal < this.getToleratedProposalDelta();
     if (isPerformingAsExpected && isPerformingAsTolerated) {
       return false;
     }
