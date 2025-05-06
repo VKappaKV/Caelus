@@ -4,7 +4,7 @@ const ALGOD_ENDPOINT = 'https://fnet-api.4160.nodely.dev';
 const ALGOD_TOKEN = '';
 const ALGOD_PORT = 443;
 
-const INDEXER_ENDPOINT = 'https://fnet-idx.4160.nodely.io:443';
+const INDEXER_ENDPOINT = 'https://fnet-idx.4160.nodely.io';
 const INDEXER_TOKEN = '';
 const INDEXER_PORT = 443;
 

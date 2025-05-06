@@ -24,8 +24,10 @@ dotenv.config();
 
 const { ADMIN_APP_ID, VALIDATOR_APP_ID, MNEMONIC } = process.env;
 
-if (!ADMIN_APP_ID || !VALIDATOR_APP_ID || !MNEMONIC) {
-  throw new Error('apps or mnemonics are missing in .env');
+if (!ADMIN_APP_ID || !VALIDATOR_APP_ID || !MNEMONIC || MNEMONIC === '') {
+  throw new Error(
+    'Remember to set the .env file, follow the structure in the .env.template file. Fill the MNEMONICs with the account mnemonics'
+  );
 }
 
 export const getAccount = async () => {
