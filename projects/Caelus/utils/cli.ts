@@ -7,7 +7,7 @@ import inquirer from 'inquirer';
 import { Config } from '@algorandfoundation/algokit-utils';
 import * as dotenv from 'dotenv';
 import { adminSetup, deploy, validatorSetup, update } from './helpers/bootstrap';
-import { mint, mintOperatorCommit, addValidator, removeOperatorCommit, burn } from './helpers/admin';
+import { mint, mintOperatorCommit, addValidator, removeOperatorCommit, burn, bid, delegate } from './helpers/admin';
 import { validatorOptIntoLST, goOnline, goOffline, migrate } from './helpers/validator';
 import { algorand } from './helpers/network';
 import { runner } from './runner';
@@ -59,9 +59,12 @@ async function main() {
           { name: 'Mint (Operator Commit)', value: 'mintOperator' },
           { name: 'Burn', value: 'burn' },
           { name: 'Remove Operator Commit', value: 'burnOperator' },
+          { name: 'Bid Validator', value: 'bidValidator' },
+          { name: 'Delegate stake to validator', value: 'delegate' },
           { name: 'Migrate Pool', value: 'migratePool' },
           { name: 'Delete Operator', value: 'deleteOperator' },
           { name: 'Validator Pool Opt-In', value: 'poolOptIn' },
+          { name: 'Claim Leftover Algos into the ', value: 'claimDustAlgos' },
           { name: 'Go Online', value: 'goOnline' },
           { name: 'Go Offline', value: 'goOffline' },
           { name: 'Init Runner Script', value: 'initRunner' },
@@ -74,6 +77,11 @@ async function main() {
 
     switch (action) {
       case 'bootstrap': {
+        const { confirm } = await confirmation();
+        if (!confirm) {
+          console.log('Aborted!');
+          break;
+        }
         const app = await deploy();
         await adminSetup(app);
 
@@ -85,25 +93,50 @@ async function main() {
         break;
       }
       case 'deploy': {
+        const { confirm } = await confirmation();
+        if (!confirm) {
+          console.log('Aborted!');
+          break;
+        }
         await deploy();
         break;
       }
       case 'admin': {
+        const { confirm } = await confirmation();
+        if (!confirm) {
+          console.log('Aborted!');
+          break;
+        }
         const app = await getAppID(ADMIN, admin, validator);
         await adminSetup(BigInt(app));
         break;
       }
       case 'validator': {
+        const { confirm } = await confirmation();
+        if (!confirm) {
+          console.log('Aborted!');
+          break;
+        }
         const app = await getAppID(ADMIN, admin, validator);
         await validatorSetup(BigInt(app));
         break;
       }
       case 'spawn': {
+        const { confirm } = await confirmation();
+        if (!confirm) {
+          console.log('Aborted!');
+          break;
+        }
         const app = await getAppID(ADMIN, admin, validator);
         await addValidator(BigInt(app));
         break;
       }
       case 'update': {
+        const { confirm } = await confirmation();
+        if (!confirm) {
+          console.log('Aborted!');
+          break;
+        }
         const app = await getAppID(ADMIN, admin, validator);
         await update(BigInt(app));
         break;
@@ -137,6 +170,18 @@ async function main() {
       case 'poolOptIn': {
         const validatorAppId = await getAppID(VALIDATOR, admin, validator);
         await validatorOptIntoLST(BigInt(validatorAppId));
+        break;
+      }
+      case 'bidValidator': {
+        const adminAppId = await getAppID(ADMIN, admin, validator);
+        const validatorAppId = await getAppID(VALIDATOR, admin, validator);
+        await bid(BigInt(adminAppId), BigInt(validatorAppId));
+        break;
+      }
+      case 'delegate': {
+        const adminAppId = await getAppID(ADMIN, admin, validator);
+        const amount = await getAmount();
+        await delegate(BigInt(adminAppId), amount);
         break;
       }
       case 'goOnline': {
@@ -199,11 +244,21 @@ async function main() {
         break;
       }
       case 'goOffline': {
+        const { confirm } = await confirmation();
+        if (!confirm) {
+          console.log('Aborted!');
+          break;
+        }
         const app = await getAppID(VALIDATOR, admin, validator);
         await goOffline(BigInt(app));
         break;
       }
       case 'migratePool': {
+        const { confirm } = await confirmation();
+        if (!confirm) {
+          console.log('Aborted!');
+          break;
+        }
         const oldValidator = await getAppID(VALIDATOR, admin, validator);
         const newValidator = await getAppID(VALIDATOR, admin, validator);
         await migrate(BigInt(oldValidator), BigInt(newValidator));
@@ -292,6 +347,17 @@ async function getAmount(): Promise<number> {
   ]);
   return Number(amount);
 }
+
+const confirmation = () => {
+  return inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'confirm',
+      message: 'Are you sure?',
+      default: false,
+    },
+  ]);
+};
 
 async function getAppID(role: string, defaultAdmin: bigint, defaultValidator: bigint): Promise<bigint> {
   let requestApp: bigint;

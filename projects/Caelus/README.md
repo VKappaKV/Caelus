@@ -8,7 +8,7 @@ For Vestguard documentation, go to TBD (gitbook link)
 
 Add .env file with the mnemoncs and default applicaiton IDs: MNEMONIC, ADMIN_APP_ID, VALIDATOR_APP_ID.
 
-run 'npm run CLI'.
+run 'npm run cli'.
 
 From there your options will be listed and will prompt you to give additional details if needed
 

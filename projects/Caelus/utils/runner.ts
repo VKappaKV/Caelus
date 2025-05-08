@@ -66,6 +66,14 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
           },
         },
         {
+          name: 'mint',
+          filter: {
+            appId: adminAppId,
+            type: TransactionType.appl,
+            methodSignature: 'mintRequest(pay)void',
+          },
+        },
+        {
           name: 'mint_event',
           filter: {
             appId: adminAppId,
@@ -90,6 +98,7 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
   );
   subscriber.on('payouts', (tx) => onPayouts(tx, myAppId));
   subscriber.on('bid', (tx) => onBidTracking(tx, adminAppId, myAppId));
+  subscriber.on('mint', async (tx) => onMintTracking(tx, adminAppId, myAppId));
   subscriber.on('mint_event', async (tx) => onMintTracking(tx, adminAppId, myAppId));
   subscriber.on('stake_delegation', async (tx) => onBidTracking(tx, adminAppId, myAppId));
   subscriber.on('burn', async (tx) => onBurn(tx, adminAppId, myAppId));
@@ -115,6 +124,7 @@ const onPayouts = async (tx: SubscribedTransaction, myAppId: bigint) => {
 };
 
 const onBidTracking = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bigint) => {
+  console.log('Bid tracking detected', tx);
   if (!tx) {
     console.log('No transaction found');
     return;
@@ -125,7 +135,35 @@ const onBidTracking = async (tx: SubscribedTransaction, adminAppId: bigint, myAp
   const admin = algorand.client.getTypedAppClientById(CaelusAdminClient, {
     appId: adminAppId,
   });
-  console.log('Bid detected', tx);
+  await outBid(admin, myValidator);
+};
+
+const onMintTracking = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bigint) => {
+  console.log('Mint tracking detected', tx);
+  if (!tx) {
+    console.log('No transaction found');
+    return;
+  }
+  const admin = algorand.client.getTypedAppClientById(CaelusAdminClient, {
+    appId: adminAppId,
+  });
+  const myValidator = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
+    appId: myAppId,
+  });
+
+  const isCurrentTopBidder = await admin.state.global.highestBidder(); // check if I am the current top bidder
+  await outBid(admin, myValidator); // check if I need to outbid
+  if (isCurrentTopBidder !== myAppId) return;
+
+  const delegateTxn = await admin.send.delegateStake({
+    args: [tx.paymentTransaction?.amount!],
+    populateAppCallResources: true,
+  });
+
+  console.log('Taking more stake to my validator after mint event ', delegateTxn.confirmation);
+};
+
+async function outBid(admin: CaelusAdminClient, myValidator: CaelusValidatorPoolClient) {
   const currentTopBidder = await admin.state.global.highestBidder();
   const topBidderClient = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
     appId: currentTopBidder!,
@@ -140,29 +178,9 @@ const onBidTracking = async (tx: SubscribedTransaction, adminAppId: bigint, myAp
 
   if (bufferOfTopBidder > bufferOfMyApp) {
     console.log('Will outbid current top bidder');
-    await admin.send.bid({ args: [myAppId], populateAppCallResources: true });
+    await admin.send.bid({ args: [myValidator.appId], populateAppCallResources: true });
   }
-};
-
-const onMintTracking = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bigint) => {
-  if (!tx) {
-    console.log('No transaction found');
-    return;
-  }
-  const admin = algorand.client.getTypedAppClientById(CaelusAdminClient, {
-    appId: adminAppId,
-  });
-
-  const isCurrentTopBidder = await admin.state.global.highestBidder(); // check if I am the current top bidder
-  if (isCurrentTopBidder !== myAppId) return;
-
-  const delegateTxn = await admin.send.delegateStake({
-    args: [tx.paymentTransaction?.amount!, myAppId],
-    populateAppCallResources: true,
-  });
-
-  console.log('Taking more stake to my validator after mint event ', delegateTxn.confirmation);
-};
+}
 
 function uint8ArrayToBigIntArray(bytes: Uint8Array): bigint[] {
   const result: bigint[] = [];

@@ -70,6 +70,22 @@ export async function mintOperatorCommit(admin: bigint, pool: bigint, amount: nu
   console.log(`Minted operator commit to pool ${pool}, txn: ${mintTxn.groupId}`);
 }
 
+export async function delegate(adminAppId: bigint, amount: number) {
+  const { testAccount } = await getAccount();
+  const client = algorand.client.getTypedAppClientById(CaelusAdminClient, {
+    appId: adminAppId,
+    defaultSender: testAccount.addr,
+    defaultSigner: testAccount.signer,
+  });
+
+  const delegateTxn = await client.send.delegateStake({
+    args: [amount],
+    populateAppCallResources: true,
+    extraFee: (2000).microAlgos(),
+  });
+  console.log(`Delegated: ${delegateTxn.txIds}`);
+}
+
 export async function burn(adminAppId: bigint, amount: bigint) {
   const { testAccount } = await getAccount();
   const client = algorand.client.getTypedAppClientById(CaelusAdminClient, {

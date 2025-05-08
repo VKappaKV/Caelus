@@ -475,6 +475,18 @@ export class CaelusAdmin extends Contract {
     assert(isDelegatable, 'only bid delegatable Apps');
     if (!this.isPool(this.highestBidder.value)) {
       this.highestBidder.value = validatorAppID;
+      this.bidEvent.log({
+        app: validatorAppID,
+        isHeighest: this.highestBidder.value === validatorAppID,
+      });
+      return;
+    }
+    if ((this.highestBidder.value.globalState('status') as uint64) !== NEUTRAL_STATUS) {
+      this.highestBidder.value = validatorAppID;
+      this.bidEvent.log({
+        app: validatorAppID,
+        isHeighest: this.highestBidder.value === validatorAppID,
+      });
       return;
     }
     const challengerBuffer = validatorAppID.globalState('saturation_buffer') as uint64;
@@ -504,18 +516,34 @@ export class CaelusAdmin extends Contract {
   }
 
   // called to send the Algo used to mint vALGO to the highest bidder
-  delegateStake(amount: uint64, validatorAppID: AppID): void {
-    assert(this.isPool(validatorAppID));
-    assert(validatorAppID === this.highestBidder.value, 'can only delegate to highest bidder account');
-    sendMethodCall<typeof CaelusValidatorPool.prototype.addStake, void>({
-      applicationID: validatorAppID,
-      methodArgs: [
-        {
-          receiver: validatorAppID.address,
-          amount: amount,
-        },
-      ],
-    });
+  delegateStake(amount: uint64): void {
+    assert(this.isPool(this.highestBidder.value));
+    assert(this.highestBidder.value.globalState('status') === NEUTRAL_STATUS);
+    if (this.txn.sender === (this.highestBidder.value.globalState('operator') as Address)) {
+      sendMethodCall<typeof CaelusValidatorPool.prototype.addStake, void>({
+        applicationID: this.highestBidder.value,
+        methodArgs: [
+          {
+            receiver: this.highestBidder.value.address,
+            amount: amount,
+          },
+        ],
+      });
+    } else {
+      const maxDelegatable = this.highestBidder.value.globalState('max_delegatable') as uint64;
+      const delegatedStake = this.highestBidder.value.globalState('delegated_stake') as uint64;
+      const newDelegatedStake = delegatedStake + amount;
+      assert(newDelegatedStake <= maxDelegatable, 'cannot delegate more than the max_delegatable');
+      sendMethodCall<typeof CaelusValidatorPool.prototype.addStake, void>({
+        applicationID: this.highestBidder.value,
+        methodArgs: [
+          {
+            receiver: this.highestBidder.value.address,
+            amount: amount,
+          },
+        ],
+      });
+    }
   }
 
   /**

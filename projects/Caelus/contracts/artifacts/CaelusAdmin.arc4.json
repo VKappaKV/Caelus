@@ -398,10 +398,6 @@
         {
           "name": "amount",
           "type": "uint64"
-        },
-        {
-          "name": "validatorAppID",
-          "type": "uint64"
         }
       ],
       "returns": {
