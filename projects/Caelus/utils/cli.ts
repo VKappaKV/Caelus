@@ -8,7 +8,7 @@ import { Config } from '@algorandfoundation/algokit-utils';
 import * as dotenv from 'dotenv';
 import { adminSetup, deploy, validatorSetup, update } from './helpers/bootstrap';
 import { mint, mintOperatorCommit, addValidator, removeOperatorCommit, burn, bid, delegate } from './helpers/admin';
-import { validatorOptIntoLST, goOnline, goOffline, migrate } from './helpers/validator';
+import { validatorOptIntoLST, goOnline, goOffline, migrate, claimDust } from './helpers/validator';
 import { algorand } from './helpers/network';
 import { runner } from './runner';
 
@@ -251,6 +251,16 @@ async function main() {
         }
         const app = await getAppID(VALIDATOR, admin, validator);
         await goOffline(BigInt(app));
+        break;
+      }
+      case 'claimDustAlgos': {
+        const { confirm } = await confirmation();
+        if (!confirm) {
+          console.log('Aborted!');
+          break;
+        }
+        const app = await getAppID(VALIDATOR, admin, validator);
+        await claimDust(BigInt(app));
         break;
       }
       case 'migratePool': {
