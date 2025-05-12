@@ -161,7 +161,7 @@
         {
           "name": "block",
           "type": "uint64",
-          "desc": "Block number of the block proposed by the node operator\n\n\n WHEN CRAFTING TXN THE BLOCK ROUND NEEDS TO BE INCLUDED AS FIRST VALID"
+          "desc": "Block number of the block proposed by the node operator"
         }
       ],
       "returns": {

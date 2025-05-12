@@ -225,7 +225,6 @@ export class CaelusValidatorPool extends Contract {
    *
    * @param {uint64} block - Block number of the block proposed by the node operator
    *
-   *  WHEN CRAFTING TXN THE BLOCK ROUND NEEDS TO BE INCLUDED AS FIRST VALID
    */
   reportRewards(block: uint64): void {
     assert(blocks[block].proposer === this.app.address);
@@ -610,19 +609,7 @@ export class CaelusValidatorPool extends Contract {
     if (hasMoreThanDelegatable) {
       const amount = this.delegatedStake.value - this.maxDelegatableStake.value;
       this.delegatedStake.value -= amount;
-      const reStakeAmount = split ? amount - max : amount;
-      sendMethodCall<typeof CaelusAdmin.prototype.reStakeFromSnitch>({
-        applicationID: this.creatorContractAppID.value,
-        methodArgs: [
-          this.app,
-          recipient,
-          {
-            receiver: this.creatorContractAppID.value.address,
-            amount: reStakeAmount,
-          },
-        ],
-      });
-      if (amount - max > 0)
+      if (split && amount > max) {
         sendMethodCall<typeof CaelusAdmin.prototype.reStakeFromSnitch>({
           applicationID: this.creatorContractAppID.value,
           methodArgs: [
@@ -634,6 +621,18 @@ export class CaelusValidatorPool extends Contract {
             },
           ],
         });
+      }
+      sendMethodCall<typeof CaelusAdmin.prototype.reStakeFromSnitch>({
+        applicationID: this.creatorContractAppID.value,
+        methodArgs: [
+          this.app,
+          recipient,
+          {
+            receiver: this.creatorContractAppID.value.address,
+            amount: max,
+          },
+        ],
+      });
     }
 
     return hasMoreThanMax || hasMoreThanDelegatable;

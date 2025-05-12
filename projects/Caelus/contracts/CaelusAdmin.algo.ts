@@ -627,12 +627,12 @@ export class CaelusAdmin extends Contract {
 
     verifyPayTxn(payFeeTxn, {
       receiver: this.app.address,
-      amount: keepFee,
+      amount: { greaterThanEqualTo: keepFee },
     });
 
     assert(amounts.length === appToInclude.length, 'array length [amount, appToInclude] mismatch');
     for (let i = 0; i < appToInclude.length; i += 1) {
-      this.pendingGroup.addMethodCall<typeof CaelusValidatorPool.prototype.flashloan, void>({
+      sendMethodCall<typeof CaelusValidatorPool.prototype.flashloan, void>({
         applicationID: appToInclude[i],
         methodArgs: [amounts[i], this.txn.sender],
       });
@@ -649,15 +649,17 @@ export class CaelusAdmin extends Contract {
         ) {
           repaid = true;
         }
-        assert(repaid);
+        assert(repaid, 'flashloan not repaid');
       }
     }
-    this.pendingGroup.submit();
     this.flashLoanEvent.log({ apps: appToInclude, amounts: amounts });
   }
 
   @abi.readonly
   getFLcounter(): uint64 {
+    if (!this.flashLoanCounter.exists) {
+      this.flashLoanCounter.value = 0;
+    }
     if (this.lastFlashloanBlock.value === globals.round) {
       return this.flashLoanCounter.value;
     }
