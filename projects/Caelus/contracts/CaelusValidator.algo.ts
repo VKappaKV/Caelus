@@ -336,7 +336,7 @@ export class CaelusValidatorPool extends Contract {
       result = result || this.performanceCheck();
     }
     if (checks.stakeAmountCheck) {
-      result = result || this.checkStakeOnSnitch(checks.recipient, checks.split, checks.max);
+      result = result || this.checkStakeOnSnitch(checks.recipient);
     }
     if (checks.delinquentCheck) {
       result = result || this.checkDelinquencyOnSnitch();
@@ -602,26 +602,14 @@ export class CaelusValidatorPool extends Contract {
     return true;
   }
 
-  private checkStakeOnSnitch(recipient: AppID, split: boolean, max: uint64): boolean {
+  private checkStakeOnSnitch(recipient: AppID): boolean {
     const hasMoreThanMax = this.app.address.balance > MAX_STAKE_PER_ACCOUNT;
     if (hasMoreThanMax) this.setDelinquency();
     const hasMoreThanDelegatable = this.saturationBuffer.value > BUFFER_MAX;
     if (hasMoreThanDelegatable) {
-      const amount = this.delegatedStake.value - this.maxDelegatableStake.value;
-      this.delegatedStake.value -= amount;
-      if (split && amount > max) {
-        sendMethodCall<typeof CaelusAdmin.prototype.reStakeFromSnitch>({
-          applicationID: this.creatorContractAppID.value,
-          methodArgs: [
-            this.app,
-            this.creatorContractAppID.value,
-            {
-              receiver: this.creatorContractAppID.value.address,
-              amount: amount - max,
-            },
-          ],
-        });
-      }
+      const restake = this.delegatedStake.value - this.maxDelegatableStake.value;
+      this.delegatedStake.value -= restake;
+
       sendMethodCall<typeof CaelusAdmin.prototype.reStakeFromSnitch>({
         applicationID: this.creatorContractAppID.value,
         methodArgs: [
@@ -629,7 +617,7 @@ export class CaelusValidatorPool extends Contract {
           recipient,
           {
             receiver: this.creatorContractAppID.value.address,
-            amount: max,
+            amount: restake,
           },
         ],
       });

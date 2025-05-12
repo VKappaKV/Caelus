@@ -4,8 +4,6 @@ export type SnitchInfo = {
   delinquentCheck: boolean;
   versionCheck: boolean;
   recipient: AppID; // must be either this.app or a validator
-  split: boolean; // if clawback will be split between recipient and admin
-  max: uint64; // use if split is true and set to the max amount to send to the validator
 };
 
 export const ALGORAND_BASE_FEE = 1000;
