@@ -269,7 +269,7 @@
       }
     },
     {
-      "name": "burnToDelinquentValidator",
+      "name": "__burnToDelinquentValidator",
       "desc": "FOLLOWUP OPERATION CALLED BY THE VALIDATOR POOL CONTRACT EITHER ON DELINQUENCY OR ON SNITCH\n\n\nOn Delinquency Validators SHOULD not have vAlgo in their balance.\nIt's first called when deliquency is set, can be called again if the entire vAlgo amount is not burned.\nThe vAlgo will be turned to Algo and added to the operator commit",
       "args": [
         {
@@ -310,7 +310,7 @@
       ]
     },
     {
-      "name": "reMintDelinquentCommit",
+      "name": "__reMintDelinquentCommit",
       "desc": "FOLLOWUP OPERATION CALLED BY THE VALIDATOR POOL CONTRACT WHEN DELINQUENCY IS SOLVED\n\n\nWhen Delinquency is solved the operator will mint his commit back into vAlgo.",
       "args": [
         {

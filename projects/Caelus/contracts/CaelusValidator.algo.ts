@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable import/no-cycle */
 import { Contract } from '@algorandfoundation/tealscript';
 import {
@@ -127,7 +128,7 @@ export class CaelusValidatorPool extends Contract {
    *
    * @param {PayTxn} opStake - node operator stake commitment
    */
-  addToOperatorCommit(opStake: PayTxn): void {
+  __addToOperatorCommit(opStake: PayTxn): void {
     assert(
       this.txn.sender === this.creatorContractAppID.value.address,
       'only Caelus admin can route operator stake without LST'
@@ -154,7 +155,7 @@ export class CaelusValidatorPool extends Contract {
    * @param {uint64} claimRequest - amount claimed by the node operator to be removed from the operator_commit counter and moved into delegated stake
    * @param {uint64} claimRequestLST - amount of LST to be sent back to the node operator
    */
-  removeFromOperatorCommit(claimRequest: uint64, claimRequestLST: uint64): void {
+  __removeFromOperatorCommit(claimRequest: uint64, claimRequestLST: uint64): void {
     assert(this.txn.sender === this.creatorContractAppID.value.address);
     assert(
       this.status.value !== DELINQUENCY_STATUS,
@@ -208,7 +209,7 @@ export class CaelusValidatorPool extends Contract {
     assert(this.delinquencyThresholdCheck(), 'Delinquency score must be below threshold');
     this.status.value = NEUTRAL_STATUS;
     this.updateDelegationFactors();
-    sendMethodCall<typeof CaelusAdmin.prototype.reMintDelinquentCommit, void>({
+    sendMethodCall<typeof CaelusAdmin.prototype.__reMintDelinquentCommit, void>({
       applicationID: this.creatorContractAppID.value,
       methodArgs: [this.app],
     });
@@ -277,7 +278,7 @@ export class CaelusValidatorPool extends Contract {
    *
    * @param {PayTxn} txnWithStake - Payment transaction to the contract account with the delegated stake
    */
-  addStake(txnWithStake: PayTxn): void {
+  __addStake(txnWithStake: PayTxn): void {
     verifyPayTxn(txnWithStake, {
       sender: this.creatorContractAppID.value.address,
       receiver: this.app.address,
@@ -292,7 +293,7 @@ export class CaelusValidatorPool extends Contract {
    * @param {uint64} amountRequested - amount of Algo to be burned
    * @param {Address} receiverBurn - address of the receiver of the burn transaction triggered on the Caelus Admin contract
    */
-  burnStake(amountRequested: uint64, receiverBurn: Address): void {
+  __burnStake(amountRequested: uint64, receiverBurn: Address): void {
     assert(
       this.txn.sender === this.creatorContractAppID.value.address,
       'Only the Caelus Admin contract can call this method'
@@ -348,7 +349,7 @@ export class CaelusValidatorPool extends Contract {
     return result;
   }
 
-  flashloan(amount: uint64, receiver: Address): void {
+  __flashloan(amount: uint64, receiver: Address): void {
     assert(this.txn.sender === this.creatorContractAppID.value.address, 'Caller must be the Caelus Admin Contract');
 
     if (!this.balanceCheckpoint.exists) {
@@ -473,7 +474,7 @@ export class CaelusValidatorPool extends Contract {
     assert(this.txn.sender === this.operatorAddress.value, 'only the operator can migrate to a new pool');
     assert(this.status.value !== DELINQUENCY_STATUS, 'cannot migrate if delinquent');
 
-    sendMethodCall<typeof CaelusValidatorPool.prototype.mergeStateOnMigration>({
+    sendMethodCall<typeof CaelusValidatorPool.prototype.__mergeStateOnMigration>({
       applicationID: newPool,
       methodArgs: [
         this.app,
@@ -498,7 +499,7 @@ export class CaelusValidatorPool extends Contract {
   /**
    * FOLLOWUP OPERATION Receiving call from the old pool to merge the state into the new pool.
    */
-  mergeStateOnMigration(
+  __mergeStateOnMigration(
     from: AppID,
     opCommit: uint64,
     delegatedAmount: uint64,
@@ -629,7 +630,7 @@ export class CaelusValidatorPool extends Contract {
   private checkDelinquencyOnSnitch(): boolean {
     if (this.status.value !== DELINQUENCY_STATUS) return false;
     if (this.app.address.assetBalance(this.tokenId.value) === 0) return false;
-    sendMethodCall<typeof CaelusAdmin.prototype.burnToDelinquentValidator>({
+    sendMethodCall<typeof CaelusAdmin.prototype.__burnToDelinquentValidator>({
       applicationID: this.creatorContractAppID.value,
       methodArgs: [
         {
@@ -676,7 +677,7 @@ export class CaelusValidatorPool extends Contract {
   }
 
   private setDelinquency(): void {
-    sendMethodCall<typeof CaelusAdmin.prototype.burnToDelinquentValidator>({
+    sendMethodCall<typeof CaelusAdmin.prototype.__burnToDelinquentValidator>({
       applicationID: this.creatorContractAppID.value,
       methodArgs: [
         {

@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable consistent-return */
 /* eslint-disable import/no-cycle */
 import { Contract } from '@algorandfoundation/tealscript';
@@ -5,7 +6,6 @@ import { CaelusValidatorPool } from './CaelusValidator.algo';
 import {
   ALGORAND_BASE_FEE,
   BURN_COOLDOWN,
-  DELINQUENCY_STATUS,
   FLASH_LOAN_FEE,
   LOCKED,
   NEUTRAL_STATUS,
@@ -303,8 +303,9 @@ export class CaelusAdmin extends Contract {
       assert(globals.round - this.lastExhaustBlock.value > BURN_COOLDOWN, 'wait at least 5 blocks since Exhaust Block');
     }
 
-    let i = 0; // forEach loop cannot use index argument in TealScript
-    this.burnQueue.value.forEach((app) => {
+    const queue = clone(this.burnQueue.value);
+    for (let i = 0; i < queue.length; i += 1) {
+      const app = queue[i];
       if (this.isPool(app)) {
         const delegatedToTarget = app.globalState('delegated_stake') as uint64;
         if (delegatedToTarget < amountToBurn - burning) {
@@ -316,8 +317,7 @@ export class CaelusAdmin extends Contract {
           burning = amountToBurn;
         }
       }
-      i += 1;
-    });
+    }
 
     const amountLeft = this.getMintAmount(amountToBurn - burning);
     if (amountLeft > 0) {
@@ -346,7 +346,7 @@ export class CaelusAdmin extends Contract {
       receiver: this.app.address,
     });
 
-    sendMethodCall<typeof CaelusValidatorPool.prototype.addToOperatorCommit>({
+    sendMethodCall<typeof CaelusValidatorPool.prototype.__addToOperatorCommit>({
       applicationID: validatorAppID,
       methodArgs: [
         {
@@ -373,7 +373,7 @@ export class CaelusAdmin extends Contract {
     });
     const toBurn = this.getBurnAmount(amount);
 
-    sendMethodCall<typeof CaelusValidatorPool.prototype.removeFromOperatorCommit, void>({
+    sendMethodCall<typeof CaelusValidatorPool.prototype.__removeFromOperatorCommit, void>({
       applicationID: appToBurnFrom,
       methodArgs: [toBurn, amount],
     });
@@ -388,20 +388,15 @@ export class CaelusAdmin extends Contract {
    * It's first called when deliquency is set, can be called again if the entire vAlgo amount is not burned.
    * The vAlgo will be turned to Algo and added to the operator commit
    */
-  burnToDelinquentValidator(burnTxn: AssetTransferTxn, validatorAppID: AppID, amountOperator: uint64): void {
-    this.isPool(validatorAppID);
-    assert(globals.round - this.lastExhaustBlock.value > BURN_COOLDOWN, "can only burn if we're not exhausted");
-    verifyAssetTransferTxn(burnTxn, {
-      xferAsset: this.tokenId.value,
-      assetSender: validatorAppID.address,
-    });
-    assert((validatorAppID.globalState('status') as uint64) !== DELINQUENCY_STATUS);
+  __burnToDelinquentValidator(burnTxn: AssetTransferTxn, validatorAppID: AppID, amountOperator: uint64): void {
+    assert(this.isPool(validatorAppID) && this.txn.sender === validatorAppID.address);
     let amountToUpdate: uint64 = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
     let toBurn: uint64 =
       this.getBurnAmount(burnTxn.assetAmount) - (validatorAppID.globalState('operator_commit') as uint64); // burn from other validators the amount of Algo accrued from the operator LST
     let amtBurned = 0; // need this to subtract from totalAlgoSupply
-    for (let i = 0; i < this.burnQueue.value.length; i += 1) {
-      const currentTargetInQueue = this.burnQueue.value[i];
+    const queue = clone(this.burnQueue.value);
+    for (let i = 0; i < queue.length; i += 1) {
+      const currentTargetInQueue = queue[i];
       if (this.isPool(currentTargetInQueue)) {
         const delegatedToTarget = currentTargetInQueue.globalState('delegated_stake') as uint64;
         if (delegatedToTarget >= toBurn) {
@@ -413,6 +408,7 @@ export class CaelusAdmin extends Contract {
           this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, this.app.address]);
           amtBurned += delegatedToTarget;
           toBurn -= delegatedToTarget;
+          this.burnQueue.value[i] = AppID.zeroIndex;
         }
       }
     }
@@ -423,7 +419,7 @@ export class CaelusAdmin extends Contract {
     if (amountToUpdate > 0) {
       this.doAxfer(burnTxn.sender, amountToUpdate, this.tokenId.value);
     }
-    sendMethodCall<typeof CaelusValidatorPool.prototype.addToOperatorCommit>({
+    sendMethodCall<typeof CaelusValidatorPool.prototype.__addToOperatorCommit>({
       applicationID: validatorAppID,
       methodArgs: [
         {
@@ -445,14 +441,9 @@ export class CaelusAdmin extends Contract {
    *
    * When Delinquency is solved the operator will mint his commit back into vAlgo.
    */
-  reMintDelinquentCommit(app: AppID): void {
-    this.isPool(app);
-    assert((app.globalState('status') as uint64) !== DELINQUENCY_STATUS, 'must solve delinquency first');
+  __reMintDelinquentCommit(app: AppID): void {
+    assert(this.isPool(app) && this.txn.sender === app.address);
     const amount = app.globalState('operator_commit') as uint64;
-    assert(
-      app.address.assetBalance(this.tokenId.value) === 0,
-      'If the app already has vALGO it cannot mint with this method'
-    );
     const amountToMint = this.getMintAmount(amount);
     this.doAxfer(app.address, amountToMint, this.tokenId.value);
 
@@ -522,7 +513,7 @@ export class CaelusAdmin extends Contract {
     assert(this.isPool(this.highestBidder.value));
     assert(this.highestBidder.value.globalState('status') === NEUTRAL_STATUS);
     if (this.txn.sender === (this.highestBidder.value.globalState('operator') as Address)) {
-      sendMethodCall<typeof CaelusValidatorPool.prototype.addStake, void>({
+      sendMethodCall<typeof CaelusValidatorPool.prototype.__addStake, void>({
         applicationID: this.highestBidder.value,
         methodArgs: [
           {
@@ -534,9 +525,8 @@ export class CaelusAdmin extends Contract {
     } else {
       const maxDelegatable = this.highestBidder.value.globalState('max_delegatable') as uint64;
       const delegatedStake = this.highestBidder.value.globalState('delegated_stake') as uint64;
-      const newDelegatedStake = delegatedStake + amount;
-      assert(newDelegatedStake <= maxDelegatable, 'cannot delegate more than the max_delegatable');
-      sendMethodCall<typeof CaelusValidatorPool.prototype.addStake, void>({
+      assert(delegatedStake + amount <= maxDelegatable, 'amount exceeds max delegatable');
+      sendMethodCall<typeof CaelusValidatorPool.prototype.__addStake, void>({
         applicationID: this.highestBidder.value,
         methodArgs: [
           {
@@ -557,7 +547,7 @@ export class CaelusAdmin extends Contract {
     let minPrio = app;
     let minSat = satSnitch;
 
-    const queue = this.burnQueue.value;
+    const queue = clone(this.burnQueue.value);
     for (let i = 0; i < queue.length; i += 1) {
       if (!this.isPool(queue[i])) {
         queue[i] = minPrio;
@@ -570,6 +560,8 @@ export class CaelusAdmin extends Contract {
         queue[i] = temp;
       }
     }
+
+    this.burnQueue.value = queue;
 
     this.snitchQueueEvent.log({
       queue: this.burnQueue.value,
@@ -601,7 +593,7 @@ export class CaelusAdmin extends Contract {
       receiver: this.app.address,
     });
     if (receiverApp !== this.app) {
-      sendMethodCall<typeof CaelusValidatorPool.prototype.addStake, void>({
+      sendMethodCall<typeof CaelusValidatorPool.prototype.__addStake, void>({
         applicationID: receiverApp,
         methodArgs: [
           {
@@ -634,7 +626,7 @@ export class CaelusAdmin extends Contract {
 
     assert(amounts.length === appToInclude.length, 'array length [amount, appToInclude] mismatch');
     for (let i = 0; i < appToInclude.length; i += 1) {
-      sendMethodCall<typeof CaelusValidatorPool.prototype.flashloan, void>({
+      sendMethodCall<typeof CaelusValidatorPool.prototype.__flashloan, void>({
         applicationID: appToInclude[i],
         methodArgs: [amounts[i], this.txn.sender],
       });
@@ -712,7 +704,7 @@ export class CaelusAdmin extends Contract {
   }
 
   private doBurnTxn(target: AppID, args: [uint64, Address]): void {
-    sendMethodCall<typeof CaelusValidatorPool.prototype.burnStake, void>({
+    sendMethodCall<typeof CaelusValidatorPool.prototype.__burnStake, void>({
       applicationID: target,
       methodArgs: [args[0], args[1]],
     });
@@ -731,23 +723,23 @@ export class CaelusAdmin extends Contract {
   }
 
   private queueIsEmpty(): boolean {
-    let isEmpty = true;
-    this.burnQueue.value.forEach((app) => {
-      if (app !== AppID.zeroIndex) {
-        isEmpty = false;
+    const queue = clone(this.burnQueue.value);
+    for (let i = 0; i < queue.length; i += 1) {
+      if (queue[i] !== AppID.zeroIndex) {
+        return false;
       }
-    });
-    return isEmpty;
+    }
+    return true;
   }
 
   private queueIsFull(): boolean {
-    let isFull = true;
-    this.burnQueue.value.forEach((app) => {
-      if (app === AppID.zeroIndex) {
-        isFull = false;
+    const queue = clone(this.burnQueue.value);
+    for (let i = 0; i < queue.length; i += 1) {
+      if (queue[i] === AppID.zeroIndex) {
+        return false;
       }
-    });
-    return isFull;
+    }
+    return true;
   }
 
   validatorAddedEvent = new EventLogger<{
