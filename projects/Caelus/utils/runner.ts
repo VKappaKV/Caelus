@@ -19,6 +19,7 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
 
   const admin = algorand.client.getTypedAppClientById(CaelusAdminClient, {
     appId: adminAppId,
+    defaultSender: testAccount,
     defaultSigner: testAccount.signer,
   });
 
