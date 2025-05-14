@@ -67,23 +67,11 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
           },
         },
         {
-          name: 'mint',
+          name: 'pay_to_admin',
           filter: {
             appId: adminAppId,
-            type: TransactionType.appl,
-            methodSignature: 'mintRequest(pay)void',
-          },
-        },
-        {
-          name: 'mint_event',
-          filter: {
-            appId: adminAppId,
-            arc28Events: [
-              {
-                groupName: 'mint',
-                eventName: 'mintEvent',
-              },
-            ],
+            type: TransactionType.pay,
+            receiver: admin.appAddress.toString(),
           },
         },
       ],
@@ -99,8 +87,7 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
   );
   subscriber.on('payouts', async (tx) => onPayouts(tx, myAppId));
   subscriber.on('bid', async (tx) => onBidTracking(tx, admin, myAppId));
-  subscriber.on('mint', async (tx) => onMintTracking(tx, admin, myAppId));
-  subscriber.on('mint_event', async (tx) => onMintTracking(tx, admin, myAppId));
+  subscriber.on('pay_to_admin', async (tx) => onMintTracking(tx, admin, myAppId));
   subscriber.on('stake_delegation', async (tx) => onBidTracking(tx, admin, myAppId));
   subscriber.on('burn', async (tx) => onBurn(tx, admin, myAppId));
   subscriber.start();
