@@ -97,12 +97,12 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
     algorand.client.algod,
     algorand.client.indexer
   );
-  subscriber.on('payouts', (tx) => onPayouts(tx, myAppId));
-  subscriber.on('bid', (tx) => onBidTracking(tx, adminAppId, myAppId));
-  subscriber.on('mint', async (tx) => onMintTracking(tx, adminAppId, myAppId));
-  subscriber.on('mint_event', async (tx) => onMintTracking(tx, adminAppId, myAppId));
-  subscriber.on('stake_delegation', async (tx) => onBidTracking(tx, adminAppId, myAppId));
-  subscriber.on('burn', async (tx) => onBurn(tx, adminAppId, myAppId));
+  subscriber.on('payouts', async (tx) => onPayouts(tx, myAppId));
+  subscriber.on('bid', async (tx) => onBidTracking(tx, admin, myAppId));
+  subscriber.on('mint', async (tx) => onMintTracking(tx, admin, myAppId));
+  subscriber.on('mint_event', async (tx) => onMintTracking(tx, admin, myAppId));
+  subscriber.on('stake_delegation', async (tx) => onBidTracking(tx, admin, myAppId));
+  subscriber.on('burn', async (tx) => onBurn(tx, admin, myAppId));
   subscriber.start();
 };
 
@@ -124,7 +124,7 @@ const onPayouts = async (tx: SubscribedTransaction, myAppId: bigint) => {
   }
 };
 
-const onBidTracking = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bigint) => {
+const onBidTracking = async (tx: SubscribedTransaction, adminClient: CaelusAdminClient, myAppId: bigint) => {
   console.log('Bid tracking detected', tx);
   if (!tx) {
     console.log('No transaction found');
@@ -133,30 +133,24 @@ const onBidTracking = async (tx: SubscribedTransaction, adminAppId: bigint, myAp
   const myValidator = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
     appId: myAppId,
   });
-  const admin = algorand.client.getTypedAppClientById(CaelusAdminClient, {
-    appId: adminAppId,
-  });
-  await outBid(admin, myValidator);
+  await outBid(adminClient, myValidator);
 };
 
-const onMintTracking = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bigint) => {
+const onMintTracking = async (tx: SubscribedTransaction, adminClient: CaelusAdminClient, myAppId: bigint) => {
   console.log('Mint tracking detected', tx);
   if (!tx) {
     console.log('No transaction found');
     return;
   }
-  const admin = algorand.client.getTypedAppClientById(CaelusAdminClient, {
-    appId: adminAppId,
-  });
   const myValidator = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
     appId: myAppId,
   });
 
-  const isCurrentTopBidder = await admin.state.global.highestBidder(); // check if I am the current top bidder
-  await outBid(admin, myValidator); // check if I need to outbid
+  const isCurrentTopBidder = await adminClient.state.global.highestBidder(); // check if I am the current top bidder
+  await outBid(adminClient, myValidator); // check if I need to outbid
   if (isCurrentTopBidder !== myAppId) return;
 
-  const delegateTxn = await admin.send.delegateStake({
+  const delegateTxn = await adminClient.send.delegateStake({
     args: [tx.paymentTransaction?.amount!],
     populateAppCallResources: true,
   });
@@ -177,7 +171,7 @@ async function outBid(admin: CaelusAdminClient, myValidator: CaelusValidatorPool
     return;
   }
 
-  if (bufferOfTopBidder > bufferOfMyApp) {
+  if (bufferOfTopBidder > bufferOfMyApp && currentTopBidder !== myValidator.appId) {
     console.log('Will outbid current top bidder');
     await admin.send.bid({ args: [myValidator.appId], populateAppCallResources: true });
   }
@@ -202,15 +196,13 @@ function uint8ArrayToBigIntArray(bytes: Uint8Array): bigint[] {
   return result;
 }
 
-const onBurn = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bigint) => {
+const onBurn = async (tx: SubscribedTransaction, adminClient: CaelusAdminClient, myAppId: bigint) => {
   console.log('Burn detected', tx);
-  const admin = algorand.client.getTypedAppClientById(CaelusAdminClient, {
-    appId: adminAppId,
-  });
+
   const client = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
     appId: myAppId,
   });
-  const currentQueue = (await admin.state.global.burnQueue()).asByteArray();
+  const currentQueue = (await adminClient.state.global.burnQueue()).asByteArray();
   if (currentQueue === undefined) {
     console.log('Burn queue is undefined');
     return;
@@ -218,7 +210,7 @@ const onBurn = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bi
   const queue = uint8ArrayToBigIntArray(currentQueue);
   for (let i = 0; i < queue.length; i += 1) {
     if (queue[i] === 0n) {
-      await admin.send.snitchToBurn({ args: [myAppId], populateAppCallResources: true });
+      await adminClient.send.snitchToBurn({ args: [myAppId], populateAppCallResources: true });
       break;
     }
     const burningValidatorClient = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
@@ -231,7 +223,7 @@ const onBurn = async (tx: SubscribedTransaction, adminAppId: bigint, myAppId: bi
       return;
     }
     if (burningValidatorBuffer < myValidatorBuffer) {
-      await snitch(adminAppId, myAppId);
+      await snitch(adminClient.appId, myAppId);
       break;
     }
   }
