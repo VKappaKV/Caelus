@@ -92,8 +92,6 @@ export async function snitchApp(poolApp: bigint, snitchParams: SnitchInfo) {
         snitchParams.delinquentCheck,
         snitchParams.versionCheck,
         snitchParams.recipient,
-        snitchParams.split,
-        snitchParams.max,
       ],
     ],
     extraFee: (5000).microAlgos(), // adjust this fee if needed
@@ -118,8 +116,6 @@ export async function snitchOtherValidator(poolApp: bigint, validatorToSnitchApp
         snitchParams.delinquentCheck,
         snitchParams.versionCheck,
         snitchParams.recipient,
-        snitchParams.split,
-        snitchParams.max,
       ],
     ],
     extraFee: (7000).microAlgos(),

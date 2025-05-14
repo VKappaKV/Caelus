@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable import/no-cycle */
 import { Contract } from '@algorandfoundation/tealscript';
 import { CaelusValidatorPool } from './CaelusValidator.algo';
@@ -301,21 +302,22 @@ export class CaelusAdmin extends Contract {
     if (!this.queueIsFull()) {
       assert(globals.round - this.lastExhaustBlock.value > BURN_COOLDOWN, 'wait at least 5 blocks since Exhaust Block');
     }
-    for (let i = 0; i < this.burnQueue.value.length; i += 1) {
-      const currentTargetInQueue = this.burnQueue.value[i];
-      if (this.isPool(currentTargetInQueue)) {
-        const delegatedToTarget = currentTargetInQueue.globalState('delegated_stake') as uint64;
+
+    let i = 0; // forEach loop cannot use index argument in TealScript
+    this.burnQueue.value.forEach((app) => {
+      if (this.isPool(app)) {
+        const delegatedToTarget = app.globalState('delegated_stake') as uint64;
         if (delegatedToTarget < amountToBurn - burning) {
-          this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, burnTo]);
+          this.doBurnTxn(app, [delegatedToTarget, burnTo]);
           this.burnQueue.value[i] = AppID.zeroIndex;
           burning += delegatedToTarget;
         } else {
-          this.doBurnTxn(currentTargetInQueue, [amountToBurn - burning, burnTo]);
+          this.doBurnTxn(app, [amountToBurn - burning, burnTo]);
           burning = amountToBurn;
-          break;
         }
       }
-    }
+      i += 1;
+    });
 
     const amountLeft = this.getMintAmount(amountToBurn - burning);
     if (amountLeft > 0) {
@@ -729,21 +731,23 @@ export class CaelusAdmin extends Contract {
   }
 
   private queueIsEmpty(): boolean {
-    for (let i = 0; i < this.burnQueue.value.length; i += 1) {
-      if (this.burnQueue.value[i] !== AppID.zeroIndex) {
-        return false;
+    let isEmpty = true;
+    this.burnQueue.value.forEach((app) => {
+      if (app !== AppID.zeroIndex) {
+        isEmpty = false;
       }
-    }
-    return true;
+    });
+    return isEmpty;
   }
 
   private queueIsFull(): boolean {
-    for (let i = 0; i < this.burnQueue.value.length; i += 1) {
-      if (this.burnQueue.value[i] === AppID.zeroIndex) {
-        return false;
+    let isFull = true;
+    this.burnQueue.value.forEach((app) => {
+      if (app === AppID.zeroIndex) {
+        isFull = false;
       }
-    }
-    return true;
+    });
+    return isFull;
   }
 
   validatorAddedEvent = new EventLogger<{
