@@ -398,8 +398,9 @@ export class CaelusAdmin extends Contract {
     let toBurn: uint64 =
       this.getBurnAmount(burnTxn.assetAmount) - (validatorAppID.globalState('operator_commit') as uint64); // burn from other validators the amount of Algo accrued from the operator LST
     let amtBurned = 0; // need this to subtract from totalAlgoSupply
-    for (let i = 0; i < this.burnQueue.value.length; i += 1) {
-      const currentTargetInQueue = this.burnQueue.value[i];
+    const bq = clone(this.burnQueue.value);
+    for (let i = 0; i < bq.length; i += 1) {
+      const currentTargetInQueue = bq[i];
       if (this.isPool(currentTargetInQueue)) {
         const delegatedToTarget = currentTargetInQueue.globalState('delegated_stake') as uint64;
         if (delegatedToTarget >= toBurn) {
@@ -411,6 +412,7 @@ export class CaelusAdmin extends Contract {
           this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, this.app.address]);
           amtBurned += delegatedToTarget;
           toBurn -= delegatedToTarget;
+          this.burnQueue.value[i] = AppID.zeroIndex;
         }
       }
     }
