@@ -67,11 +67,19 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
           },
         },
         {
-          name: 'pay_to_admin',
+          name: 'mint',
           filter: {
             appId: adminAppId,
-            type: TransactionType.pay,
-            receiver: admin.appAddress.toString(),
+            type: TransactionType.appl,
+            methodSignature: 'mintRequest(pay)void',
+          },
+        },
+        {
+          name: 'declared_reward',
+          filter: {
+            appId: adminAppId,
+            type: TransactionType.appl,
+            methodSignature: 'declareRewards(uint64,uint64,pay)void',
           },
         },
       ],
@@ -87,9 +95,13 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
   );
   subscriber.on('payouts', async (tx) => onPayouts(tx, myAppId));
   subscriber.on('bid', async (tx) => onBidTracking(tx, admin, myAppId));
-  subscriber.on('pay_to_admin', async (tx) => onMintTracking(tx, admin, myAppId));
+  subscriber.on('mint', async (tx) => onMintTracking(tx, admin, myAppId));
+  subscriber.on('declared_reward', async (tx) => onMintTracking(tx, admin, myAppId));
   subscriber.on('stake_delegation', async (tx) => onBidTracking(tx, admin, myAppId));
   subscriber.on('burn', async (tx) => onBurn(tx, admin, myAppId));
+  subscriber.onError((error) => {
+    console.error('Error in subscriber', error);
+  });
   subscriber.start();
 };
 
@@ -133,16 +145,26 @@ const onMintTracking = async (tx: SubscribedTransaction, adminClient: CaelusAdmi
     appId: myAppId,
   });
 
-  const isCurrentTopBidder = await adminClient.state.global.highestBidder(); // check if I am the current top bidder
   await outBid(adminClient, myValidator); // check if I need to outbid
-  if (isCurrentTopBidder !== myAppId) return;
 
-  const delegateTxn = await adminClient.send.delegateStake({
-    args: [tx.paymentTransaction?.amount!],
-    populateAppCallResources: true,
-  });
+  const currentTopBidder = await adminClient.state.global.highestBidder();
+  console.log('Current top bidder', currentTopBidder);
+  if (currentTopBidder === myAppId) {
+    console.log('I am the top bidder, taking more stake');
+    const adminInfo = await algorand.account.getInformation(adminClient.appAddress);
+    const availableAdminBalance =
+      adminInfo.balance.microAlgos > adminInfo.minBalance.microAlgos
+        ? adminInfo.balance.microAlgos - adminInfo.minBalance.microAlgos
+        : 0n;
 
-  console.log('Taking more stake to my validator after mint event ', delegateTxn.confirmation);
+    const delegateTxn = await adminClient.send.delegateStake({
+      args: [availableAdminBalance],
+      populateAppCallResources: true,
+      extraFee: (2000).microAlgos(),
+    });
+
+    console.log('Taking more stake to my validator', delegateTxn.confirmation);
+  }
 };
 
 async function outBid(admin: CaelusAdminClient, myValidator: CaelusValidatorPoolClient) {
@@ -159,7 +181,7 @@ async function outBid(admin: CaelusAdminClient, myValidator: CaelusValidatorPool
   }
 
   if (bufferOfTopBidder > bufferOfMyApp && currentTopBidder !== myValidator.appId) {
-    console.log('Will outbid current top bidder');
+    console.log('Will outbid current top bidder, new bidder is', myValidator.appId);
     await admin.send.bid({ args: [myValidator.appId], populateAppCallResources: true });
   }
 }

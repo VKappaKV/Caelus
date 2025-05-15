@@ -511,7 +511,8 @@ export class CaelusAdmin extends Contract {
   // called to send the Algo used to mint vALGO to the highest bidder
   delegateStake(amount: uint64): void {
     assert(this.isPool(this.highestBidder.value));
-    assert(this.highestBidder.value.globalState('status') === NEUTRAL_STATUS);
+    const highestBidderStatus = this.highestBidder.value.globalState('status') as uint64;
+    assert(highestBidderStatus === NEUTRAL_STATUS);
     if (this.txn.sender === (this.highestBidder.value.globalState('operator') as Address)) {
       sendMethodCall<typeof CaelusValidatorPool.prototype.__addStake, void>({
         applicationID: this.highestBidder.value,
@@ -523,9 +524,9 @@ export class CaelusAdmin extends Contract {
         ],
       });
     } else {
-      const maxDelegatable = this.highestBidder.value.globalState('max_delegatable') as uint64;
-      const delegatedStake = this.highestBidder.value.globalState('delegated_stake') as uint64;
-      assert(delegatedStake + amount <= maxDelegatable, 'amount exceeds max delegatable');
+      const maxDelegatableStake = this.highestBidder.value.globalState('max_delegatable_stake') as uint64;
+      const delegated = this.highestBidder.value.globalState('delegated_stake') as uint64;
+      assert(delegated + amount <= maxDelegatableStake, 'amount exceeds max delegatable');
       sendMethodCall<typeof CaelusValidatorPool.prototype.__addStake, void>({
         applicationID: this.highestBidder.value,
         methodArgs: [
