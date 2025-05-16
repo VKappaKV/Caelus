@@ -164,7 +164,7 @@ async function main() {
         const adminAppId = await getAppID(ADMIN, admin, validator);
         const validatorAppId = await getAppID(VALIDATOR, admin, validator);
         const amount = await getAmount();
-        await removeOperatorCommit(BigInt(adminAppId), BigInt(validatorAppId), amount);
+        await removeOperatorCommit(BigInt(validatorAppId), BigInt(adminAppId), amount);
         break;
       }
       case 'poolOptIn': {
