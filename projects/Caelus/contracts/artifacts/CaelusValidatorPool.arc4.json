@@ -121,6 +121,18 @@
       ]
     },
     {
+      "name": "__updateYieldAccrued",
+      "args": [
+        {
+          "name": "yieldAccruedTxn",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
       "name": "solveDelinquency",
       "desc": "Delinquent Validators need to propose a valid block to clear up their delinquency status.\n\n\nThis method should be called when the delinquency score is below the threshold and the operator has proposed a block.",
       "args": [
@@ -232,7 +244,7 @@
         },
         {
           "name": "params",
-          "type": "(bool,bool,bool,bool,uint64)",
+          "type": "(bool,bool,bool,uint64)",
           "desc": "parameters to check for the validator (For example: performanceCheck, stakeAmountCheck, delinquentCheck, versionCheck)"
         }
       ],
@@ -245,7 +257,7 @@
           "args": [
             {
               "name": "request",
-              "type": "(bool,bool,bool,bool,uint64)"
+              "type": "(bool,bool,bool,uint64)"
             },
             {
               "name": "result",
@@ -261,7 +273,7 @@
       "args": [
         {
           "name": "checks",
-          "type": "(bool,bool,bool,bool,uint64)"
+          "type": "(bool,bool,bool,uint64)"
         }
       ],
       "returns": {
@@ -643,7 +655,7 @@
       "args": [
         {
           "name": "request",
-          "type": "(bool,bool,bool,bool,uint64)"
+          "type": "(bool,bool,bool,uint64)"
         },
         {
           "name": "result",

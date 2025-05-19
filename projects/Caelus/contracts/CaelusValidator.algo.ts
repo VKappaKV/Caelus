@@ -44,6 +44,8 @@ export class CaelusValidatorPool extends Contract {
 
   operatorCommit = GlobalStateKey<uint64>({ key: 'operator_commit' });
 
+  operatorYieldAccrued = GlobalStateKey<uint64>({ key: 'operator_yield_accrued' });
+
   // Delegated Stake params
 
   delegatedStake = GlobalStateKey<uint64>({ key: 'delegated_stake' });
@@ -95,6 +97,7 @@ export class CaelusValidatorPool extends Contract {
 
     // stake counters
     this.operatorCommit.value = 0;
+    this.operatorYieldAccrued.value = 0;
     this.delegatedStake.value = 0;
     this.maxDelegatableStake.value = 0;
 
@@ -186,6 +189,15 @@ export class CaelusValidatorPool extends Contract {
     });
   }
 
+  __updateYieldAccrued(yieldAccruedTxn: PayTxn): void {
+    verifyPayTxn(yieldAccruedTxn, {
+      sender: this.creatorContractAppID.value.address,
+      receiver: this.app.address,
+      amount: { lessThanEqualTo: this.operatorYieldAccrued.value },
+    });
+    this.operatorYieldAccrued.value -= yieldAccruedTxn.amount;
+  }
+
   /**
    * Delinquent Validators need to propose a valid block to clear up their delinquency status.
    *
@@ -204,6 +216,7 @@ export class CaelusValidatorPool extends Contract {
       this.app.address.assetBalance(this.tokenId.value) === 0,
       'Before clearing up delinquency all the LST must have been burned'
     );
+    assert(this.operatorYieldAccrued.value === 0, 'Operator yield must be 0 before clearing up delinquency');
     assert(blocks[block].proposer === this.app.address, 'the solving block must be proposed by this account');
     assert(this.lastDelinquencyReport.value < block); // validator has to win a proposal sooner than latest delinquency report to clear up delinquency
     assert(this.delinquencyThresholdCheck(), 'Delinquency score must be below threshold');
@@ -338,9 +351,6 @@ export class CaelusValidatorPool extends Contract {
     }
     if (checks.stakeAmountCheck) {
       result = result || this.checkStakeOnSnitch(checks.recipient);
-    }
-    if (checks.delinquentCheck) {
-      result = result || this.checkDelinquencyOnSnitch();
     }
     if (checks.versionCheck) {
       result = result || this.checkProgramVersion();
@@ -627,24 +637,6 @@ export class CaelusValidatorPool extends Contract {
     return hasMoreThanMax || hasMoreThanDelegatable;
   }
 
-  private checkDelinquencyOnSnitch(): boolean {
-    if (this.status.value !== DELINQUENCY_STATUS) return false;
-    if (this.app.address.assetBalance(this.tokenId.value) === 0) return false;
-    sendMethodCall<typeof CaelusAdmin.prototype.__burnToDelinquentValidator>({
-      applicationID: this.creatorContractAppID.value,
-      methodArgs: [
-        {
-          xferAsset: this.tokenId.value,
-          assetReceiver: this.creatorContractAppID.value.address,
-          assetAmount: this.app.address.assetBalance(this.tokenId.value),
-        },
-        this.app,
-        0, // must be kept 0 because the operator commit is already removed from the TotalStake on setDelinquency, this is a follow up call to ensure all his LST balance have been burned
-      ],
-    });
-    return true;
-  }
-
   private checkProgramVersion(): boolean {
     const latestVersion = this.creatorContractAppID.value.globalState('validator_pool_version') as uint64;
     if (latestVersion === this.validatorPoolContractVersion.value) return false;
@@ -677,16 +669,15 @@ export class CaelusValidatorPool extends Contract {
   }
 
   private setDelinquency(): void {
-    sendMethodCall<typeof CaelusAdmin.prototype.__burnToDelinquentValidator>({
+    const yieldAccrued = sendMethodCall<typeof CaelusAdmin.prototype.__onDelinquency, uint64>({
       applicationID: this.creatorContractAppID.value,
       methodArgs: [
+        this.app,
         {
           xferAsset: this.tokenId.value,
           assetReceiver: this.creatorContractAppID.value.address,
           assetAmount: this.app.address.assetBalance(this.tokenId.value),
         },
-        this.app,
-        this.operatorCommit.value,
       ],
     });
     sendPayment({
@@ -697,6 +688,7 @@ export class CaelusValidatorPool extends Contract {
     this.performanceCounter.value = 0;
     this.updateDelegationFactors();
     this.status.value = DELINQUENCY_STATUS;
+    this.operatorYieldAccrued.value = yieldAccrued;
   }
 
   private fixDelinquencyScore(): void {

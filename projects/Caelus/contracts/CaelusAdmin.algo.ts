@@ -382,17 +382,37 @@ export class CaelusAdmin extends Contract {
   }
 
   /**
+   * FOLLOWUP OPERATION CALLED BY THE VALIDATOR POOL CONTRACT ON DELINQUENCY
+   *
+   * @param validatorAppID delinquent validator app id
+   * @param burnTxn deliquent validator axfer of LST to the admin contract
+   * @returns yield accrued amount
+   */
+  __onDelinquency(validatorAppID: AppID, burnTxn: AssetTransferTxn): uint64 {
+    assert(this.isPool(validatorAppID) && this.txn.sender === validatorAppID.address);
+    verifyAssetTransferTxn(burnTxn, {
+      xferAsset: this.tokenId.value,
+      assetReceiver: this.app.address,
+      assetAmount: validatorAppID.address.assetBalance(this.tokenId.value),
+    });
+    const algoToBurn = this.getBurnAmount(burnTxn.assetAmount);
+    const opCommit = validatorAppID.globalState('operator_commit') as uint64;
+    const yieldAccrued = algoToBurn - opCommit;
+    this.downSupplyCounters(opCommit, burnTxn.assetAmount);
+
+    return yieldAccrued;
+  }
+
+  /**
    * FOLLOWUP OPERATION CALLED BY THE VALIDATOR POOL CONTRACT EITHER ON DELINQUENCY OR ON SNITCH
    *
    * On Delinquency Validators SHOULD not have vAlgo in their balance.
    * It's first called when deliquency is set, can be called again if the entire vAlgo amount is not burned.
    * The vAlgo will be turned to Algo and added to the operator commit
    */
-  __burnToDelinquentValidator(burnTxn: AssetTransferTxn, validatorAppID: AppID, amountOperator: uint64): void {
-    assert(this.isPool(validatorAppID) && this.txn.sender === validatorAppID.address);
-    let amountToUpdate: uint64 = 0; // the ASA amount to give back if the burn request isnt filled && then reduce circ supply
-    let toBurn: uint64 =
-      this.getBurnAmount(burnTxn.assetAmount) - (validatorAppID.globalState('operator_commit') as uint64); // burn from other validators the amount of Algo accrued from the operator LST
+  burnToDelinquentValidator(validatorAppID: AppID): void {
+    assert(this.isPool(validatorAppID) && this.txn.sender === (validatorAppID.globalState('operator') as Address));
+    let toBurn = validatorAppID.globalState('operator_yield_accrued') as uint64; // burn from other validators the amount of Algo accrued from the operator LST
     let amtBurned = 0; // need this to subtract from totalAlgoSupply
     const queue = clone(this.burnQueue.value);
     for (let i = 0; i < queue.length; i += 1) {
@@ -412,14 +432,10 @@ export class CaelusAdmin extends Contract {
         }
       }
     }
-    amountToUpdate = this.getBurnAmount(toBurn - amtBurned);
 
-    this.downSupplyCounters(amtBurned + amountOperator, burnTxn.assetAmount - amountToUpdate);
+    this.downSupplyCounters(amtBurned, 0);
 
-    if (amountToUpdate > 0) {
-      this.doAxfer(burnTxn.sender, amountToUpdate, this.tokenId.value);
-    }
-    sendMethodCall<typeof CaelusValidatorPool.prototype.__addToOperatorCommit>({
+    sendMethodCall<typeof CaelusValidatorPool.prototype.__updateYieldAccrued>({
       applicationID: validatorAppID,
       methodArgs: [
         {
@@ -430,8 +446,8 @@ export class CaelusAdmin extends Contract {
     });
 
     this.burnEvent.log({
-      filled: amountToUpdate > 0,
-      amount: burnTxn.assetAmount,
+      filled: amtBurned === toBurn,
+      amount: toBurn,
       output: amtBurned,
     });
   }

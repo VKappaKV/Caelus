@@ -269,19 +269,31 @@
       }
     },
     {
-      "name": "__burnToDelinquentValidator",
+      "name": "__onDelinquency",
+      "desc": "FOLLOWUP OPERATION CALLED BY THE VALIDATOR POOL CONTRACT ON DELINQUENCY",
+      "args": [
+        {
+          "name": "validatorAppID",
+          "type": "uint64",
+          "desc": "delinquent validator app id"
+        },
+        {
+          "name": "burnTxn",
+          "type": "axfer",
+          "desc": "deliquent validator axfer of LST to the admin contract"
+        }
+      ],
+      "returns": {
+        "type": "uint64",
+        "desc": "yield accrued amount"
+      }
+    },
+    {
+      "name": "burnToDelinquentValidator",
       "desc": "FOLLOWUP OPERATION CALLED BY THE VALIDATOR POOL CONTRACT EITHER ON DELINQUENCY OR ON SNITCH\n\n\nOn Delinquency Validators SHOULD not have vAlgo in their balance.\nIt's first called when deliquency is set, can be called again if the entire vAlgo amount is not burned.\nThe vAlgo will be turned to Algo and added to the operator commit",
       "args": [
         {
-          "name": "burnTxn",
-          "type": "axfer"
-        },
-        {
           "name": "validatorAppID",
-          "type": "uint64"
-        },
-        {
-          "name": "amountOperator",
           "type": "uint64"
         }
       ],
@@ -519,6 +531,30 @@
       "args": [
         {
           "name": "assetId",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
+      "name": "getMintAmount",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
+      "name": "getBurnAmount",
+      "args": [
+        {
+          "name": "amount",
           "type": "uint64"
         }
       ],
