@@ -41,7 +41,7 @@
     },
     {
       "name": "__addToOperatorCommit",
-      "desc": "followup operation called by the Caelus Admin to send the correct amount into the operator commit",
+      "desc": "followup operation called by the Vestguard Admin to send the correct amount into the operator commit",
       "args": [
         {
           "name": "opStake",
@@ -130,7 +130,31 @@
       ],
       "returns": {
         "type": "void"
-      }
+      },
+      "events": [
+        {
+          "name": "operatorCommitUpdateEvent",
+          "args": [
+            {
+              "name": "app",
+              "type": "uint64"
+            },
+            {
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "name": "amountAdded",
+              "type": "uint64"
+            },
+            {
+              "name": "amountRemoved",
+              "type": "uint64"
+            }
+          ],
+          "desc": ""
+        }
+      ]
     },
     {
       "name": "solveDelinquency",
@@ -202,7 +226,7 @@
     },
     {
       "name": "__addStake",
-      "desc": "FOLLOWUP OPERATION CALLED BY THE CAELUS ADMIN TO SEND THE DELEGATED STAKE TO THE NODE OPERATOR\n\n\nReceive delegated stake and update the delegation factors.",
+      "desc": "FOLLOWUP OPERATION CALLED BY THE Vestguard ADMIN TO SEND THE DELEGATED STAKE TO THE NODE OPERATOR\n\n\nReceive delegated stake and update the delegation factors.",
       "args": [
         {
           "name": "txnWithStake",
@@ -216,7 +240,7 @@
     },
     {
       "name": "__burnStake",
-      "desc": "FOLLOWUP OPERATION CALLED BY THE CAELUS ADMIN TO CLAWBACK THE DELEGATED STAKE ON BURN OPERATION",
+      "desc": "FOLLOWUP OPERATION CALLED BY THE Vestguard ADMIN TO CLAWBACK THE DELEGATED STAKE ON BURN OPERATION",
       "args": [
         {
           "name": "amountRequested",
@@ -226,7 +250,7 @@
         {
           "name": "receiverBurn",
           "type": "address",
-          "desc": "address of the receiver of the burn transaction triggered on the Caelus Admin contract"
+          "desc": "address of the receiver of the burn transaction triggered on the Vestguard Admin contract"
         }
       ],
       "returns": {
@@ -438,6 +462,10 @@
           "type": "uint64"
         },
         {
+          "name": "opYieldAccrued",
+          "type": "uint64"
+        },
+        {
           "name": "delegatedAmount",
           "type": "uint64"
         },
@@ -460,7 +488,7 @@
     },
     {
       "name": "claimLeftAlgo",
-      "desc": "Used by anyone to clear up remaining Algo outside of stake counters back to the Caelus Admin contract to be redistributed",
+      "desc": "Used by anyone to clear up remaining Algo outside of stake counters back to the Vestguard Admin contract to be redistributed",
       "args": [],
       "returns": {
         "type": "void"
@@ -468,7 +496,7 @@
     },
     {
       "name": "deleteApplication",
-      "desc": "Node operator can close the Validator and get back his stake. Delegated stake is put back into the Caelus Admin contract.",
+      "desc": "Node operator can close the Validator and get back his stake. Delegated stake is put back into the Vestguard Admin contract.",
       "args": [],
       "returns": {
         "type": "void"

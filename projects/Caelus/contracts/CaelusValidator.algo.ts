@@ -18,7 +18,7 @@ import {
 import { CaelusAdmin } from './CaelusAdmin.algo';
 
 /**
- * Caelus Validator Pool Contract is the contract account participating in the consensus protocol and receiver of the delegated stake.
+ * Vestguard Validator Pool Contract is the contract account participating in the consensus protocol and receiver of the delegated stake.
  * Each Pool has a node operator who's responsible for the correct behavior of the node to which the account is participating with.
  * Misbehaviors are controlled through possible regular checks by anyone.
  * The more the contract proposes blocks within the expected time the more delegated stake it can accrue. It's important for the node operator to be declaring to the admin contract which blocks it has proposed to successfully be recognized his share of the amount.
@@ -127,14 +127,18 @@ export class CaelusValidatorPool extends Contract {
   }
 
   /**
-   *  followup operation called by the Caelus Admin to send the correct amount into the operator commit
+   *  followup operation called by the Vestguard Admin to send the correct amount into the operator commit
    *
    * @param {PayTxn} opStake - node operator stake commitment
    */
   __addToOperatorCommit(opStake: PayTxn): void {
     assert(
       this.txn.sender === this.creatorContractAppID.value.address,
-      'only Caelus admin can route operator stake without LST'
+      'only Vestguard admin can route operator stake without LST'
+    );
+    assert(
+      this.operatorCommit.value + opStake.amount <= MAX_STAKE_PER_ACCOUNT,
+      'Operator commit cannot exceed 50M Algo'
     );
     verifyPayTxn(opStake, {
       receiver: this.app.address,
@@ -196,6 +200,14 @@ export class CaelusValidatorPool extends Contract {
       amount: { lessThanEqualTo: this.operatorYieldAccrued.value },
     });
     this.operatorYieldAccrued.value -= yieldAccruedTxn.amount;
+    this.operatorCommit.value += yieldAccruedTxn.amount;
+    this.updateDelegationFactors();
+    this.operatorCommitUpdateEvent.log({
+      app: this.app,
+      operator: this.operatorAddress.value,
+      amountAdded: yieldAccruedTxn.amount,
+      amountRemoved: 0,
+    });
   }
 
   /**
@@ -206,17 +218,12 @@ export class CaelusValidatorPool extends Contract {
    * @param block - block number of the block proposed by the node operator while the account was in delinquency
    */
   solveDelinquency(block: uint64): void {
-    assert(this.status.value !== DELINQUENCY_STATUS, 'Account is not delinquent');
+    assert(this.status.value === DELINQUENCY_STATUS, 'Account is not delinquent');
     assert(this.txn.sender === this.operatorAddress.value, 'Only the Node Operator can clear up Delinquency');
     assert(
       this.delegatedStake.value === 0,
       'Before clearing up delinquency all the delegated stake must have been redistributed'
     );
-    assert(
-      this.app.address.assetBalance(this.tokenId.value) === 0,
-      'Before clearing up delinquency all the LST must have been burned'
-    );
-    assert(this.operatorYieldAccrued.value === 0, 'Operator yield must be 0 before clearing up delinquency');
     assert(blocks[block].proposer === this.app.address, 'the solving block must be proposed by this account');
     assert(this.lastDelinquencyReport.value < block); // validator has to win a proposal sooner than latest delinquency report to clear up delinquency
     assert(this.delinquencyThresholdCheck(), 'Delinquency score must be below threshold');
@@ -285,7 +292,7 @@ export class CaelusValidatorPool extends Contract {
   }
 
   /**
-   * FOLLOWUP OPERATION CALLED BY THE CAELUS ADMIN TO SEND THE DELEGATED STAKE TO THE NODE OPERATOR
+   * FOLLOWUP OPERATION CALLED BY THE Vestguard ADMIN TO SEND THE DELEGATED STAKE TO THE NODE OPERATOR
    *
    * Receive delegated stake and update the delegation factors.
    *
@@ -301,15 +308,15 @@ export class CaelusValidatorPool extends Contract {
   }
 
   /**
-   * FOLLOWUP OPERATION CALLED BY THE CAELUS ADMIN TO CLAWBACK THE DELEGATED STAKE ON BURN OPERATION
+   * FOLLOWUP OPERATION CALLED BY THE Vestguard ADMIN TO CLAWBACK THE DELEGATED STAKE ON BURN OPERATION
    *
    * @param {uint64} amountRequested - amount of Algo to be burned
-   * @param {Address} receiverBurn - address of the receiver of the burn transaction triggered on the Caelus Admin contract
+   * @param {Address} receiverBurn - address of the receiver of the burn transaction triggered on the Vestguard Admin contract
    */
   __burnStake(amountRequested: uint64, receiverBurn: Address): void {
     assert(
       this.txn.sender === this.creatorContractAppID.value.address,
-      'Only the Caelus Admin contract can call this method'
+      'Only the Vestguard Admin contract can call this method'
     );
     assert(amountRequested <= this.delegatedStake.value, 'Cannot withdraw more stake than the delegated amount'); // this or take only what you can and communicate back the remaining request
     assert(
@@ -330,7 +337,7 @@ export class CaelusValidatorPool extends Contract {
    * @param {SnitchInfo} params - parameters to check for the validator (For example: performanceCheck, stakeAmountCheck, delinquentCheck, versionCheck)
    */
   snitchValidator(appToSnitch: AppID, params: SnitchInfo): void {
-    assert(this.status.value !== DELINQUENCY_STATUS);
+    assert(this.status.value !== DELINQUENCY_STATUS, 'Cannot snitch if the account is delinquent');
     const result = sendMethodCall<typeof CaelusValidatorPool.prototype.getSnitched, boolean>({
       applicationID: appToSnitch,
       methodArgs: [params],
@@ -360,7 +367,7 @@ export class CaelusValidatorPool extends Contract {
   }
 
   __flashloan(amount: uint64, receiver: Address): void {
-    assert(this.txn.sender === this.creatorContractAppID.value.address, 'Caller must be the Caelus Admin Contract');
+    assert(this.txn.sender === this.creatorContractAppID.value.address, 'Caller must be the Vestguard Admin Contract');
 
     if (!this.balanceCheckpoint.exists) {
       this.balanceCheckpoint.value = this.app.address.balance;
@@ -370,7 +377,7 @@ export class CaelusValidatorPool extends Contract {
       amount: amount,
     });
 
-    // top level Caelus Admin checks that `checkBalance()` is called within the outer group before sending the flashloan txn
+    // top level Vestguard Admin checks that `checkBalance()` is called within the outer group before sending the flashloan txn
   }
 
   checkBalance(): void {
@@ -456,7 +463,7 @@ export class CaelusValidatorPool extends Contract {
   goOffline(): void {
     assert(
       this.txn.sender === this.operatorAddress.value || this.txn.sender === this.creatorContractAppID.value.address,
-      'Only Node Operator or Caelus Admin contract can set the contract offline'
+      'Only Node Operator or Vestguard Admin contract can set the contract offline'
     );
     sendOfflineKeyRegistration({});
     this.status.value = NOT_DELEGATABLE_STATUS;
@@ -489,9 +496,13 @@ export class CaelusValidatorPool extends Contract {
       methodArgs: [
         this.app,
         this.operatorCommit.value,
+        this.operatorYieldAccrued.value,
         this.delegatedStake.value,
         this.performanceCounter.value,
-        { receiver: newPool.address, amount: this.operatorCommit.value + this.delegatedStake.value },
+        {
+          receiver: newPool.address,
+          amount: this.operatorCommit.value + this.delegatedStake.value + this.operatorYieldAccrued.value,
+        },
         {
           xferAsset: this.tokenId.value,
           assetReceiver: newPool.address,
@@ -501,9 +512,11 @@ export class CaelusValidatorPool extends Contract {
     });
 
     this.goOffline();
+    this.operatorYieldAccrued.value = 0;
     this.operatorCommit.value = 0;
     this.delegatedStake.value = 0;
     this.performanceCounter.value = 0;
+    this.updateDelegationFactors();
   }
 
   /**
@@ -512,6 +525,7 @@ export class CaelusValidatorPool extends Contract {
   __mergeStateOnMigration(
     from: AppID,
     opCommit: uint64,
+    opYieldAccrued: uint64,
     delegatedAmount: uint64,
     performanceCounter: uint64,
     stakeTxn: PayTxn,
@@ -524,7 +538,7 @@ export class CaelusValidatorPool extends Contract {
     );
     verifyPayTxn(stakeTxn, {
       receiver: this.app.address,
-      amount: opCommit + delegatedAmount,
+      amount: opCommit + delegatedAmount + opYieldAccrued,
     });
     verifyAssetTransferTxn(lstTxn, {
       xferAsset: this.tokenId.value,
@@ -533,17 +547,22 @@ export class CaelusValidatorPool extends Contract {
 
     this.performanceCounter.value += performanceCounter;
     this.operatorCommit.value += opCommit;
+    this.operatorYieldAccrued.value += opYieldAccrued;
     this.delegatedStake.value += delegatedAmount;
 
     this.updateDelegationFactors();
   }
 
   /**
-   * Used by anyone to clear up remaining Algo outside of stake counters back to the Caelus Admin contract to be redistributed
+   * Used by anyone to clear up remaining Algo outside of stake counters back to the Vestguard Admin contract to be redistributed
    */
   claimLeftAlgo(): void {
     const dust =
-      this.app.address.balance - this.operatorCommit.value - this.delegatedStake.value - this.app.address.minBalance;
+      this.app.address.balance -
+      this.operatorCommit.value -
+      this.operatorYieldAccrued.value -
+      this.delegatedStake.value -
+      this.app.address.minBalance;
     sendPayment({
       receiver: this.creatorContractAppID.value.address,
       amount: dust,
@@ -551,11 +570,15 @@ export class CaelusValidatorPool extends Contract {
   }
 
   /**
-   * Node operator can close the Validator and get back his stake. Delegated stake is put back into the Caelus Admin contract.
+   * Node operator can close the Validator and get back his stake. Delegated stake is put back into the Vestguard Admin contract.
    */
   deleteApplication(): void {
     assert(this.status.value !== DELINQUENCY_STATUS, 'Account is delinquent. Solve Delinquency state before closing');
     assert(this.txn.sender === this.operatorAddress.value, 'Only the node operator can close the node');
+    sendMethodCall<typeof CaelusAdmin.prototype.__cleanseOnValidatorDeletion>({
+      applicationID: this.creatorContractAppID.value,
+      methodArgs: [this.app],
+    });
     this.purge();
     this.validatorCloseEvent.log({
       app: this.app,
@@ -570,6 +593,7 @@ export class CaelusValidatorPool extends Contract {
    */
 
   private performanceCheck(): boolean {
+    // check if the account is eligible for incentives, otherwise it has been set offline by the protocol and needs to be put in delinquency
     if (!this.app.address.incentiveEligible) {
       this.setDelinquency();
 
@@ -615,7 +639,7 @@ export class CaelusValidatorPool extends Contract {
 
   private checkStakeOnSnitch(recipient: AppID): boolean {
     const hasMoreThanMax = this.app.address.balance > MAX_STAKE_PER_ACCOUNT;
-    if (hasMoreThanMax) this.setDelinquency();
+    if (hasMoreThanMax) this.updateDelegationFactors();
     const hasMoreThanDelegatable = this.saturationBuffer.value > BUFFER_MAX;
     if (hasMoreThanDelegatable) {
       const restake = this.delegatedStake.value - this.maxDelegatableStake.value;
@@ -642,6 +666,7 @@ export class CaelusValidatorPool extends Contract {
     if (latestVersion === this.validatorPoolContractVersion.value) return false;
     this.purge();
     this.operatorCommit.value = 0;
+    this.operatorYieldAccrued.value = 0;
     this.delegatedStake.value = 0;
     this.updateDelegationFactors();
     this.goOffline();
@@ -716,10 +741,10 @@ export class CaelusValidatorPool extends Contract {
   }
 
   private updateDelegationFactors(): void {
-    assert(
-      this.status.value !== DELINQUENCY_STATUS,
-      'Account is delinquent. Solve Delinquency state before updating parameters'
-    );
+    let isDelinquent = false;
+    if (this.status.value === DELINQUENCY_STATUS) {
+      isDelinquent = true;
+    }
     // start counting from the operator commit
     if (this.operatorCommit.value > globals.payoutsMinBalance) {
       this.maxDelegatableStake.value = this.operatorCommit.value;
@@ -733,12 +758,17 @@ export class CaelusValidatorPool extends Contract {
       // check against globals.payoutsMaxBalance (50M)
       if (this.app.address.balance >= MAX_STAKE_PER_ACCOUNT) {
         this.maxDelegatableStake.value = 0;
-        this.setDelinquency();
+        if (!isDelinquent) {
+          this.status.value = NOT_DELEGATABLE_STATUS;
+        }
       } else if (this.app.address.balance + this.maxDelegatableStake.value > MAX_STAKE_PER_ACCOUNT) {
         this.maxDelegatableStake.value = MAX_STAKE_PER_ACCOUNT - this.app.address.balance;
       }
     } else {
       this.maxDelegatableStake.value = 0;
+      if (!isDelinquent) {
+        this.status.value = NOT_DELEGATABLE_STATUS;
+      }
     }
 
     // calculate saturation buffer with 3 decimal precision & set flag for delegation eligibility
@@ -746,7 +776,15 @@ export class CaelusValidatorPool extends Contract {
       this.saturationBuffer.value = (this.delegatedStake.value * BUFFER_MAX) / this.maxDelegatableStake.value;
     } else {
       this.saturationBuffer.value = BUFFER_MAX; // When the maxDelegatableStake is 0, the saturation buffer is set to 1000
-      this.status.value = NOT_DELEGATABLE_STATUS;
+      if (!isDelinquent) {
+        this.status.value = NOT_DELEGATABLE_STATUS;
+      }
+    }
+    // ensure that delinquent accounts keep their status and their counters are zeroed
+    if (isDelinquent) {
+      this.maxDelegatableStake.value = 0;
+      this.performanceCounter.value = 0;
+      this.saturationBuffer.value = BUFFER_MAX;
     }
   }
 

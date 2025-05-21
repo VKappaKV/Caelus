@@ -70,7 +70,6 @@ export async function solveDelinquency(poolApp: bigint, block: bigint) {
 type SnitchInfo = {
   performanceCheck: boolean;
   stakeAmountCheck: boolean;
-  delinquentCheck: boolean;
   versionCheck: boolean;
   recipient: bigint; // must be either this.app or a validator
   split: boolean; // if clawback will be split between recipient and admin
@@ -86,13 +85,7 @@ export async function snitchApp(poolApp: bigint, snitchParams: SnitchInfo) {
   });
   const tx = await client.send.getSnitched({
     args: [
-      [
-        snitchParams.performanceCheck,
-        snitchParams.stakeAmountCheck,
-        snitchParams.delinquentCheck,
-        snitchParams.versionCheck,
-        snitchParams.recipient,
-      ],
+      [snitchParams.performanceCheck, snitchParams.stakeAmountCheck, snitchParams.versionCheck, snitchParams.recipient],
     ],
     extraFee: (5000).microAlgos(), // adjust this fee if needed
     populateAppCallResources: true,
@@ -110,13 +103,7 @@ export async function snitchOtherValidator(poolApp: bigint, validatorToSnitchApp
   const tx = await client.send.snitchValidator({
     args: [
       validatorToSnitchApp,
-      [
-        snitchParams.performanceCheck,
-        snitchParams.stakeAmountCheck,
-        snitchParams.delinquentCheck,
-        snitchParams.versionCheck,
-        snitchParams.recipient,
-      ],
+      [snitchParams.performanceCheck, snitchParams.stakeAmountCheck, snitchParams.versionCheck, snitchParams.recipient],
     ],
     extraFee: (7000).microAlgos(),
     populateAppCallResources: true,

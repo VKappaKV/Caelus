@@ -629,7 +629,7 @@ export class CaelusAdmin extends Contract {
    *
    * @param {PayTxn} payFeeTxn - FlashLoan fee payment; the fee is flat and grows with demand for the flashloan service
    * @param {uint64[]} amounts - The amount of Algo to take from each app, the value has to be correlated to the app in the appToInclude array at the same index
-   * @param {AppID} appToInclude - The AppID of the Validator Pool Contracts to execute the flashloan request on
+   * @param {AppID[]} appToInclude - The AppID of the Validator Pool Contracts to execute the flashloan request on
    */
   makeFlashLoanRequest(payFeeTxn: PayTxn, amounts: uint64[], appToInclude: AppID[]): void {
     this.getFLcounter();
@@ -687,6 +687,20 @@ export class CaelusAdmin extends Contract {
   arc62_get_circulating_supply(assetId: AssetID): uint64 {
     assert(assetId === this.tokenId.value, 'invalid asset id');
     return this.tokenCirculatingSupply.value;
+  }
+
+  __cleanseOnValidatorDeletion(app: AppID): void {
+    assert(this.isPool(app));
+    const queue = clone(this.burnQueue.value);
+    for (let i = 0; i < queue.length; i += 1) {
+      if (queue[i] === app) {
+        queue[i] = AppID.zeroIndex;
+      }
+    }
+    if (this.highestBidder.value === app) {
+      this.highestBidder.value = AppID.zeroIndex;
+    }
+    this.burnQueue.value = queue;
   }
 
   /**
