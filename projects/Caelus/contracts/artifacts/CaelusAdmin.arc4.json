@@ -549,6 +549,22 @@
       "returns": {
         "type": "void"
       }
+    },
+    {
+      "name": "__onDustCollection",
+      "args": [
+        {
+          "name": "dustTxn",
+          "type": "pay"
+        },
+        {
+          "name": "app",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
     }
   ],
   "events": [

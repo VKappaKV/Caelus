@@ -60,9 +60,7 @@ export class CaelusAdmin extends Contract {
 
   tiers = GlobalStateKey<uint64[]>({ key: 'tiers' });
 
-  tokenCirculatingSupply = GlobalStateKey<uint64>({
-    key: 'circulating_supply',
-  });
+  idleStake = GlobalStateKey<uint64>({ key: 'idle_stake' });
 
   highestBidder = GlobalStateKey<AppID>({ key: 'highest_bidder' });
 
@@ -85,7 +83,7 @@ export class CaelusAdmin extends Contract {
     this.pegRatio.value = 1 * SCALE;
 
     this.tokenId.value = AssetID.zeroIndex;
-    this.tokenCirculatingSupply.value = 0;
+    this.idleStake.value = 0;
 
     this.highestBidder.value = AppID.zeroIndex;
 
@@ -239,8 +237,8 @@ export class CaelusAdmin extends Contract {
 
     const minted = this.getMintAmount(mintTxn.amount);
     this.doAxfer(this.txn.sender, minted, this.tokenId.value);
-    this.totalStake.value += mintTxn.amount;
-    this.tokenCirculatingSupply.value += minted;
+    this.idleStake.value += mintTxn.amount;
+    this.upStakeCounter(mintTxn.amount);
 
     this.mintEvent.log({
       instant: true,
@@ -262,14 +260,13 @@ export class CaelusAdmin extends Contract {
       assetReceiver: this.app.address,
       assetAmount: { greaterThanEqualTo: ALGORAND_BASE_FEE },
     });
-
-    const amountToBurn = this.getBurnAmount(burnTxn.assetAmount);
+    const toBurn = this.getBurnAmount(burnTxn.assetAmount);
     let burning = 0;
-
-    const idleAlgo = this.app.address.balance - this.app.address.minBalance;
-    if (idleAlgo > 0) {
-      const amountToBurnFromIdle = idleAlgo >= amountToBurn ? amountToBurn : idleAlgo;
+    this.stakeDust();
+    if (this.idleStake.value > 0) {
+      const amountToBurnFromIdle = this.idleStake.value >= toBurn ? toBurn : this.idleStake.value;
       burning += amountToBurnFromIdle;
+      this.idleStake.value -= amountToBurnFromIdle;
 
       sendPayment({
         receiver: burnTxn.sender,
@@ -277,8 +274,8 @@ export class CaelusAdmin extends Contract {
       });
     }
 
-    if (burning === amountToBurn) {
-      this.downSupplyCounters(amountToBurn, burnTxn.assetAmount);
+    if (burning === toBurn) {
+      this.downStakeCounter(toBurn);
       this.burnEvent.log({
         filled: true,
         amount: burnTxn.assetAmount,
@@ -288,9 +285,9 @@ export class CaelusAdmin extends Contract {
     }
 
     if (this.queueIsEmpty()) {
-      const amountLeft = this.getMintAmount(amountToBurn - burning);
+      const amountLeft = this.getMintAmount(toBurn - burning);
       this.doAxfer(burnTxn.sender, amountLeft, this.tokenId.value);
-      this.downSupplyCounters(burning, burnTxn.assetAmount - amountLeft);
+      this.downStakeCounter(burning);
       this.burnEvent.log({
         filled: false,
         amount: burnTxn.assetAmount - amountLeft,
@@ -308,27 +305,29 @@ export class CaelusAdmin extends Contract {
       const app = queue[i];
       if (this.isPool(app)) {
         const delegatedToTarget = app.globalState('delegated_stake') as uint64;
-        if (delegatedToTarget < amountToBurn - burning) {
+        if (delegatedToTarget > 0 && delegatedToTarget < toBurn - burning) {
           this.doBurnTxn(app, [delegatedToTarget, burnTo]);
           this.burnQueue.value[i] = AppID.zeroIndex;
           burning += delegatedToTarget;
+        } else if (delegatedToTarget > 0) {
+          this.doBurnTxn(app, [toBurn - burning, burnTo]);
+          burning = toBurn;
         } else {
-          this.doBurnTxn(app, [amountToBurn - burning, burnTo]);
-          burning = amountToBurn;
+          this.burnQueue.value[i] = AppID.zeroIndex;
         }
       }
     }
 
-    const amountLeft = this.getMintAmount(amountToBurn - burning);
+    const amountLeft = this.getMintAmount(toBurn - burning);
     if (amountLeft > 0) {
       this.doAxfer(burnTxn.sender, amountLeft, this.tokenId.value);
       this.lastExhaustBlock.value = globals.round;
     }
 
-    this.downSupplyCounters(burning, burnTxn.assetAmount - amountLeft);
+    this.downStakeCounter(burning);
 
     this.burnEvent.log({
-      filled: amountLeft > 0,
+      filled: burning === toBurn,
       amount: burnTxn.assetAmount - amountLeft,
       output: burning,
     });
@@ -358,7 +357,7 @@ export class CaelusAdmin extends Contract {
 
     const amountToMint = this.getMintAmount(stakeCommit.amount);
     this.doAxfer(validatorAppID.address, amountToMint, this.tokenId.value);
-    this.upSupplyCounters(stakeCommit.amount, amountToMint);
+    this.upStakeCounter(stakeCommit.amount);
   }
 
   /**
@@ -377,8 +376,6 @@ export class CaelusAdmin extends Contract {
       applicationID: appToBurnFrom,
       methodArgs: [toBurn, amount],
     });
-
-    this.tokenCirculatingSupply.value -= amount;
   }
 
   /**
@@ -398,7 +395,7 @@ export class CaelusAdmin extends Contract {
     const algoToBurn = this.getBurnAmount(burnTxn.assetAmount);
     const opCommit = validatorAppID.globalState('operator_commit') as uint64;
     const yieldAccrued = algoToBurn - opCommit;
-    this.downSupplyCounters(opCommit, burnTxn.assetAmount);
+    this.downStakeCounter(opCommit);
 
     return yieldAccrued;
   }
@@ -412,43 +409,55 @@ export class CaelusAdmin extends Contract {
    */
   burnToDelinquentValidator(validatorAppID: AppID): void {
     assert(this.isPool(validatorAppID) && this.txn.sender === (validatorAppID.globalState('operator') as Address));
-    let toBurn = validatorAppID.globalState('operator_yield_accrued') as uint64; // burn from other validators the amount of Algo accrued from the operator LST
-    let amtBurned = 0; // need this to subtract from totalAlgoSupply
-    const queue = clone(this.burnQueue.value);
-    for (let i = 0; i < queue.length; i += 1) {
-      const currentTargetInQueue = queue[i];
-      if (this.isPool(currentTargetInQueue)) {
-        const delegatedToTarget = currentTargetInQueue.globalState('delegated_stake') as uint64;
-        if (delegatedToTarget >= toBurn) {
-          this.doBurnTxn(currentTargetInQueue, [toBurn, this.app.address]);
-          amtBurned += toBurn;
-          toBurn = 0;
-          break;
-        } else {
-          this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, this.app.address]);
-          amtBurned += delegatedToTarget;
-          toBurn -= delegatedToTarget;
-          this.burnQueue.value[i] = AppID.zeroIndex;
+    const toBurn = validatorAppID.globalState('operator_yield_accrued') as uint64; // burn from other validators the amount of Algo accrued from the operator LST
+    let burning = 0; // need this to subtract from totalAlgoSupply
+    this.stakeDust();
+    if (this.idleStake.value > 0) {
+      const amountToBurnFromIdle = this.idleStake.value <= toBurn ? this.idleStake.value : toBurn;
+      this.idleStake.value -= amountToBurnFromIdle;
+      burning += amountToBurnFromIdle;
+    }
+    if (burning !== toBurn) {
+      const queue = clone(this.burnQueue.value);
+      for (let i = 0; i < queue.length; i += 1) {
+        const currentTargetInQueue = queue[i];
+        if (this.isPool(currentTargetInQueue)) {
+          const delegatedToTarget = currentTargetInQueue.globalState('delegated_stake') as uint64;
+          if (delegatedToTarget >= toBurn - burning) {
+            this.doBurnTxn(currentTargetInQueue, [toBurn - burning, this.app.address]);
+            burning = toBurn;
+            break;
+          } else if (delegatedToTarget > 0 && delegatedToTarget < toBurn - burning) {
+            this.doBurnTxn(currentTargetInQueue, [delegatedToTarget, this.app.address]);
+            burning += delegatedToTarget;
+            this.burnQueue.value[i] = AppID.zeroIndex;
+          } else {
+            this.burnQueue.value[i] = AppID.zeroIndex;
+          }
         }
       }
     }
 
-    this.downSupplyCounters(amtBurned, 0);
+    if (burning < toBurn && this.queueIsEmpty()) {
+      this.lastExhaustBlock.value = globals.round;
+    }
+
+    this.downStakeCounter(burning);
 
     sendMethodCall<typeof CaelusValidatorPool.prototype.__updateYieldAccrued>({
       applicationID: validatorAppID,
       methodArgs: [
         {
           receiver: validatorAppID.address,
-          amount: amtBurned,
+          amount: burning,
         },
       ],
     });
 
     this.burnEvent.log({
-      filled: amtBurned === toBurn,
+      filled: burning === toBurn,
       amount: toBurn,
-      output: amtBurned,
+      output: burning,
     });
   }
 
@@ -463,7 +472,7 @@ export class CaelusAdmin extends Contract {
     const amountToMint = this.getMintAmount(amount);
     this.doAxfer(app.address, amountToMint, this.tokenId.value);
 
-    this.upSupplyCounters(amount, amountToMint);
+    this.upStakeCounter(amount);
 
     this.mintEvent.log({
       instant: true,
@@ -520,39 +529,34 @@ export class CaelusAdmin extends Contract {
     assert(blocks[block].proposer === proposer.address);
     assert(rewardPay.receiver === this.app.address);
     const amount = rewardPay.amount - wideRatio([this.protocolFee.value, rewardPay.amount], [100]);
-    this.totalStake.value += amount;
-    this.upSupplyCounters(amount, 0);
+    if (this.idleStake.exists) {
+      this.idleStake.value = 0;
+    }
+    this.idleStake.value += amount;
+    this.upStakeCounter(amount);
   }
 
   // called to send the Algo used to mint vALGO to the highest bidder
   delegateStake(amount: uint64): void {
     assert(this.isPool(this.highestBidder.value));
     const highestBidderStatus = this.highestBidder.value.globalState('status') as uint64;
-    assert(highestBidderStatus === NEUTRAL_STATUS);
-    if (this.txn.sender === (this.highestBidder.value.globalState('operator') as Address)) {
-      sendMethodCall<typeof CaelusValidatorPool.prototype.__addStake, void>({
-        applicationID: this.highestBidder.value,
-        methodArgs: [
-          {
-            receiver: this.highestBidder.value.address,
-            amount: amount,
-          },
-        ],
-      });
-    } else {
+    assert(highestBidderStatus === NEUTRAL_STATUS, 'cannot delegate stake to non-neutral validator');
+    this.stakeDust();
+    if (this.txn.sender !== (this.highestBidder.value.globalState('operator') as Address)) {
       const maxDelegatableStake = this.highestBidder.value.globalState('max_delegatable_stake') as uint64;
       const delegated = this.highestBidder.value.globalState('delegated_stake') as uint64;
       assert(delegated + amount <= maxDelegatableStake, 'amount exceeds max delegatable');
-      sendMethodCall<typeof CaelusValidatorPool.prototype.__addStake, void>({
-        applicationID: this.highestBidder.value,
-        methodArgs: [
-          {
-            receiver: this.highestBidder.value.address,
-            amount: amount,
-          },
-        ],
-      });
     }
+    sendMethodCall<typeof CaelusValidatorPool.prototype.__addStake, void>({
+      applicationID: this.highestBidder.value,
+      methodArgs: [
+        {
+          receiver: this.highestBidder.value.address,
+          amount: amount,
+        },
+      ],
+    });
+    this.idleStake.value -= amount;
   }
 
   /**
@@ -686,7 +690,7 @@ export class CaelusAdmin extends Contract {
   @abi.readonly
   arc62_get_circulating_supply(assetId: AssetID): uint64 {
     assert(assetId === this.tokenId.value, 'invalid asset id');
-    return this.tokenCirculatingSupply.value;
+    return this.tokenId.value.total - this.tokenId.value.reserve.assetBalance(assetId);
   }
 
   __cleanseOnValidatorDeletion(app: AppID): void {
@@ -701,6 +705,15 @@ export class CaelusAdmin extends Contract {
       this.highestBidder.value = AppID.zeroIndex;
     }
     this.burnQueue.value = queue;
+    this.stakeDust();
+  }
+
+  __onDustCollection(dustTxn: PayTxn, app: AppID): void {
+    verifyPayTxn(dustTxn, {
+      sender: app.address,
+      receiver: this.app.address,
+    });
+    this.stakeDust();
   }
 
   /**
@@ -708,10 +721,11 @@ export class CaelusAdmin extends Contract {
    */
 
   private calculateLSTRatio(): void {
-    if (this.tokenCirculatingSupply.value === 0) {
+    const supply = this.arc62_get_circulating_supply(this.tokenId.value);
+    if (supply === 0) {
       return;
     }
-    this.pegRatio.value = wideRatio([this.totalStake.value, SCALE], [this.tokenCirculatingSupply.value]);
+    this.pegRatio.value = wideRatio([this.totalStake.value, SCALE], [supply]);
   }
 
   private getMintAmount(amount: uint64): uint64 {
@@ -724,14 +738,21 @@ export class CaelusAdmin extends Contract {
     return wideRatio([amount, this.pegRatio.value], [SCALE]);
   }
 
-  private upSupplyCounters(stake: uint64, supply: uint64): void {
-    this.totalStake.value += stake;
-    this.tokenCirculatingSupply.value += supply;
+  private stakeDust(): void {
+    if (!this.idleStake.exists) {
+      this.idleStake.value = 0;
+    }
+    const dust = this.app.address.balance - this.app.address.minBalance - this.idleStake.value;
+    this.upStakeCounter(dust);
+    this.idleStake.value += dust;
   }
 
-  private downSupplyCounters(stake: uint64, supply: uint64): void {
+  private upStakeCounter(stake: uint64): void {
+    this.totalStake.value += stake;
+  }
+
+  private downStakeCounter(stake: uint64): void {
     this.totalStake.value -= stake;
-    this.tokenCirculatingSupply.value -= supply;
   }
 
   private doBurnTxn(target: AppID, args: [uint64, Address]): void {

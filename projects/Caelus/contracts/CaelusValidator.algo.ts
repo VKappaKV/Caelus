@@ -563,9 +563,15 @@ export class CaelusValidatorPool extends Contract {
       this.operatorYieldAccrued.value -
       this.delegatedStake.value -
       this.app.address.minBalance;
-    sendPayment({
-      receiver: this.creatorContractAppID.value.address,
-      amount: dust,
+    sendMethodCall<typeof CaelusAdmin.prototype.__onDustCollection>({
+      applicationID: this.creatorContractAppID.value,
+      methodArgs: [
+        {
+          receiver: this.creatorContractAppID.value.address,
+          amount: dust,
+        },
+        this.app,
+      ],
     });
   }
 
