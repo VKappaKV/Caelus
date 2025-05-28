@@ -390,7 +390,6 @@ export class CaelusAdmin extends Contract {
     verifyAssetTransferTxn(burnTxn, {
       xferAsset: this.tokenId.value,
       assetReceiver: this.app.address,
-      assetAmount: validatorAppID.address.assetBalance(this.tokenId.value),
     });
     const algoToBurn = this.getBurnAmount(burnTxn.assetAmount);
     const opCommit = validatorAppID.globalState('operator_commit') as uint64;
