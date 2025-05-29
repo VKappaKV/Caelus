@@ -910,14 +910,6 @@ mintRequest:
 	frame_bury 0 // minted: uint64
 
 	// contracts\CaelusAdmin.algo.ts:239
-	// this.doAxfer(this.txn.sender, minted, this.tokenId.value)
-	bytec 4 //  "token_id"
-	app_global_get
-	frame_dig 0 // minted: uint64
-	txn Sender
-	callsub doAxfer
-
-	// contracts\CaelusAdmin.algo.ts:240
 	// this.idleStake.value += mintTxn.amount
 	bytec 1 //  "idle_stake"
 	app_global_get
@@ -927,6 +919,14 @@ mintRequest:
 	bytec 1 //  "idle_stake"
 	swap
 	app_global_put
+
+	// contracts\CaelusAdmin.algo.ts:240
+	// this.doAxfer(this.txn.sender, minted, this.tokenId.value)
+	bytec 4 //  "token_id"
+	app_global_get
+	frame_dig 0 // minted: uint64
+	txn Sender
+	callsub doAxfer
 
 	// contracts\CaelusAdmin.algo.ts:241
 	// this.upStakeCounter(mintTxn.amount)
@@ -1777,13 +1777,6 @@ __onDelinquency:
 	assert
 
 	// contracts\CaelusAdmin.algo.ts:394
-	// algoToBurn = this.getBurnAmount(burnTxn.assetAmount)
-	frame_dig -2 // burnTxn: AssetTransferTxn
-	gtxns AssetAmount
-	callsub getBurnAmount
-	frame_bury 0 // algoToBurn: uint64
-
-	// contracts\CaelusAdmin.algo.ts:395
 	// opCommit = validatorAppID.globalState('operator_commit') as uint64
 	frame_dig -1 // validatorAppID: AppID
 	bytec 26 //  "operator_commit"
@@ -1791,19 +1784,26 @@ __onDelinquency:
 
 	// global state value does not exist: validatorAppID.globalState('operator_commit')
 	assert
-	frame_bury 1 // opCommit: uint64
+	frame_bury 0 // opCommit: uint64
+
+	// contracts\CaelusAdmin.algo.ts:395
+	// this.downStakeCounter(opCommit)
+	frame_dig 0 // opCommit: uint64
+	callsub downStakeCounter
 
 	// contracts\CaelusAdmin.algo.ts:396
-	// yieldAccrued = algoToBurn - opCommit
-	frame_dig 0 // algoToBurn: uint64
-	frame_dig 1 // opCommit: uint64
-	-
-	frame_bury 2 // yieldAccrued: uint64
+	// algoToBurn = this.getBurnAmount(burnTxn.assetAmount)
+	frame_dig -2 // burnTxn: AssetTransferTxn
+	gtxns AssetAmount
+	callsub getBurnAmount
+	frame_bury 1 // algoToBurn: uint64
 
 	// contracts\CaelusAdmin.algo.ts:397
-	// this.downStakeCounter(opCommit)
-	frame_dig 1 // opCommit: uint64
-	callsub downStakeCounter
+	// yieldAccrued = algoToBurn - opCommit
+	frame_dig 1 // algoToBurn: uint64
+	frame_dig 0 // opCommit: uint64
+	-
+	frame_bury 2 // yieldAccrued: uint64
 
 	// contracts\CaelusAdmin.algo.ts:399
 	// return yieldAccrued;

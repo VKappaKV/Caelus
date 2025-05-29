@@ -3849,97 +3849,97 @@
     "teal": 914,
     "source": "contracts\\CaelusAdmin.algo.ts:239",
     "pc": [
-      1210,
-      1211
+      1210
     ]
   },
   {
     "teal": 915,
     "source": "contracts\\CaelusAdmin.algo.ts:239",
     "pc": [
-      1212
+      1211
     ]
   },
   {
     "teal": 916,
     "source": "contracts\\CaelusAdmin.algo.ts:239",
     "pc": [
-      1213,
-      1214
+      1212,
+      1213
     ]
   },
   {
     "teal": 917,
     "source": "contracts\\CaelusAdmin.algo.ts:239",
     "pc": [
-      1215,
-      1216
+      1214,
+      1215
     ]
   },
   {
     "teal": 918,
     "source": "contracts\\CaelusAdmin.algo.ts:239",
     "pc": [
-      1217,
-      1218,
+      1216
+    ]
+  },
+  {
+    "teal": 919,
+    "source": "contracts\\CaelusAdmin.algo.ts:239",
+    "pc": [
+      1217
+    ]
+  },
+  {
+    "teal": 920,
+    "source": "contracts\\CaelusAdmin.algo.ts:239",
+    "pc": [
+      1218
+    ]
+  },
+  {
+    "teal": 921,
+    "source": "contracts\\CaelusAdmin.algo.ts:239",
+    "pc": [
       1219
-    ]
-  },
-  {
-    "teal": 922,
-    "source": "contracts\\CaelusAdmin.algo.ts:240",
-    "pc": [
-      1220
-    ]
-  },
-  {
-    "teal": 923,
-    "source": "contracts\\CaelusAdmin.algo.ts:240",
-    "pc": [
-      1221
-    ]
-  },
-  {
-    "teal": 924,
-    "source": "contracts\\CaelusAdmin.algo.ts:240",
-    "pc": [
-      1222,
-      1223
     ]
   },
   {
     "teal": 925,
     "source": "contracts\\CaelusAdmin.algo.ts:240",
     "pc": [
-      1224,
-      1225
+      1220,
+      1221
     ]
   },
   {
     "teal": 926,
     "source": "contracts\\CaelusAdmin.algo.ts:240",
     "pc": [
-      1226
+      1222
     ]
   },
   {
     "teal": 927,
     "source": "contracts\\CaelusAdmin.algo.ts:240",
     "pc": [
-      1227
+      1223,
+      1224
     ]
   },
   {
     "teal": 928,
     "source": "contracts\\CaelusAdmin.algo.ts:240",
     "pc": [
-      1228
+      1225,
+      1226
     ]
   },
   {
     "teal": 929,
     "source": "contracts\\CaelusAdmin.algo.ts:240",
     "pc": [
+      1227,
+      1228,
       1229
     ]
   },
@@ -7346,53 +7346,53 @@
     "teal": 1783,
     "source": "contracts\\CaelusAdmin.algo.ts:394",
     "pc": [
-      1967,
-      1968,
-      1969
+      1967
     ]
   },
   {
-    "teal": 1784,
+    "teal": 1786,
+    "source": "contracts\\CaelusAdmin.algo.ts:394",
+    "errorMessage": "global state value does not exist: validatorAppID.globalState('operator_commit')",
+    "pc": [
+      1968
+    ]
+  },
+  {
+    "teal": 1787,
     "source": "contracts\\CaelusAdmin.algo.ts:394",
     "pc": [
-      1970,
-      1971
+      1969,
+      1970
     ]
   },
   {
-    "teal": 1788,
+    "teal": 1791,
     "source": "contracts\\CaelusAdmin.algo.ts:395",
     "pc": [
-      1972,
-      1973
+      1971,
+      1972
     ]
   },
   {
-    "teal": 1789,
+    "teal": 1792,
     "source": "contracts\\CaelusAdmin.algo.ts:395",
     "pc": [
+      1973,
       1974,
       1975
     ]
   },
   {
-    "teal": 1790,
-    "source": "contracts\\CaelusAdmin.algo.ts:395",
+    "teal": 1796,
+    "source": "contracts\\CaelusAdmin.algo.ts:396",
     "pc": [
-      1976
-    ]
-  },
-  {
-    "teal": 1793,
-    "source": "contracts\\CaelusAdmin.algo.ts:395",
-    "errorMessage": "global state value does not exist: validatorAppID.globalState('operator_commit')",
-    "pc": [
+      1976,
       1977
     ]
   },
   {
-    "teal": 1794,
-    "source": "contracts\\CaelusAdmin.algo.ts:395",
+    "teal": 1797,
+    "source": "contracts\\CaelusAdmin.algo.ts:396",
     "pc": [
       1978,
       1979
@@ -7403,34 +7403,28 @@
     "source": "contracts\\CaelusAdmin.algo.ts:396",
     "pc": [
       1980,
-      1981
+      1981,
+      1982
     ]
   },
   {
     "teal": 1799,
     "source": "contracts\\CaelusAdmin.algo.ts:396",
     "pc": [
-      1982,
-      1983
-    ]
-  },
-  {
-    "teal": 1800,
-    "source": "contracts\\CaelusAdmin.algo.ts:396",
-    "pc": [
+      1983,
       1984
     ]
   },
   {
-    "teal": 1801,
-    "source": "contracts\\CaelusAdmin.algo.ts:396",
+    "teal": 1803,
+    "source": "contracts\\CaelusAdmin.algo.ts:397",
     "pc": [
       1985,
       1986
     ]
   },
   {
-    "teal": 1805,
+    "teal": 1804,
     "source": "contracts\\CaelusAdmin.algo.ts:397",
     "pc": [
       1987,
@@ -7438,10 +7432,16 @@
     ]
   },
   {
+    "teal": 1805,
+    "source": "contracts\\CaelusAdmin.algo.ts:397",
+    "pc": [
+      1989
+    ]
+  },
+  {
     "teal": 1806,
     "source": "contracts\\CaelusAdmin.algo.ts:397",
     "pc": [
-      1989,
       1990,
       1991
     ]

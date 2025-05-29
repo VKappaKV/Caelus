@@ -3032,6 +3032,16 @@ setDelinquency:
 	bytec 3 // 0x
 
 	// contracts\CaelusValidator.algo.ts:703
+	// assert(this.status.value !== DELINQUENCY_STATUS, 'Account already delinquent')
+	bytec 5 //  "status"
+	app_global_get
+	intc 2 // 2
+	!=
+
+	// Account already delinquent
+	assert
+
+	// contracts\CaelusValidator.algo.ts:704
 	// yieldAccrued = sendMethodCall<typeof CaelusAdmin.prototype.__onDelinquency, uint64>({
 	//       applicationID: this.creatorContractAppID.value,
 	//       methodArgs: [
@@ -3047,13 +3057,13 @@ setDelinquency:
 	intc 5 //  axfer
 	itxn_field TypeEnum
 
-	// contracts\CaelusValidator.algo.ts:708
+	// contracts\CaelusValidator.algo.ts:709
 	// xferAsset: this.tokenId.value
 	bytec 10 //  "token_id"
 	app_global_get
 	itxn_field XferAsset
 
-	// contracts\CaelusValidator.algo.ts:709
+	// contracts\CaelusValidator.algo.ts:710
 	// assetReceiver: this.creatorContractAppID.value.address
 	bytec 2 //  "creator"
 	app_global_get
@@ -3061,7 +3071,7 @@ setDelinquency:
 	pop
 	itxn_field AssetReceiver
 
-	// contracts\CaelusValidator.algo.ts:710
+	// contracts\CaelusValidator.algo.ts:711
 	// assetAmount: this.app.address.assetBalance(this.tokenId.value)
 	global CurrentApplicationAddress
 	bytec 10 //  "token_id"
@@ -3079,13 +3089,13 @@ setDelinquency:
 	pushbytes 0x6ff47287 // method "__onDelinquency(uint64,axfer)uint64"
 	itxn_field ApplicationArgs
 
-	// contracts\CaelusValidator.algo.ts:704
+	// contracts\CaelusValidator.algo.ts:705
 	// applicationID: this.creatorContractAppID.value
 	bytec 2 //  "creator"
 	app_global_get
 	itxn_field ApplicationID
 
-	// contracts\CaelusValidator.algo.ts:705
+	// contracts\CaelusValidator.algo.ts:706
 	// methodArgs: [
 	//         this.app,
 	//         {
@@ -3112,7 +3122,7 @@ setDelinquency:
 	btoi
 	frame_bury 0 // yieldAccrued: uint64
 
-	// contracts\CaelusValidator.algo.ts:714
+	// contracts\CaelusValidator.algo.ts:715
 	// sendPayment({
 	//       receiver: this.creatorContractAppID.value.address,
 	//       amount: this.delegatedStake.value,
@@ -3121,7 +3131,7 @@ setDelinquency:
 	intc 1 //  pay
 	itxn_field TypeEnum
 
-	// contracts\CaelusValidator.algo.ts:715
+	// contracts\CaelusValidator.algo.ts:716
 	// receiver: this.creatorContractAppID.value.address
 	bytec 2 //  "creator"
 	app_global_get
@@ -3129,7 +3139,7 @@ setDelinquency:
 	pop
 	itxn_field Receiver
 
-	// contracts\CaelusValidator.algo.ts:716
+	// contracts\CaelusValidator.algo.ts:717
 	// amount: this.delegatedStake.value
 	bytec 1 //  "delegated_stake"
 	app_global_get
@@ -3142,29 +3152,29 @@ setDelinquency:
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts\CaelusValidator.algo.ts:718
+	// contracts\CaelusValidator.algo.ts:719
 	// this.delegatedStake.value = 0
 	bytec 1 //  "delegated_stake"
 	intc 0 // 0
 	app_global_put
 
-	// contracts\CaelusValidator.algo.ts:719
+	// contracts\CaelusValidator.algo.ts:720
 	// this.performanceCounter.value = 0
 	bytec 9 //  "performance"
 	intc 0 // 0
 	app_global_put
 
-	// contracts\CaelusValidator.algo.ts:720
+	// contracts\CaelusValidator.algo.ts:721
 	// this.updateDelegationFactors()
 	callsub updateDelegationFactors
 
-	// contracts\CaelusValidator.algo.ts:721
+	// contracts\CaelusValidator.algo.ts:722
 	// this.status.value = DELINQUENCY_STATUS
 	bytec 5 //  "status"
 	intc 2 // 2
 	app_global_put
 
-	// contracts\CaelusValidator.algo.ts:722
+	// contracts\CaelusValidator.algo.ts:723
 	// this.operatorYieldAccrued.value = yieldAccrued
 	bytec 8 //  "operator_yield_accrued"
 	frame_dig 0 // yieldAccrued: uint64
@@ -3176,7 +3186,7 @@ fixDelinquencyScore:
 	proto 0 0
 
 	// *if20_condition
-	// contracts\CaelusValidator.algo.ts:726
+	// contracts\CaelusValidator.algo.ts:727
 	// this.delinquencyScore.value === 0
 	bytec 7 //  "delinquency_score"
 	app_global_get
@@ -3185,13 +3195,13 @@ fixDelinquencyScore:
 	bz *if20_end
 
 	// *if20_consequent
-	// contracts\CaelusValidator.algo.ts:727
+	// contracts\CaelusValidator.algo.ts:728
 	// return;
 	retsub
 
 *if20_end:
 	// *if21_condition
-	// contracts\CaelusValidator.algo.ts:729
+	// contracts\CaelusValidator.algo.ts:730
 	// this.status.value === DELINQUENCY_STATUS
 	bytec 5 //  "status"
 	app_global_get
@@ -3200,7 +3210,7 @@ fixDelinquencyScore:
 	bz *if21_end
 
 	// *if21_consequent
-	// contracts\CaelusValidator.algo.ts:730
+	// contracts\CaelusValidator.algo.ts:731
 	// this.delinquencyScore.value -= 5
 	bytec 7 //  "delinquency_score"
 	app_global_get
@@ -3211,7 +3221,7 @@ fixDelinquencyScore:
 	app_global_put
 
 *if21_end:
-	// contracts\CaelusValidator.algo.ts:732
+	// contracts\CaelusValidator.algo.ts:733
 	// this.delinquencyScore.value = 0
 	bytec 7 //  "delinquency_score"
 	intc 0 // 0
@@ -3222,7 +3232,7 @@ fixDelinquencyScore:
 purge:
 	proto 0 0
 
-	// contracts\CaelusValidator.algo.ts:736
+	// contracts\CaelusValidator.algo.ts:737
 	// sendAssetTransfer({
 	//       xferAsset: this.tokenId.value,
 	//       assetReceiver: this.operatorAddress.value,
@@ -3233,25 +3243,25 @@ purge:
 	intc 5 //  axfer
 	itxn_field TypeEnum
 
-	// contracts\CaelusValidator.algo.ts:737
+	// contracts\CaelusValidator.algo.ts:738
 	// xferAsset: this.tokenId.value
 	bytec 10 //  "token_id"
 	app_global_get
 	itxn_field XferAsset
 
-	// contracts\CaelusValidator.algo.ts:738
+	// contracts\CaelusValidator.algo.ts:739
 	// assetReceiver: this.operatorAddress.value
 	bytec 4 //  "operator"
 	app_global_get
 	itxn_field AssetReceiver
 
-	// contracts\CaelusValidator.algo.ts:739
+	// contracts\CaelusValidator.algo.ts:740
 	// assetCloseTo: this.operatorAddress.value
 	bytec 4 //  "operator"
 	app_global_get
 	itxn_field AssetCloseTo
 
-	// contracts\CaelusValidator.algo.ts:740
+	// contracts\CaelusValidator.algo.ts:741
 	// assetAmount: this.app.address.assetBalance(this.tokenId.value)
 	global CurrentApplicationAddress
 	bytec 10 //  "token_id"
@@ -3267,7 +3277,7 @@ purge:
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts\CaelusValidator.algo.ts:742
+	// contracts\CaelusValidator.algo.ts:743
 	// sendPayment({
 	//       receiver: this.creatorContractAppID.value.address,
 	//       amount: this.operatorCommit.value + this.delegatedStake.value,
@@ -3277,7 +3287,7 @@ purge:
 	intc 1 //  pay
 	itxn_field TypeEnum
 
-	// contracts\CaelusValidator.algo.ts:743
+	// contracts\CaelusValidator.algo.ts:744
 	// receiver: this.creatorContractAppID.value.address
 	bytec 2 //  "creator"
 	app_global_get
@@ -3285,7 +3295,7 @@ purge:
 	pop
 	itxn_field Receiver
 
-	// contracts\CaelusValidator.algo.ts:744
+	// contracts\CaelusValidator.algo.ts:745
 	// amount: this.operatorCommit.value + this.delegatedStake.value
 	bytec 0 //  "operator_commit"
 	app_global_get
@@ -3294,7 +3304,7 @@ purge:
 	+
 	itxn_field Amount
 
-	// contracts\CaelusValidator.algo.ts:745
+	// contracts\CaelusValidator.algo.ts:746
 	// closeRemainderTo: this.creatorContractAppID.value.globalState('manager') as Address
 	bytec 2 //  "creator"
 	app_global_get
@@ -3321,13 +3331,13 @@ updateDelegationFactors:
 	bytec 3 // 0x
 	dup
 
-	// contracts\CaelusValidator.algo.ts:750
+	// contracts\CaelusValidator.algo.ts:751
 	// isDelinquent = false
 	intc 0 // 0
 	frame_bury 0 // isDelinquent: bool
 
 	// *if22_condition
-	// contracts\CaelusValidator.algo.ts:751
+	// contracts\CaelusValidator.algo.ts:752
 	// this.status.value === DELINQUENCY_STATUS
 	bytec 5 //  "status"
 	app_global_get
@@ -3336,14 +3346,14 @@ updateDelegationFactors:
 	bz *if22_end
 
 	// *if22_consequent
-	// contracts\CaelusValidator.algo.ts:752
+	// contracts\CaelusValidator.algo.ts:753
 	// isDelinquent = true
 	intc 1 // 1
 	frame_bury 0 // isDelinquent: bool
 
 *if22_end:
 	// *if23_condition
-	// contracts\CaelusValidator.algo.ts:755
+	// contracts\CaelusValidator.algo.ts:756
 	// this.operatorCommit.value > globals.payoutsMinBalance
 	bytec 0 //  "operator_commit"
 	app_global_get
@@ -3352,14 +3362,14 @@ updateDelegationFactors:
 	bz *if23_else
 
 	// *if23_consequent
-	// contracts\CaelusValidator.algo.ts:756
+	// contracts\CaelusValidator.algo.ts:757
 	// this.maxDelegatableStake.value = this.operatorCommit.value
 	bytec 6 //  "max_delegatable_stake"
 	bytec 0 //  "operator_commit"
 	app_global_get
 	app_global_put
 
-	// contracts\CaelusValidator.algo.ts:758
+	// contracts\CaelusValidator.algo.ts:759
 	// tokenBoost = (this.getTier() * this.operatorCommit.value) / 2
 	callsub getTier
 	bytec 0 //  "operator_commit"
@@ -3369,7 +3379,7 @@ updateDelegationFactors:
 	/
 	frame_bury 1 // tokenBoost: uint64
 
-	// contracts\CaelusValidator.algo.ts:759
+	// contracts\CaelusValidator.algo.ts:760
 	// this.maxDelegatableStake.value += tokenBoost
 	bytec 6 //  "max_delegatable_stake"
 	app_global_get
@@ -3379,7 +3389,7 @@ updateDelegationFactors:
 	swap
 	app_global_put
 
-	// contracts\CaelusValidator.algo.ts:762
+	// contracts\CaelusValidator.algo.ts:763
 	// this.maxDelegatableStake.value += PERFORMANCE_STAKE_INCREASE * (this.performanceCounter.value / PERFORMANCE_STEP)
 	bytec 6 //  "max_delegatable_stake"
 	app_global_get
@@ -3395,7 +3405,7 @@ updateDelegationFactors:
 	app_global_put
 
 	// *if24_condition
-	// contracts\CaelusValidator.algo.ts:765
+	// contracts\CaelusValidator.algo.ts:766
 	// this.app.address.balance >= MAX_STAKE_PER_ACCOUNT
 	global CurrentApplicationAddress
 	acct_params_get AcctBalance
@@ -3405,21 +3415,21 @@ updateDelegationFactors:
 	bz *if24_elseif1_condition
 
 	// *if24_consequent
-	// contracts\CaelusValidator.algo.ts:766
+	// contracts\CaelusValidator.algo.ts:767
 	// this.maxDelegatableStake.value = 0
 	bytec 6 //  "max_delegatable_stake"
 	intc 0 // 0
 	app_global_put
 
 	// *if25_condition
-	// contracts\CaelusValidator.algo.ts:767
+	// contracts\CaelusValidator.algo.ts:768
 	// !isDelinquent
 	frame_dig 0 // isDelinquent: bool
 	!
 	bz *if25_end
 
 	// *if25_consequent
-	// contracts\CaelusValidator.algo.ts:768
+	// contracts\CaelusValidator.algo.ts:769
 	// this.status.value = NOT_DELEGATABLE_STATUS
 	bytec 5 //  "status"
 	intc 1 // 1
@@ -3429,7 +3439,7 @@ updateDelegationFactors:
 	b *if24_end
 
 *if24_elseif1_condition:
-	// contracts\CaelusValidator.algo.ts:770
+	// contracts\CaelusValidator.algo.ts:771
 	// this.app.address.balance + this.maxDelegatableStake.value > MAX_STAKE_PER_ACCOUNT
 	global CurrentApplicationAddress
 	acct_params_get AcctBalance
@@ -3442,7 +3452,7 @@ updateDelegationFactors:
 	bz *if24_end
 
 	// *if24_elseif1_consequent
-	// contracts\CaelusValidator.algo.ts:771
+	// contracts\CaelusValidator.algo.ts:772
 	// this.maxDelegatableStake.value = MAX_STAKE_PER_ACCOUNT - this.app.address.balance
 	bytec 6 //  "max_delegatable_stake"
 	intc 4 // 50000000000000
@@ -3456,21 +3466,21 @@ updateDelegationFactors:
 	b *if23_end
 
 *if23_else:
-	// contracts\CaelusValidator.algo.ts:774
+	// contracts\CaelusValidator.algo.ts:775
 	// this.maxDelegatableStake.value = 0
 	bytec 6 //  "max_delegatable_stake"
 	intc 0 // 0
 	app_global_put
 
 	// *if26_condition
-	// contracts\CaelusValidator.algo.ts:775
+	// contracts\CaelusValidator.algo.ts:776
 	// !isDelinquent
 	frame_dig 0 // isDelinquent: bool
 	!
 	bz *if26_end
 
 	// *if26_consequent
-	// contracts\CaelusValidator.algo.ts:776
+	// contracts\CaelusValidator.algo.ts:777
 	// this.status.value = NOT_DELEGATABLE_STATUS
 	bytec 5 //  "status"
 	intc 1 // 1
@@ -3480,7 +3490,7 @@ updateDelegationFactors:
 
 *if23_end:
 	// *if27_condition
-	// contracts\CaelusValidator.algo.ts:781
+	// contracts\CaelusValidator.algo.ts:782
 	// this.maxDelegatableStake.value > 0
 	bytec 6 //  "max_delegatable_stake"
 	app_global_get
@@ -3489,7 +3499,7 @@ updateDelegationFactors:
 	bz *if27_else
 
 	// *if27_consequent
-	// contracts\CaelusValidator.algo.ts:782
+	// contracts\CaelusValidator.algo.ts:783
 	// this.saturationBuffer.value = (this.delegatedStake.value * BUFFER_MAX) / this.maxDelegatableStake.value
 	bytec 12 //  "saturation_buffer"
 	bytec 1 //  "delegated_stake"
@@ -3503,21 +3513,21 @@ updateDelegationFactors:
 	b *if27_end
 
 *if27_else:
-	// contracts\CaelusValidator.algo.ts:784
+	// contracts\CaelusValidator.algo.ts:785
 	// this.saturationBuffer.value = BUFFER_MAX
 	bytec 12 //  "saturation_buffer"
 	intc 6 // 1000000
 	app_global_put
 
 	// *if28_condition
-	// contracts\CaelusValidator.algo.ts:785
+	// contracts\CaelusValidator.algo.ts:786
 	// !isDelinquent
 	frame_dig 0 // isDelinquent: bool
 	!
 	bz *if28_end
 
 	// *if28_consequent
-	// contracts\CaelusValidator.algo.ts:786
+	// contracts\CaelusValidator.algo.ts:787
 	// this.status.value = NOT_DELEGATABLE_STATUS
 	bytec 5 //  "status"
 	intc 1 // 1
@@ -3527,25 +3537,25 @@ updateDelegationFactors:
 
 *if27_end:
 	// *if29_condition
-	// contracts\CaelusValidator.algo.ts:790
+	// contracts\CaelusValidator.algo.ts:791
 	// isDelinquent
 	frame_dig 0 // isDelinquent: bool
 	bz *if29_end
 
 	// *if29_consequent
-	// contracts\CaelusValidator.algo.ts:791
+	// contracts\CaelusValidator.algo.ts:792
 	// this.maxDelegatableStake.value = 0
 	bytec 6 //  "max_delegatable_stake"
 	intc 0 // 0
 	app_global_put
 
-	// contracts\CaelusValidator.algo.ts:792
+	// contracts\CaelusValidator.algo.ts:793
 	// this.performanceCounter.value = 0
 	bytec 9 //  "performance"
 	intc 0 // 0
 	app_global_put
 
-	// contracts\CaelusValidator.algo.ts:793
+	// contracts\CaelusValidator.algo.ts:794
 	// this.saturationBuffer.value = BUFFER_MAX
 	bytec 12 //  "saturation_buffer"
 	intc 6 // 1000000
@@ -3562,13 +3572,13 @@ getTier:
 	bytec 3 // 0x
 	dupn 2
 
-	// contracts\CaelusValidator.algo.ts:798
+	// contracts\CaelusValidator.algo.ts:799
 	// boostToken = AssetID.zeroIndex
 	intc 0 // 0
 	frame_bury 0 // boostToken: uint64
 
 	// *if30_condition
-	// contracts\CaelusValidator.algo.ts:799
+	// contracts\CaelusValidator.algo.ts:800
 	// !this.boostTokenID.exists
 	txna Applications 0
 	bytec 15 //  "boost_token_id"
@@ -3579,7 +3589,7 @@ getTier:
 	bz *if30_end
 
 	// *if30_consequent
-	// contracts\CaelusValidator.algo.ts:800
+	// contracts\CaelusValidator.algo.ts:801
 	// this.boostTokenID.value = this.creatorContractAppID.value.globalState('boost_token_id') as AssetID
 	bytec 15 //  "boost_token_id"
 	bytec 2 //  "creator"
@@ -3592,14 +3602,14 @@ getTier:
 	app_global_put
 
 *if30_end:
-	// contracts\CaelusValidator.algo.ts:802
+	// contracts\CaelusValidator.algo.ts:803
 	// boostToken = this.boostTokenID.value
 	bytec 15 //  "boost_token_id"
 	app_global_get
 	frame_bury 0 // boostToken: uint64
 
 	// *if31_condition
-	// contracts\CaelusValidator.algo.ts:803
+	// contracts\CaelusValidator.algo.ts:804
 	// boostToken === AssetID.zeroIndex
 	frame_dig 0 // boostToken: uint64
 	intc 0 // 0
@@ -3607,14 +3617,14 @@ getTier:
 	bz *if31_end
 
 	// *if31_consequent
-	// contracts\CaelusValidator.algo.ts:803
+	// contracts\CaelusValidator.algo.ts:804
 	// return 0;
 	intc 0 // 0
 	b *getTier*return
 
 *if31_end:
 	// *if32_condition
-	// contracts\CaelusValidator.algo.ts:804
+	// contracts\CaelusValidator.algo.ts:805
 	// this.operatorAddress.value.isOptedInToAsset(boostToken)
 	bytec 4 //  "operator"
 	app_global_get
@@ -3625,13 +3635,13 @@ getTier:
 	bz *if32_end
 
 	// *if32_consequent
-	// contracts\CaelusValidator.algo.ts:804
+	// contracts\CaelusValidator.algo.ts:805
 	// return 0;
 	intc 0 // 0
 	b *getTier*return
 
 *if32_end:
-	// contracts\CaelusValidator.algo.ts:805
+	// contracts\CaelusValidator.algo.ts:806
 	// ownedToken = this.operatorAddress.value.assetBalance(boostToken)
 	bytec 4 //  "operator"
 	app_global_get
@@ -3641,7 +3651,7 @@ getTier:
 	frame_bury 1 // ownedToken: uint64
 
 	// *if33_condition
-	// contracts\CaelusValidator.algo.ts:806
+	// contracts\CaelusValidator.algo.ts:807
 	// ownedToken === 0
 	frame_dig 1 // ownedToken: uint64
 	intc 0 // 0
@@ -3649,13 +3659,13 @@ getTier:
 	bz *if33_end
 
 	// *if33_consequent
-	// contracts\CaelusValidator.algo.ts:806
+	// contracts\CaelusValidator.algo.ts:807
 	// return 0;
 	intc 0 // 0
 	b *getTier*return
 
 *if33_end:
-	// contracts\CaelusValidator.algo.ts:807
+	// contracts\CaelusValidator.algo.ts:808
 	// getTier = sendMethodCall<typeof CaelusAdmin.prototype.getBoostTier, uint64>({
 	//       applicationID: this.creatorContractAppID.value,
 	//       methodArgs: [ownedToken],
@@ -3666,13 +3676,13 @@ getTier:
 	pushbytes 0x00c3a714 // method "getBoostTier(uint64)uint64"
 	itxn_field ApplicationArgs
 
-	// contracts\CaelusValidator.algo.ts:808
+	// contracts\CaelusValidator.algo.ts:809
 	// applicationID: this.creatorContractAppID.value
 	bytec 2 //  "creator"
 	app_global_get
 	itxn_field ApplicationID
 
-	// contracts\CaelusValidator.algo.ts:809
+	// contracts\CaelusValidator.algo.ts:810
 	// methodArgs: [ownedToken]
 	frame_dig 1 // ownedToken: uint64
 	itob
@@ -3692,7 +3702,7 @@ getTier:
 	btoi
 	frame_bury 2 // getTier: uint64
 
-	// contracts\CaelusValidator.algo.ts:811
+	// contracts\CaelusValidator.algo.ts:812
 	// return getTier;
 	frame_dig 2 // getTier: uint64
 
@@ -3708,7 +3718,7 @@ getTier:
 getToleratedProposalDelta:
 	proto 0 1
 
-	// contracts\CaelusValidator.algo.ts:815
+	// contracts\CaelusValidator.algo.ts:816
 	// return this.getExpectedProposalsDelta() * 3;
 	callsub getExpectedProposalsDelta
 	pushint 3
@@ -3723,25 +3733,25 @@ getExpectedProposalsDelta:
 	bytec 3 // 0x
 	dupn 2
 
-	// contracts\CaelusValidator.algo.ts:819
+	// contracts\CaelusValidator.algo.ts:820
 	// currentOnlineStake = onlineStake()
 	online_stake
 	frame_bury 0 // currentOnlineStake: uint64
 
-	// contracts\CaelusValidator.algo.ts:820
+	// contracts\CaelusValidator.algo.ts:821
 	// currentAccountStake = this.app.address.voterBalance
 	global CurrentApplicationAddress
 	voter_params_get VoterBalance
 	frame_bury 1 // currentAccountStake: uint64
 
-	// contracts\CaelusValidator.algo.ts:821
+	// contracts\CaelusValidator.algo.ts:822
 	// roundDelta = currentOnlineStake / currentAccountStake
 	frame_dig 0 // currentOnlineStake: uint64
 	frame_dig 1 // currentAccountStake: uint64
 	/
 	frame_bury 2 // roundDelta: uint64
 
-	// contracts\CaelusValidator.algo.ts:822
+	// contracts\CaelusValidator.algo.ts:823
 	// return roundDelta * 20;
 	frame_dig 2 // roundDelta: uint64
 	pushint 20
