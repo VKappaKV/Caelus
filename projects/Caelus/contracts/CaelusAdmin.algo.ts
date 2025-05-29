@@ -236,8 +236,8 @@ export class CaelusAdmin extends Contract {
     });
 
     const minted = this.getMintAmount(mintTxn.amount);
-    this.doAxfer(this.txn.sender, minted, this.tokenId.value);
     this.idleStake.value += mintTxn.amount;
+    this.doAxfer(this.txn.sender, minted, this.tokenId.value);
     this.upStakeCounter(mintTxn.amount);
 
     this.mintEvent.log({
@@ -391,10 +391,10 @@ export class CaelusAdmin extends Contract {
       xferAsset: this.tokenId.value,
       assetReceiver: this.app.address,
     });
-    const algoToBurn = this.getBurnAmount(burnTxn.assetAmount);
     const opCommit = validatorAppID.globalState('operator_commit') as uint64;
-    const yieldAccrued = algoToBurn - opCommit;
     this.downStakeCounter(opCommit);
+    const algoToBurn = this.getBurnAmount(burnTxn.assetAmount);
+    const yieldAccrued = algoToBurn - opCommit;
 
     return yieldAccrued;
   }

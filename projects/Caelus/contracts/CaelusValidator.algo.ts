@@ -700,6 +700,7 @@ export class CaelusValidatorPool extends Contract {
   }
 
   private setDelinquency(): void {
+    assert(this.status.value !== DELINQUENCY_STATUS, 'Account already delinquent');
     const yieldAccrued = sendMethodCall<typeof CaelusAdmin.prototype.__onDelinquency, uint64>({
       applicationID: this.creatorContractAppID.value,
       methodArgs: [
