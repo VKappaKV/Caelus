@@ -1,7 +1,14 @@
 /* eslint-disable camelcase */
 import { Contract } from '@algorandfoundation/tealscript';
-import { NOT_DELEGATABLE_STATUS, PROTOCOL_COMMISSION, SCALE, VALIDATOR_POOL_MBR } from './constants.algo';
-import { Puppet } from './ValidatorPuppet.algo';
+import {
+  ALGORAND_BASE_FEE,
+  MBR_OPT_IN,
+  NOT_DELEGATABLE_STATUS,
+  PROTOCOL_COMMISSION,
+  SCALE,
+  VALIDATOR_POOL_MBR,
+} from './constants.algo';
+import { Puppet } from './Puppet.algo';
 
 interface Validator {
   commit: uint64;
@@ -68,10 +75,20 @@ export class Equilibrium extends Contract {
     });
   }
 
-  spawnValidator(mbr: PayTxn): void {
+  mint(): void {}
+
+  burn(): void {}
+
+  snitch(): void {}
+
+  bid(): void {}
+
+  delegate(): void {}
+
+  spawn_validator(mbr: PayTxn): void {
     verifyPayTxn(mbr, {
       receiver: this.app.address,
-      amount: VALIDATOR_POOL_MBR,
+      amount: VALIDATOR_POOL_MBR + ALGORAND_BASE_FEE,
     });
 
     const validator_address = sendMethodCall<typeof Puppet.prototype.spawn>({
@@ -82,7 +99,7 @@ export class Equilibrium extends Contract {
 
     sendPayment({
       receiver: validator_address,
-      amount: 100_000,
+      amount: MBR_OPT_IN + ALGORAND_BASE_FEE,
     });
 
     sendAssetTransfer({
@@ -103,5 +120,55 @@ export class Equilibrium extends Contract {
       last_report: 0,
       delinquency: 0,
     };
+  }
+
+  operator_commit(commitTxn: PayTxn): void {
+    // Txn -> validator address
+    // Send LST with equivalent value to commit w.r.t. peg ratio
+    // Update values
+  }
+
+  operator_unstake(amount: uint64): void {
+    // amount is in LST
+    // turn the LST amount into ALGO w.r.t. peg ratio
+    // send LST to operator
+    // move Algo amount into idle stake
+  }
+
+  go_online(
+    fee_payment: PayTxn,
+    vote_PK: bytes,
+    selection_PK: bytes,
+    state_proof_PK: bytes,
+    vote_first: uint64,
+    vote_last: uint64,
+    vote_key_dilution: uint64
+  ): void {
+    // fee_payment is the fee to pay for the validator to go online and be eligible for rewards
+    // check that the fee payment is correct
+    // check sender is the operator of the validator
+    // set status to ONLINE
+  }
+
+  go_offline(): void {
+    // check sender is the operator of the validator
+    // set status to OFFLINE
+  }
+
+  report_block(): void {}
+
+  report_delinquency(): void {
+    // check delinquency values: stake amount, last block etc.
+    // set status to DELINQUENT || increment delinquency counter
+  }
+
+  solve_delinquency(): void {}
+
+  close_validator(): void {
+    // check sender is the operator of the validator
+    // check that the validator is not delinquent
+    // send all Algo to idle stake
+    // send all LST to operator
+    // delete validator from map & closeout account
   }
 }

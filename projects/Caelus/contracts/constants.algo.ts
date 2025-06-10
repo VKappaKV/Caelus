@@ -7,7 +7,9 @@ export type SnitchInfo = {
 
 export const ALGORAND_BASE_FEE = 1000;
 
-export const VALIDATOR_POOL_MBR = 2_041_900;
+export const MBR_OPT_IN = 100_000;
+
+export const VALIDATOR_POOL_MBR = 2_040_900;
 
 export const PROTOCOL_COMMISSION = 4;
 export const VALIDATOR_COMMISSION = 6;
