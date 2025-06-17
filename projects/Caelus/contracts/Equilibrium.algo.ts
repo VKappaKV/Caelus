@@ -2,7 +2,9 @@
 import { Contract } from '@algorandfoundation/tealscript';
 import {
   ALGORAND_BASE_FEE,
+  MAX_STAKE_PER_ACCOUNT,
   MBR_OPT_IN,
+  NEUTRAL_STATUS,
   NOT_DELEGATABLE_STATUS,
   PROTOCOL_COMMISSION,
   SCALE,
@@ -29,6 +31,8 @@ export class Equilibrium extends Contract {
   protocol_fee = GlobalStateKey<uint64>({ key: 'protocol_fee' });
 
   total_stake = GlobalStateKey<uint64>({ key: 'total_stake' });
+
+  supply = GlobalStateKey<uint64>({ key: 'supply' });
 
   peg_ratio = GlobalStateKey<uint64>({ key: 'peg_ratio' });
 
@@ -91,6 +95,8 @@ export class Equilibrium extends Contract {
       amount: VALIDATOR_POOL_MBR + ALGORAND_BASE_FEE,
     });
 
+    assert(this.operator_to_validator_map(this.txn.sender).exists === false, 'Operator already has a validator');
+
     const validator_address = sendMethodCall<typeof Puppet.prototype.spawn>({
       onCompletion: OnCompletion.DeleteApplication,
       approvalProgram: Puppet.approvalProgram(),
@@ -144,15 +150,43 @@ export class Equilibrium extends Contract {
     vote_last: uint64,
     vote_key_dilution: uint64
   ): void {
-    // fee_payment is the fee to pay for the validator to go online and be eligible for rewards
-    // check that the fee payment is correct
-    // check sender is the operator of the validator
-    // set status to ONLINE
+    assert(this.operator_to_validator_map(this.txn.sender).exists, 'Operator does not have a validator');
+    const validator_address = this.operator_to_validator_map(this.txn.sender).value;
+    verifyPayTxn(fee_payment, {
+      receiver: validator_address,
+      amount: this.get_online_fee(),
+    });
+
+    assert(
+      validator_address.balance >= globals.payoutsMinBalance && validator_address.balance <= MAX_STAKE_PER_ACCOUNT
+    );
+
+    sendOnlineKeyRegistration({
+      sender: validator_address,
+      votePK: vote_PK,
+      selectionPK: selection_PK,
+      stateProofPK: state_proof_PK,
+      voteFirst: vote_first,
+      voteLast: vote_last,
+      voteKeyDilution: vote_key_dilution,
+      fee: fee_payment.amount,
+    });
+
+    const val_info = clone(this.validator(validator_address).value);
+
+    if (val_info.status === NOT_DELEGATABLE_STATUS) {
+      val_info.status = NEUTRAL_STATUS;
+    }
+    this.validator(validator_address).value = val_info;
   }
 
   go_offline(): void {
-    // check sender is the operator of the validator
-    // set status to OFFLINE
+    assert(this.operator_to_validator_map(this.txn.sender).exists, 'Operator does not have a validator');
+    const validator_address = this.operator_to_validator_map(this.txn.sender).value;
+    sendOfflineKeyRegistration({
+      sender: validator_address,
+    });
+    this.validator(validator_address).value.status = NOT_DELEGATABLE_STATUS;
   }
 
   report_block(): void {}
@@ -170,5 +204,29 @@ export class Equilibrium extends Contract {
     // send all Algo to idle stake
     // send all LST to operator
     // delete validator from map & closeout account
+  }
+
+  private get_online_fee(): uint64 {
+    if (!this.app.address.incentiveEligible) {
+      return globals.payoutsGoOnlineFee;
+    }
+    return 0;
+  }
+
+  private get_peg(): void {
+    if (this.supply.value === 0) {
+      return;
+    }
+    this.peg_ratio.value = wideRatio([this.total_stake.value, SCALE], [this.supply.value]);
+  }
+
+  private get_mint_amount(amount: uint64): uint64 {
+    this.get_peg();
+    return wideRatio([amount, SCALE], [this.peg_ratio.value]);
+  }
+
+  private get_burn_amount(amount: uint64): uint64 {
+    this.get_peg();
+    return wideRatio([amount, this.peg_ratio.value], [SCALE]);
   }
 }
