@@ -79,7 +79,19 @@ export class Equilibrium extends Contract {
     });
   }
 
-  mint(): void {}
+  mint(mintTxn: PayTxn): void {
+    verifyPayTxn(mintTxn, {
+      sender: this.txn.sender,
+      receiver: this.app.address,
+      amount: { greaterThanEqualTo: ALGORAND_BASE_FEE },
+    });
+    sendAssetTransfer({
+      assetReceiver: this.txn.sender,
+      xferAsset: this.token_id.value,
+      assetAmount: this.get_mint_amount(mintTxn.amount),
+    });
+    this.up_counters(mintTxn.amount, this.get_mint_amount(mintTxn.amount));
+  }
 
   burn(): void {}
 
@@ -228,5 +240,18 @@ export class Equilibrium extends Contract {
   private get_burn_amount(amount: uint64): uint64 {
     this.get_peg();
     return wideRatio([amount, this.peg_ratio.value], [SCALE]);
+  }
+
+  private up_counters(stake: uint64, supply: uint64): void {
+    this.total_stake.value += stake;
+    this.supply.value += supply;
+    this.get_peg();
+  }
+
+  private down_counters(stake: uint64, supply: uint64): void {
+    assert(this.total_stake.value >= stake && this.supply.value >= supply, 'Counters cannot go below zero');
+    this.total_stake.value -= stake;
+    this.supply.value -= supply;
+    this.get_peg();
   }
 }
