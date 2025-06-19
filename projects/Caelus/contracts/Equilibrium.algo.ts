@@ -2,6 +2,7 @@
 import { Contract } from '@algorandfoundation/tealscript';
 import {
   ALGORAND_BASE_FEE,
+  BUFFER_MAX,
   MAX_STAKE_PER_ACCOUNT,
   MBR_OPT_IN,
   NEUTRAL_STATUS,
@@ -9,14 +10,18 @@ import {
   PROTOCOL_COMMISSION,
   SCALE,
   VALIDATOR_POOL_MBR,
+  PERFORMANCE_STAKE_INCREASE,
+  PERFORMANCE_STEP,
 } from './constants.algo';
 import { Puppet } from './Puppet.algo';
 
 interface Validator {
+  operator: Address;
   commit: uint64;
   yielded: uint64;
   delegated: uint64;
   performance: uint64;
+  buffer: uint64;
   status: uint64;
   last_block: uint64;
   last_report: uint64;
@@ -97,9 +102,29 @@ export class Equilibrium extends Contract {
 
   snitch(): void {}
 
-  bid(): void {}
+  bid(bidding: Address): void {
+    assert(this.validator(bidding).exists, 'Bidding address is not a validator');
+    assert(this.validator(bidding).value.status === NEUTRAL_STATUS, 'Validator is not delegatable');
 
-  delegate(): void {}
+    const challenger = this.validator(bidding).value;
+
+    if (this.highest_bidder.value === Address.zeroAddress) {
+      this.highest_bidder.value = bidding;
+    } else {
+      const current_bidder = clone(this.validator(this.highest_bidder.value).value);
+      if (current_bidder.buffer < challenger.buffer) {
+        this.highest_bidder.value = bidding;
+      }
+    }
+  }
+
+  delegate(amount: uint64): void {
+    sendPayment({
+      receiver: this.highest_bidder.value,
+      amount: amount,
+    });
+    this.idle_stake.value -= amount;
+  }
 
   spawn_validator(mbr: PayTxn): void {
     verifyPayTxn(mbr, {
@@ -129,10 +154,12 @@ export class Equilibrium extends Contract {
 
     this.operator_to_validator_map(this.txn.sender).value = validator_address;
     this.validator(validator_address).value = {
+      operator: this.txn.sender,
       commit: 0,
       yielded: 0,
       delegated: 0,
       performance: 0,
+      buffer: BUFFER_MAX,
       status: NOT_DELEGATABLE_STATUS,
       last_block: 0,
       last_report: 0,
@@ -141,9 +168,21 @@ export class Equilibrium extends Contract {
   }
 
   operator_commit(commitTxn: PayTxn): void {
-    // Txn -> validator address
-    // Send LST with equivalent value to commit w.r.t. peg ratio
-    // Update values
+    verifyPayTxn(commitTxn, {
+      receiver: this.operator_to_validator_map(this.txn.sender).value,
+      amount: { greaterThanEqualTo: ALGORAND_BASE_FEE },
+    });
+    const lst_amount = this.get_mint_amount(commitTxn.amount);
+    sendAssetTransfer({
+      assetAmount: lst_amount,
+      assetReceiver: this.operator_to_validator_map(this.txn.sender).value,
+      xferAsset: this.token_id.value,
+    });
+    this.up_counters(commitTxn.amount, lst_amount);
+    const validator = this.operator_to_validator_map(this.txn.sender).value;
+    const validator_info = this.validator(validator).value;
+    validator_info.commit += commitTxn.amount;
+    validator_info.buffer = this.re_buffer(validator);
   }
 
   operator_unstake(amount: uint64): void {
@@ -210,12 +249,13 @@ export class Equilibrium extends Contract {
 
   solve_delinquency(): void {}
 
-  close_validator(): void {
+  close_validator(val: Address): void {
     // check sender is the operator of the validator
     // check that the validator is not delinquent
     // send all Algo to idle stake
     // send all LST to operator
     // delete validator from map & closeout account
+    this.cleanup_on_delete(val);
   }
 
   private get_online_fee(): uint64 {
@@ -253,5 +293,25 @@ export class Equilibrium extends Contract {
     this.total_stake.value -= stake;
     this.supply.value -= supply;
     this.get_peg();
+  }
+
+  private cleanup_on_delete(to_cleanup: Address): void {
+    if (this.highest_bidder.value === to_cleanup) {
+      this.highest_bidder.value = Address.zeroAddress;
+    }
+    const queue = clone(this.burn_queue.value);
+    for (let i = 0; i < queue.length; i += 1) {
+      if (queue[i] === to_cleanup) {
+        queue[i] = Address.zeroAddress;
+        break;
+      }
+    }
+    this.burn_queue.value = queue;
+  }
+
+  private re_buffer(validator: Address): uint64 {
+    const val_info = this.validator(validator).value;
+    const max = val_info.commit + PERFORMANCE_STAKE_INCREASE * (val_info.performance / PERFORMANCE_STEP);
+    return (val_info.delegated * BUFFER_MAX) / max;
   }
 }
