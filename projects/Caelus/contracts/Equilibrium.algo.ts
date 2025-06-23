@@ -49,6 +49,8 @@ export class Equilibrium extends Contract {
 
   burn_queue = GlobalStateKey<StaticArray<Address, 5>>({ key: 'burn_queue' });
 
+  exhausted = GlobalStateKey<uint64>({ key: 'exhausted' });
+
   operator_to_validator_map = BoxMap<Address, Address>();
 
   validator = BoxMap<Address, Validator>();
@@ -62,6 +64,7 @@ export class Equilibrium extends Contract {
     this.idle_stake.value = 0;
     this.highest_bidder.value = Address.zeroAddress;
     this.burn_queue.value = [];
+    this.exhausted.value = globals.round;
   }
 
   updateApplication(): void {
@@ -96,11 +99,102 @@ export class Equilibrium extends Contract {
       assetAmount: this.get_mint_amount(mintTxn.amount),
     });
     this.up_counters(mintTxn.amount, this.get_mint_amount(mintTxn.amount));
+    this.idle_stake.value += mintTxn.amount;
   }
 
-  burn(): void {}
+  burn(burnTxn: AssetTransferTxn): void {
+    // TODO: RECHECK
+    verifyAssetTransferTxn(burnTxn, {
+      assetReceiver: this.app.address,
+      xferAsset: this.token_id.value,
+      assetAmount: { greaterThanEqualTo: ALGORAND_BASE_FEE },
+    });
+    assert(this.txn.sender === burnTxn.assetSender, 'Burn transaction sender mismatch');
+    const burn_amount = this.get_burn_amount(burnTxn.assetAmount);
+    let burned = 0; // Algo amount burn counter
 
-  snitch(): void {}
+    // check if there are Algo in idle balance to use
+    if (this.idle_stake.value > 0) {
+      let amount_from_idle = 0;
+      if (this.idle_stake.value >= burn_amount) {
+        this.idle_stake.value -= burn_amount;
+        burned = burn_amount;
+        amount_from_idle = burn_amount;
+      } else {
+        burned = this.idle_stake.value;
+        this.idle_stake.value = 0;
+        amount_from_idle = burned;
+      }
+      sendPayment({
+        receiver: this.txn.sender,
+        amount: amount_from_idle,
+      });
+      const from_idle = this.get_burn_amount(amount_from_idle);
+      this.down_counters(amount_from_idle, from_idle);
+    }
+
+    if (this.exhausted.value === globals.round && !this.queue_is_full()) {
+      return;
+    }
+
+    if (burned !== burn_amount) {
+      const queue = clone(this.burn_queue.value);
+      for (let i = 0; i < queue.length; i += 1) {
+        if (queue[i] !== Address.zeroAddress && burned !== burn_amount) {
+          const delegated = this.validator(queue[i]).value.delegated;
+          const to_burn = burn_amount - burned;
+          let burning_from_i = 0;
+          if (delegated >= to_burn) {
+            this.validator(queue[i]).value.delegated -= to_burn;
+            burned += to_burn;
+            burning_from_i = to_burn;
+          } else {
+            burning_from_i = delegated;
+            this.validator(queue[i]).value.delegated = 0;
+            queue[i] = Address.zeroAddress;
+            burned += delegated;
+          }
+          if (burning_from_i > 0) {
+            sendPayment({
+              sender: queue[i],
+              receiver: this.txn.sender,
+              amount: burning_from_i,
+            });
+          }
+        }
+      }
+      const amount_in_lst = this.get_burn_amount(burned);
+      this.down_counters(burned, amount_in_lst);
+      this.burn_queue.value = queue;
+      if (amount_in_lst > 0) {
+        sendAssetTransfer({
+          assetSender: this.txn.sender,
+          assetReceiver: this.app.address,
+          xferAsset: this.token_id.value,
+          assetAmount: burnTxn.assetAmount - amount_in_lst,
+        });
+        this.exhausted.value = globals.round;
+      }
+    }
+  }
+
+  snitch(validator: Address): void {
+    assert(this.validator(validator).exists, 'Validator does not exist');
+    const queue = clone(this.burn_queue.value);
+    let minValidator: Address = validator;
+    for (let i = 0; i < queue.length; i += 1) {
+      if (queue[i] === Address.zeroAddress) {
+        queue[i] = validator;
+        break;
+      }
+      if (this.validator(queue[i]).value.buffer < this.validator(minValidator).value.buffer) {
+        const temp = queue[i];
+        queue[i] = minValidator;
+        minValidator = temp;
+      }
+    }
+    this.burn_queue.value = queue;
+  }
 
   bid(bidding: Address): void {
     assert(this.validator(bidding).exists, 'Bidding address is not a validator');
@@ -240,7 +334,23 @@ export class Equilibrium extends Contract {
     this.validator(validator_address).value.status = NOT_DELEGATABLE_STATUS;
   }
 
-  report_block(): void {}
+  report_block(block: uint64): void {}
+
+  stake_dust(account: Address): void {
+    let dust: uint64 = 0;
+    if (account === this.app.address) {
+      dust = this.app.address.balance - this.idle_stake.value - this.app.address.minBalance;
+      this.up_counters(dust, 0);
+    } else if (this.validator(account).exists) {
+      const val_info = this.validator(account).value;
+      dust = account.balance - val_info.commit - val_info.delegated - account.minBalance;
+      if (dust > 0) {
+        this.up_counters(dust, 0);
+        val_info.delegated += dust;
+        this.validator(account).value = val_info;
+      }
+    }
+  }
 
   report_delinquency(): void {
     // check delinquency values: stake amount, last block etc.
@@ -313,5 +423,15 @@ export class Equilibrium extends Contract {
     const val_info = this.validator(validator).value;
     const max = val_info.commit + PERFORMANCE_STAKE_INCREASE * (val_info.performance / PERFORMANCE_STEP);
     return (val_info.delegated * BUFFER_MAX) / max;
+  }
+
+  private queue_is_full(): boolean {
+    const queue = clone(this.burn_queue.value);
+    for (let i = 0; i < queue.length; i += 1) {
+      if (queue[i] === Address.zeroAddress) {
+        return false;
+      }
+    }
+    return true;
   }
 }
