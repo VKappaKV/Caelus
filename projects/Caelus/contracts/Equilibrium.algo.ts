@@ -12,6 +12,8 @@ import {
   VALIDATOR_POOL_MBR,
   PERFORMANCE_STAKE_INCREASE,
   PERFORMANCE_STEP,
+  OPERATOR_REPORT_MAX_TIME,
+  VALIDATOR_COMMISSION,
 } from './constants.algo';
 import { Puppet } from './Puppet.algo';
 
@@ -334,7 +336,29 @@ export class Equilibrium extends Contract {
     this.validator(validator_address).value.status = NOT_DELEGATABLE_STATUS;
   }
 
-  report_block(block: uint64): void {}
+  report_block(block: uint64): void {
+    const proposer = blocks[block].proposer;
+    assert(this.validator(proposer).exists, 'proposer is not a recognized validator');
+    const report = blocks[block].proposerPayout;
+    const validator = clone(this.validator(proposer).value);
+    assert(block > validator.last_report, 'this block is older than the last reported');
+    const report_time = globals.round - block < OPERATOR_REPORT_MAX_TIME;
+    const keep_fee = wideRatio([report, VALIDATOR_COMMISSION], [100]);
+    if (this.expected_performance(proposer.voterBalance) > globals.round - proposer.lastProposed)
+      validator.performance += 1;
+    if (report_time) {
+      validator.commit += keep_fee;
+    } else {
+      sendPayment({
+        sender: proposer,
+        receiver: this.txn.sender,
+        amount: keep_fee,
+      });
+    }
+    validator.delinquency = 0;
+    validator.last_report = block;
+    this.validator(proposer).value = validator;
+  }
 
   stake_dust(account: Address): void {
     let dust: uint64 = 0;
@@ -433,5 +457,13 @@ export class Equilibrium extends Contract {
       }
     }
     return true;
+  }
+
+  private expected_performance(stake: uint64): uint64 {
+    return onlineStake() / stake;
+  }
+
+  private tolerated_performance(expected: uint64): uint64 {
+    return expected * 2;
   }
 }
