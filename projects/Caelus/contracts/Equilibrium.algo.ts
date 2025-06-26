@@ -284,8 +284,27 @@ export class Equilibrium extends Contract {
   operator_unstake(amount: uint64): void {
     // amount is in LST
     // turn the LST amount into ALGO w.r.t. peg ratio
-    // send LST to operator
-    // move Algo amount into idle stake
+    const algo_amount = this.get_burn_amount(amount);
+    const val = this.operator_to_validator_map(this.txn.sender).value;
+    const val_info = clone(this.validator(val).value);
+    val_info.commit -= algo_amount;
+    assert(
+      val_info.commit > globals.payoutsMinBalance,
+      'must keep enough Algo to remain above the minimum balance threshold for payouts'
+    );
+    sendPayment({
+      sender: val,
+      receiver: this.txn.sender,
+      amount: algo_amount,
+    });
+    sendAssetTransfer({
+      assetSender: val,
+      assetReceiver: this.app.address,
+      assetAmount: amount,
+      xferAsset: this.token_id.value,
+    });
+    this.re_buffer(val);
+    this.down_counters(algo_amount, amount);
   }
 
   go_online(
