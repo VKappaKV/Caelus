@@ -1,0 +1,216 @@
+{
+  "name": "Equilibrium",
+  "desc": "",
+  "methods": [
+    {
+      "name": "createApplication",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "updateApplication",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "init_token",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "mint",
+      "args": [
+        {
+          "name": "mintTxn",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "burn",
+      "args": [
+        {
+          "name": "burnTxn",
+          "type": "axfer"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "snitch",
+      "args": [
+        {
+          "name": "validator",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "bid",
+      "args": [
+        {
+          "name": "bidding",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "delegate",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "spawn_validator",
+      "args": [
+        {
+          "name": "mbr",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "operator_commit",
+      "args": [
+        {
+          "name": "commitTxn",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "operator_unstake",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "go_online",
+      "args": [
+        {
+          "name": "fee_payment",
+          "type": "pay"
+        },
+        {
+          "name": "vote_PK",
+          "type": "byte[]"
+        },
+        {
+          "name": "selection_PK",
+          "type": "byte[]"
+        },
+        {
+          "name": "state_proof_PK",
+          "type": "byte[]"
+        },
+        {
+          "name": "vote_first",
+          "type": "uint64"
+        },
+        {
+          "name": "vote_last",
+          "type": "uint64"
+        },
+        {
+          "name": "vote_key_dilution",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "go_offline",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "report_block",
+      "args": [
+        {
+          "name": "block",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "stake_dust",
+      "args": [
+        {
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "report_delinquency",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "solve_delinquency",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "close_validator",
+      "args": [
+        {
+          "name": "val",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ]
+}

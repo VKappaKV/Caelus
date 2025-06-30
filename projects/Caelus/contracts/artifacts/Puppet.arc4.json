@@ -1,0 +1,13 @@
+{
+  "name": "Puppet",
+  "desc": "",
+  "methods": [
+    {
+      "name": "spawn",
+      "args": [],
+      "returns": {
+        "type": "address"
+      }
+    }
+  ]
+}

@@ -53,9 +53,9 @@ export class Equilibrium extends Contract {
 
   exhausted = GlobalStateKey<uint64>({ key: 'exhausted' });
 
-  operator_to_validator_map = BoxMap<Address, Address>();
+  operator_to_validator_map = BoxMap<Address, Address>({ prefix: 'o_to_v_' });
 
-  validator = BoxMap<Address, Validator>();
+  validator = BoxMap<Address, Validator>({ prefix: 'v_' });
 
   createApplication(): void {
     this.manager.value = this.txn.sender;
@@ -365,15 +365,14 @@ export class Equilibrium extends Contract {
     const keep_fee = wideRatio([report, VALIDATOR_COMMISSION], [100]);
     if (this.expected_performance(proposer.voterBalance) > globals.round - proposer.lastProposed)
       validator.performance += 1;
-    if (report_time) {
-      validator.commit += keep_fee;
-    } else {
-      sendPayment({
-        sender: proposer,
-        receiver: this.txn.sender,
-        amount: keep_fee,
-      });
-    }
+
+    const receiver = report_time ? validator.operator : this.txn.sender;
+
+    sendPayment({
+      sender: proposer,
+      receiver: receiver,
+      amount: keep_fee,
+    });
     validator.delinquency = 0;
     validator.last_report = block;
     this.validator(proposer).value = validator;
