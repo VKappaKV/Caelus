@@ -23,9 +23,6 @@ export const BURN_COOLDOWN = 5;
 export const PERFORMANCE_STAKE_INCREASE = 10_000_000_000;
 export const MAX_STAKE_PER_ACCOUNT = 50_000_000_000_000;
 
-export const VEST_TIER_4 = 100_000_000_000;
-export const VEST_TIER_5 = 150_000_000_000;
-
 export const FLASH_LOAN_FEE = 10_000_000;
 
 export const SCALE = 1_000_000;
