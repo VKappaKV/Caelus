@@ -14,20 +14,21 @@ import {
   PERFORMANCE_STEP,
   OPERATOR_REPORT_MAX_TIME,
   VALIDATOR_COMMISSION,
+  DELINQUENCY_STATUS,
 } from './constants.algo';
 import { Puppet } from './Puppet.algo';
 
 interface Validator {
-  operator: Address;
-  commit: uint64;
-  yielded: uint64;
-  delegated: uint64;
-  performance: uint64;
-  buffer: uint64;
-  status: uint64;
-  last_block: uint64;
-  last_report: uint64;
-  delinquency: uint64;
+  operator: Address; // operator address
+  commit: uint64; // amount of Algo the operator has committed
+  yielded: uint64; // amount of Algo the validator has yielded as rewards
+  delegated: uint64; // amount of Algo the validator has received as delegation
+  performance: uint64; // performance score
+  buffer: uint64; // buffer score: delegated/max
+  status: uint64; // NEUTRAL_STATUS | NOT_DELEGATABLE_STATUS | DELINQUENCY_STATUS
+  last_block: uint64; // last block the validator has proposed
+  last_report: uint64; // last successful delinquency report
+  delinquency: uint64; // delinquency score
 }
 
 export class Equilibrium extends Contract {
@@ -202,6 +203,9 @@ export class Equilibrium extends Contract {
     assert(this.validator(bidding).exists, 'Bidding address is not a validator');
     assert(this.validator(bidding).value.status === NEUTRAL_STATUS, 'Validator is not delegatable');
 
+    if (this.highest_bidder.value !== Address.zeroAddress) {
+      assert(this.validator(bidding).value.performance >= 5, 'Validator performance is too low to bid');
+    }
     const challenger = this.validator(bidding).value;
 
     if (this.highest_bidder.value === Address.zeroAddress) {
@@ -394,12 +398,35 @@ export class Equilibrium extends Contract {
     }
   }
 
-  report_delinquency(): void {
+  check_delinquency(): void {
     // check delinquency values: stake amount, last block etc.
     // set status to DELINQUENT || increment delinquency counter
+    // save report block in last report
   }
 
-  solve_delinquency(): void {}
+  solve_delinquency(block: uint64, validator: Address): void {
+    assert(this.validator(validator).exists, 'Validator does not exist');
+    const val_info = clone(this.validator(validator).value);
+    assert(val_info.status === DELINQUENCY_STATUS, 'Validator is not delinquent');
+    assert(block > val_info.last_report, 'Block must be more recent than last report');
+    assert(blocks[block].proposer === validator, 'Validator did not propose the given block');
+
+    if (val_info.last_report > block) {
+      return;
+    }
+
+    if (val_info.delinquency > 1) {
+      val_info.delinquency -= 1;
+    } else {
+      val_info.delinquency = 0;
+      val_info.status = NEUTRAL_STATUS;
+    }
+
+    // fetch validator info
+    // check last delinquent report block
+    // if block > last report block abbassa delinquency score
+    // if score is 0, set status to NEUTRAL_STATUS
+  }
 
   close_validator(val: Address): void {
     // check sender is the operator of the validator
@@ -407,7 +434,26 @@ export class Equilibrium extends Contract {
     // send all Algo to idle stake
     // send all LST to operator
     // delete validator from map & closeout account
+
+    assert(this.txn.sender === this.validator(val).value.operator, 'Only operator can close the validator');
+    assert(this.validator(val).value.status !== DELINQUENCY_STATUS, 'Cannot close a delinquent validator');
+    const lst_balance = val.assetBalance(this.token_id.value);
+    sendAssetTransfer({
+      assetSender: val,
+      assetReceiver: this.txn.sender,
+      xferAsset: this.token_id.value,
+      assetAmount: lst_balance,
+    });
+    sendPayment({
+      sender: val,
+      receiver: this.app.address,
+      amount: val.balance - val.minBalance,
+      closeRemainderTo: this.app.address,
+    });
+    this.idle_stake.value += val.balance - val.minBalance;
     this.cleanup_on_delete(val);
+    this.operator_to_validator_map(this.txn.sender).delete();
+    this.validator(val).delete();
   }
 
   private get_online_fee(): uint64 {
@@ -461,9 +507,17 @@ export class Equilibrium extends Contract {
     this.burn_queue.value = queue;
   }
 
+  private get_max(info: Validator): uint64 {
+    const max = info.commit + PERFORMANCE_STAKE_INCREASE * (info.performance / PERFORMANCE_STEP);
+    return max / info.delinquency;
+  }
+
   private re_buffer(validator: Address): uint64 {
     const val_info = this.validator(validator).value;
-    const max = val_info.commit + PERFORMANCE_STAKE_INCREASE * (val_info.performance / PERFORMANCE_STEP);
+    const max = this.get_max(val_info);
+    if (max === 0) {
+      return BUFFER_MAX;
+    }
     return (val_info.delegated * BUFFER_MAX) / max;
   }
 
