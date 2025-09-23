@@ -41,17 +41,17 @@ spawn:
 
 	// contracts\Puppet.algo.ts:6
 	// sendPayment({
-	//       receiver: this.txn.sender,
+	//       receiver: this.app.address,
 	//       amount: 0,
-	//       rekeyTo: this.txn.sender,
+	//       rekeyTo: globals.callerApplicationAddress,
 	//     })
 	itxn_begin
 	intc 1 //  pay
 	itxn_field TypeEnum
 
 	// contracts\Puppet.algo.ts:7
-	// receiver: this.txn.sender
-	txn Sender
+	// receiver: this.app.address
+	global CurrentApplicationAddress
 	itxn_field Receiver
 
 	// contracts\Puppet.algo.ts:8
@@ -60,8 +60,8 @@ spawn:
 	itxn_field Amount
 
 	// contracts\Puppet.algo.ts:9
-	// rekeyTo: this.txn.sender
-	txn Sender
+	// rekeyTo: globals.callerApplicationAddress
+	global CallerApplicationAddress
 	itxn_field RekeyTo
 
 	// Fee field not set, defaulting to 0

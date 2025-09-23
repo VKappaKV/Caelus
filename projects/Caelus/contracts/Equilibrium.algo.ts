@@ -1,5 +1,7 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable camelcase */
 import { Contract } from '@algorandfoundation/tealscript';
+import { send } from 'process';
 import {
   ALGORAND_BASE_FEE,
   BUFFER_MAX,
@@ -50,7 +52,7 @@ export class Equilibrium extends Contract {
 
   highest_bidder = GlobalStateKey<Address>({ key: 'highest_bidder' });
 
-  burn_queue = GlobalStateKey<StaticArray<Address, 5>>({ key: 'burn_queue' });
+  burn_queue = BoxKey<StaticArray<Address, 5>>({ key: 'burn_queue' });
 
   exhausted = GlobalStateKey<uint64>({ key: 'exhausted' });
 
@@ -66,7 +68,6 @@ export class Equilibrium extends Contract {
     this.token_id.value = AssetID.zeroIndex;
     this.idle_stake.value = 0;
     this.highest_bidder.value = Address.zeroAddress;
-    this.burn_queue.value = [];
     this.exhausted.value = globals.round;
   }
 
@@ -74,8 +75,9 @@ export class Equilibrium extends Contract {
     assert(this.txn.sender === this.manager.value);
   }
 
-  init_token(): void {
+  init_(): void {
     assert(this.token_id.value === AssetID.zeroIndex, 'Token already initialized');
+    this.burn_queue.value = [];
     this.token_id.value = sendAssetCreation({
       configAssetTotal: 10 ** 16,
       configAssetDecimals: 6,
@@ -229,7 +231,7 @@ export class Equilibrium extends Contract {
   spawn_validator(mbr: PayTxn): void {
     verifyPayTxn(mbr, {
       receiver: this.app.address,
-      amount: VALIDATOR_POOL_MBR + ALGORAND_BASE_FEE,
+      amount: VALIDATOR_POOL_MBR + ALGORAND_BASE_FEE, // mettere {biggerThanEqualTo}
     });
 
     assert(this.operator_to_validator_map(this.txn.sender).exists === false, 'Operator already has a validator');
@@ -246,7 +248,7 @@ export class Equilibrium extends Contract {
     });
 
     sendAssetTransfer({
-      assetSender: validator_address,
+      sender: validator_address,
       assetReceiver: validator_address,
       xferAsset: this.token_id.value,
       assetAmount: 0,

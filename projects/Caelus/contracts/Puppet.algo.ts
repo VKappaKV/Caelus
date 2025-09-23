@@ -4,9 +4,9 @@ export class Puppet extends Contract {
   @allow.create('DeleteApplication')
   spawn(): Address {
     sendPayment({
-      receiver: this.txn.sender,
+      receiver: this.app.address,
       amount: 0,
-      rekeyTo: this.txn.sender,
+      rekeyTo: globals.callerApplicationAddress,
     });
     return this.app.address;
   }

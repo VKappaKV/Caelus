@@ -17,7 +17,7 @@
       }
     },
     {
-      "name": "init_token",
+      "name": "init_",
       "args": [],
       "returns": {
         "type": "void"
