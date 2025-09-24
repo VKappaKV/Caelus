@@ -1,8 +1,8 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable no-console */
 import * as algokit from '@algorandfoundation/algokit-utils';
-import { algorand } from './network';
-import { getAccount } from '../cli';
+import { algorand } from '../network';
+import { getAccount } from '../account';
 import { CaelusAdminClient } from '../../contracts/clients/CaelusAdminClient';
 
 export async function addValidator(APP_ID: bigint) {

@@ -8,8 +8,8 @@ import { SubscribedTransaction } from '@algorandfoundation/algokit-subscriber/ty
 import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
 import { reportRewards } from './helpers/validator';
 import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
-import { getAccount } from './cli';
-import { algorand, FEE_SINK_ADDRESS } from './helpers/network';
+import { getAccount } from './account';
+import { algorand, FEE_SINK_ADDRESS } from './network';
 import { snitch } from './helpers/admin';
 
 export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: bigint) => {

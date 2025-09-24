@@ -5,12 +5,11 @@
 /* eslint-disable no-console */
 import inquirer from 'inquirer';
 import { Config } from '@algorandfoundation/algokit-utils';
-import * as dotenv from 'dotenv';
-import { adminSetup, deploy, validatorSetup, update } from './helpers/bootstrap';
+import { deploy, update } from './helpers/deploy';
 import { mint, mintOperatorCommit, addValidator, removeOperatorCommit, burn, bid, delegate } from './helpers/admin';
 import { validatorOptIntoLST, goOnline, goOffline, migrate, claimDust } from './helpers/validator';
-import { algorand } from './helpers/network';
 import { runner } from './runner';
+import { ADMIN_APP_ID, VALIDATOR_APP_ID } from './account';
 
 Config.configure({
   debug: true,
@@ -19,24 +18,6 @@ Config.configure({
 
 const ADMIN = 'ADMIN';
 const VALIDATOR = 'VALIDATOR';
-
-dotenv.config();
-
-const { ADMIN_APP_ID, VALIDATOR_APP_ID, MNEMONIC } = process.env;
-
-if (!ADMIN_APP_ID || !VALIDATOR_APP_ID || !MNEMONIC || MNEMONIC === '') {
-  throw new Error(
-    'Remember to set the .env file, follow the structure in the .env.template file. Fill the MNEMONICs with the account mnemonics'
-  );
-}
-
-export const getAccount = async () => {
-  const testAccount = algorand.account.fromMnemonic(MNEMONIC);
-
-  const random = algorand.account.random();
-
-  return { testAccount, random };
-};
 
 async function main() {
   let admin: bigint = 0n;
@@ -49,7 +30,6 @@ async function main() {
         name: 'action',
         message: '\n What do you want to execute?',
         choices: [
-          { name: 'Bootstrap (deploy contract + admin set up & validator contract inscription)', value: 'bootstrap' },
           { name: 'Deploy', value: 'deploy' },
           { name: 'Admin Setup', value: 'admin' },
           { name: 'Validator Contract inscription', value: 'validator' },
@@ -64,7 +44,7 @@ async function main() {
           { name: 'Migrate Pool', value: 'migratePool' },
           { name: 'Delete Operator', value: 'deleteOperator' },
           { name: 'Validator Pool Opt-In', value: 'poolOptIn' },
-          { name: 'Claim Leftover Algos into the ', value: 'claimDustAlgos' },
+          { name: 'Claim Leftover Algos into the Validator', value: 'claimDustAlgos' },
           { name: 'Go Online', value: 'goOnline' },
           { name: 'Go Offline', value: 'goOffline' },
           { name: 'Init Runner Script', value: 'initRunner' },
@@ -76,22 +56,6 @@ async function main() {
     action = pick.action;
 
     switch (action) {
-      case 'bootstrap': {
-        const { confirm } = await confirmation();
-        if (!confirm) {
-          console.log('Aborted!');
-          break;
-        }
-        const app = await deploy();
-        await adminSetup(app);
-
-        await new Promise<void>((resolve) => {
-          setTimeout(() => resolve(), 1000);
-        });
-
-        await validatorSetup(app);
-        break;
-      }
       case 'deploy': {
         const { confirm } = await confirmation();
         if (!confirm) {
@@ -99,26 +63,6 @@ async function main() {
           break;
         }
         await deploy();
-        break;
-      }
-      case 'admin': {
-        const { confirm } = await confirmation();
-        if (!confirm) {
-          console.log('Aborted!');
-          break;
-        }
-        const app = await getAppID(ADMIN, admin, validator);
-        await adminSetup(BigInt(app));
-        break;
-      }
-      case 'validator': {
-        const { confirm } = await confirmation();
-        if (!confirm) {
-          console.log('Aborted!');
-          break;
-        }
-        const app = await getAppID(ADMIN, admin, validator);
-        await validatorSetup(BigInt(app));
         break;
       }
       case 'spawn': {

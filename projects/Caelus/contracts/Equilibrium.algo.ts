@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable camelcase */
 import { Contract } from '@algorandfoundation/tealscript';
-import { send } from 'process';
 import {
   ALGORAND_BASE_FEE,
   BUFFER_MAX,
@@ -114,7 +113,7 @@ export class Equilibrium extends Contract {
       xferAsset: this.token_id.value,
       assetAmount: { greaterThanEqualTo: ALGORAND_BASE_FEE },
     });
-    assert(this.txn.sender === burnTxn.assetSender, 'Burn transaction sender mismatch');
+    assert(this.txn.sender === burnTxn.sender, 'Burn transaction sender mismatch');
     const burn_amount = this.get_burn_amount(burnTxn.assetAmount);
     let burned = 0; // Algo amount burn counter
 
@@ -173,7 +172,7 @@ export class Equilibrium extends Contract {
       this.burn_queue.value = queue;
       if (amount_in_lst > 0) {
         sendAssetTransfer({
-          assetSender: this.txn.sender,
+          sender: this.txn.sender,
           assetReceiver: this.app.address,
           xferAsset: this.token_id.value,
           assetAmount: burnTxn.assetAmount - amount_in_lst,
@@ -242,9 +241,12 @@ export class Equilibrium extends Contract {
       clearStateProgram: Puppet.clearProgram(),
     });
 
+    /**
+     * Fund the validator with 2x MBR to cover opt-in and minimum balance
+     */
     sendPayment({
       receiver: validator_address,
-      amount: MBR_OPT_IN + ALGORAND_BASE_FEE,
+      amount: MBR_OPT_IN * 2,
     });
 
     sendAssetTransfer({
@@ -304,7 +306,7 @@ export class Equilibrium extends Contract {
       amount: algo_amount,
     });
     sendAssetTransfer({
-      assetSender: val,
+      sender: val,
       assetReceiver: this.app.address,
       assetAmount: amount,
       xferAsset: this.token_id.value,
@@ -441,7 +443,7 @@ export class Equilibrium extends Contract {
     assert(this.validator(val).value.status !== DELINQUENCY_STATUS, 'Cannot close a delinquent validator');
     const lst_balance = val.assetBalance(this.token_id.value);
     sendAssetTransfer({
-      assetSender: val,
+      sender: val,
       assetReceiver: this.txn.sender,
       xferAsset: this.token_id.value,
       assetAmount: lst_balance,
