@@ -16,6 +16,7 @@ import {
   OPERATOR_REPORT_MAX_TIME,
   VALIDATOR_COMMISSION,
   DELINQUENCY_STATUS,
+  ACCOUNT_MIN_BALANCE,
 } from './constants.algo';
 import { Puppet } from './Puppet.algo';
 
@@ -203,12 +204,12 @@ export class Equilibrium extends Contract {
   bid(bidding: Address): void {
     assert(this.validator(bidding).exists, 'Bidding address is not a validator');
     assert(this.validator(bidding).value.status === NEUTRAL_STATUS, 'Validator is not delegatable');
-
+    /* FOR PROD
     if (this.highest_bidder.value !== Address.zeroAddress) {
       assert(this.validator(bidding).value.performance >= 5, 'Validator performance is too low to bid');
     }
+    */
     const challenger = this.validator(bidding).value;
-
     if (this.highest_bidder.value === Address.zeroAddress) {
       this.highest_bidder.value = bidding;
     } else {
@@ -242,11 +243,11 @@ export class Equilibrium extends Contract {
     });
 
     /**
-     * Fund the validator with 2x MBR to cover opt-in and minimum balance
+     * Fund the validator to cover minimum balance for account creation and opt-in
      */
     sendPayment({
       receiver: validator_address,
-      amount: MBR_OPT_IN * 2,
+      amount: MBR_OPT_IN + ACCOUNT_MIN_BALANCE,
     });
 
     sendAssetTransfer({
@@ -272,11 +273,16 @@ export class Equilibrium extends Contract {
   }
 
   operator_commit(commitTxn: PayTxn): void {
+    const validator_address = this.operator_to_validator_map(this.txn.sender).value;
     verifyPayTxn(commitTxn, {
-      receiver: this.operator_to_validator_map(this.txn.sender).value,
+      receiver: this.app.address,
       amount: { greaterThanEqualTo: ALGORAND_BASE_FEE },
     });
     const lst_amount = this.get_mint_amount(commitTxn.amount);
+    sendPayment({
+      receiver: validator_address,
+      amount: commitTxn.amount,
+    });
     sendAssetTransfer({
       assetAmount: lst_amount,
       assetReceiver: this.operator_to_validator_map(this.txn.sender).value,
@@ -327,14 +333,17 @@ export class Equilibrium extends Contract {
     assert(this.operator_to_validator_map(this.txn.sender).exists, 'Operator does not have a validator');
     const validator_address = this.operator_to_validator_map(this.txn.sender).value;
     verifyPayTxn(fee_payment, {
-      receiver: validator_address,
+      receiver: this.app.address,
       amount: this.get_online_fee(),
     });
 
     assert(
       validator_address.balance >= globals.payoutsMinBalance && validator_address.balance <= MAX_STAKE_PER_ACCOUNT
     );
-
+    sendPayment({
+      receiver: validator_address,
+      amount: fee_payment.amount,
+    });
     sendOnlineKeyRegistration({
       sender: validator_address,
       votePK: vote_PK,

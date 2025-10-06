@@ -6,10 +6,10 @@
 import inquirer from 'inquirer';
 import { Config } from '@algorandfoundation/algokit-utils';
 import { deploy, update } from './helpers/deploy';
-import { mint, mintOperatorCommit, addValidator, removeOperatorCommit, burn, bid, delegate } from './helpers/admin';
-import { validatorOptIntoLST, goOnline, goOffline, migrate, claimDust } from './helpers/validator';
 import { runner } from './runner';
-import { ADMIN_APP_ID, VALIDATOR_APP_ID } from './account';
+import { ADMIN_APP_ID, getAccount, VALIDATOR_APP_ID } from './account';
+import { clientSetUp, mint } from './helpers/main';
+import { EquilibriumClient } from '../contracts/clients/EquilibriumClient';
 
 Config.configure({
   debug: true,
@@ -23,6 +23,14 @@ async function main() {
   let admin: bigint = 0n;
   let validator: bigint = 0n;
   let action: string = '';
+  let appId: bigint = 0n;
+  let client: EquilibriumClient | undefined;
+
+  if (appId !== 0n) {
+    const { testAccount } = await getAccount();
+    client = await clientSetUp(appId, testAccount);
+  }
+
   while (action !== 'exit') {
     const pick = await inquirer.prompt([
       {
@@ -62,7 +70,9 @@ async function main() {
           console.log('Aborted!');
           break;
         }
-        await deploy();
+        appId = await deploy();
+        const { testAccount } = await getAccount();
+        client = await clientSetUp(appId, testAccount);
         break;
       }
       case 'spawn': {
@@ -86,9 +96,13 @@ async function main() {
         break;
       }
       case 'mint': {
-        const app = await getAppID(ADMIN, admin, validator);
         const amount = await getAmount();
-        await mint(BigInt(app), amount);
+        const account = await getAccount();
+        if (!client) {
+          console.log('Client not set up. Please deploy first...Or check something else is wrong');
+          break;
+        }
+        await mint(amount, account.testAccount, client);
         break;
       }
       case 'burn': {
