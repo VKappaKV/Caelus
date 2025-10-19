@@ -10,7 +10,7 @@ import { reportRewards } from './helpers/validator';
 import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
 import { getAccount } from './account';
 import { algorand, FEE_SINK_ADDRESS } from './network';
-import { snitch } from './helpers/admin';
+import { snitch } from './helpers/main';
 
 export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: bigint) => {
   let currentWatermark = watermark;

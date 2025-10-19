@@ -18,7 +18,12 @@
     },
     {
       "name": "init_",
-      "args": [],
+      "args": [
+        {
+          "name": "mbr",
+          "type": "pay"
+        }
+      ],
       "returns": {
         "type": "void"
       }

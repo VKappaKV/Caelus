@@ -11,6 +11,7 @@ export const MBR_OPT_IN = 100_000;
 export const ACCOUNT_MIN_BALANCE = 100_000;
 
 export const VALIDATOR_POOL_MBR = 2_040_900;
+export const BURN_QUEUE_MBR = 134_500;
 
 export const PROTOCOL_COMMISSION = 4;
 export const VALIDATOR_COMMISSION = 6;

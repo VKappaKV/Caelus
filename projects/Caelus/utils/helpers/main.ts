@@ -77,7 +77,7 @@ export async function spawn(account: Account, client: EquilibriumClient) {
   await group
     .addTransaction(mbrTxn)
     .spawnValidator({ args: [mbrTxn] })
-    .send({ populateAppCallResources: true });
+    .send({ populateAppCallResources: true, coverAppCallInnerTransactionFees: true });
 }
 
 export async function commit(account: Account, client: EquilibriumClient, amount: number) {

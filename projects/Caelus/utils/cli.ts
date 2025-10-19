@@ -5,10 +5,11 @@
 /* eslint-disable no-console */
 import inquirer from 'inquirer';
 import { Config } from '@algorandfoundation/algokit-utils';
+import chalk from 'chalk';
 import { deploy, update } from './helpers/deploy';
 import { runner } from './runner';
 import { ADMIN_APP_ID, getAccount, VALIDATOR_APP_ID } from './account';
-import { clientSetUp, mint } from './helpers/main';
+import { clientSetUp, mint, spawn, commit, snitch, burn } from './helpers/main';
 import { EquilibriumClient } from '../contracts/clients/EquilibriumClient';
 
 Config.configure({
@@ -24,23 +25,16 @@ async function main() {
   let validator: bigint = 0n;
   let action: string = '';
   let appId: bigint = 0n;
-  let client: EquilibriumClient | undefined;
-
-  if (appId !== 0n) {
-    const { testAccount } = await getAccount();
-    client = await clientSetUp(appId, testAccount);
-  }
+  const { testAccount } = await getAccount();
 
   while (action !== 'exit') {
     const pick = await inquirer.prompt([
       {
         type: 'list',
         name: 'action',
-        message: '\n What do you want to execute?',
+        message: chalk.blue('\n What do you want to execute?'),
         choices: [
           { name: 'Deploy', value: 'deploy' },
-          { name: 'Admin Setup', value: 'admin' },
-          { name: 'Validator Contract inscription', value: 'validator' },
           { name: 'Spawn Validator', value: 'spawn' },
           { name: 'Update', value: 'update' },
           { name: 'Mint', value: 'mint' },
@@ -49,9 +43,7 @@ async function main() {
           { name: 'Remove Operator Commit', value: 'burnOperator' },
           { name: 'Bid Validator', value: 'bidValidator' },
           { name: 'Delegate stake to validator', value: 'delegate' },
-          { name: 'Migrate Pool', value: 'migratePool' },
           { name: 'Delete Operator', value: 'deleteOperator' },
-          { name: 'Validator Pool Opt-In', value: 'poolOptIn' },
           { name: 'Claim Leftover Algos into the Validator', value: 'claimDustAlgos' },
           { name: 'Go Online', value: 'goOnline' },
           { name: 'Go Offline', value: 'goOffline' },
@@ -71,7 +63,6 @@ async function main() {
           break;
         }
         appId = await deploy();
-        const { testAccount } = await getAccount();
         client = await clientSetUp(appId, testAccount);
         break;
       }
@@ -81,8 +72,7 @@ async function main() {
           console.log('Aborted!');
           break;
         }
-        const app = await getAppID(ADMIN, admin, validator);
-        await addValidator(BigInt(app));
+        await spawn(testAccount, client);
         break;
       }
       case 'update': {
@@ -123,11 +113,6 @@ async function main() {
         const validatorAppId = await getAppID(VALIDATOR, admin, validator);
         const amount = await getAmount();
         await removeOperatorCommit(BigInt(validatorAppId), BigInt(adminAppId), amount);
-        break;
-      }
-      case 'poolOptIn': {
-        const validatorAppId = await getAppID(VALIDATOR, admin, validator);
-        await validatorOptIntoLST(BigInt(validatorAppId));
         break;
       }
       case 'bidValidator': {
@@ -221,17 +206,6 @@ async function main() {
         await claimDust(BigInt(app));
         break;
       }
-      case 'migratePool': {
-        const { confirm } = await confirmation();
-        if (!confirm) {
-          console.log('Aborted!');
-          break;
-        }
-        const oldValidator = await getAppID(VALIDATOR, admin, validator);
-        const newValidator = await getAppID(VALIDATOR, admin, validator);
-        await migrate(BigInt(oldValidator), BigInt(newValidator));
-        break;
-      }
       case 'initRunner': {
         const app = await getAppID(ADMIN, admin, validator);
         const validatorAppId = await getAppID(VALIDATOR, admin, validator);
@@ -254,14 +228,14 @@ async function main() {
             name: 'choice',
             message: 'What do you want to do?',
             choices: [
-              { name: 'Set Default Admin', value: 'setAdmin' },
+              { name: 'Set Default Main', value: 'setMain' },
               { name: 'Set Default Validator', value: 'setValidator' },
               { name: 'Exit', value: 'exit' },
             ],
           },
         ]);
         switch (choice) {
-          case 'setAdmin': {
+          case 'setMain': {
             const app = await inquirer.prompt([
               {
                 type: 'input',

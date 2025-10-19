@@ -17,6 +17,7 @@ import {
   VALIDATOR_COMMISSION,
   DELINQUENCY_STATUS,
   ACCOUNT_MIN_BALANCE,
+  BURN_QUEUE_MBR,
 } from './constants.algo';
 import { Puppet } from './Puppet.algo';
 
@@ -52,7 +53,7 @@ export class Equilibrium extends Contract {
 
   highest_bidder = GlobalStateKey<Address>({ key: 'highest_bidder' });
 
-  burn_queue = BoxKey<StaticArray<Address, 5>>({ key: 'burn_queue' });
+  burn_queue = BoxKey<StaticArray<Address, 10>>({ key: 'burn_queue' });
 
   exhausted = GlobalStateKey<uint64>({ key: 'exhausted' });
 
@@ -75,7 +76,11 @@ export class Equilibrium extends Contract {
     assert(this.txn.sender === this.manager.value);
   }
 
-  init_(): void {
+  init_(mbr: PayTxn): void {
+    verifyPayTxn(mbr, {
+      receiver: this.app.address,
+      amount: { greaterThanEqualTo: MBR_OPT_IN + ACCOUNT_MIN_BALANCE + BURN_QUEUE_MBR },
+    });
     assert(this.token_id.value === AssetID.zeroIndex, 'Token already initialized');
     this.burn_queue.value = [];
     this.token_id.value = sendAssetCreation({
@@ -204,7 +209,7 @@ export class Equilibrium extends Contract {
   bid(bidding: Address): void {
     assert(this.validator(bidding).exists, 'Bidding address is not a validator');
     assert(this.validator(bidding).value.status === NEUTRAL_STATUS, 'Validator is not delegatable');
-    /* FOR PROD
+    /* FOR MAINNET TO BE UNCOMMENTED.
     if (this.highest_bidder.value !== Address.zeroAddress) {
       assert(this.validator(bidding).value.performance >= 5, 'Validator performance is too low to bid');
     }
@@ -231,7 +236,7 @@ export class Equilibrium extends Contract {
   spawn_validator(mbr: PayTxn): void {
     verifyPayTxn(mbr, {
       receiver: this.app.address,
-      amount: VALIDATOR_POOL_MBR + ALGORAND_BASE_FEE, // mettere {biggerThanEqualTo}
+      amount: { greaterThanEqualTo: VALIDATOR_POOL_MBR + ALGORAND_BASE_FEE },
     });
 
     assert(this.operator_to_validator_map(this.txn.sender).exists === false, 'Operator already has a validator');
