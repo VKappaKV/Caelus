@@ -76,7 +76,7 @@ export class Equilibrium extends Contract {
     assert(this.txn.sender === this.manager.value);
   }
 
-  init_(mbr: PayTxn): void {
+  init(mbr: PayTxn): void {
     verifyPayTxn(mbr, {
       receiver: this.app.address,
       amount: { greaterThanEqualTo: MBR_OPT_IN + ACCOUNT_MIN_BALANCE + BURN_QUEUE_MBR },

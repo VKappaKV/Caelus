@@ -1,19 +1,22 @@
 import { Config } from '@algorandfoundation/algokit-utils';
 import { OnSchemaBreak, OnUpdate } from '@algorandfoundation/algokit-utils/types/app';
-import algosdk from 'algosdk';
+import algosdk, { Address } from 'algosdk';
 import { algorand } from '../network';
-import { getAccount } from '../account';
 import { EquilibriumClient, EquilibriumFactory } from '../../contracts/clients/EquilibriumClient';
+import { Account } from './main';
 
 Config.configure({
   debug: true,
   traceAll: true,
 });
 
-export async function deploy(): Promise<bigint> {
-  // change with other wallet depending on your network
-  const { testAccount } = await getAccount();
+interface DeployResult {
+  id: bigint;
+  address: Address;
+  name: string;
+}
 
+export async function deploy(testAccount: Account): Promise<DeployResult> {
   const contractFactory = algorand.client.getTypedAppFactory(EquilibriumFactory, {
     defaultSender: testAccount.addr,
     defaultSigner: testAccount.signer,
@@ -47,15 +50,10 @@ export async function deploy(): Promise<bigint> {
     populateAppCallResources: true,
   });
 
-  console.log('APP ID IS: ', appDeployer.appId);
-  console.log('APP ADDRESS IS: ', appDeployer.appAddress);
-
-  return appDeployer.appId;
+  return { id: appDeployer.appId, address: appDeployer.appAddress, name: appDeployer.name };
 }
 
-export async function update(APP_ID: bigint) {
-  const { testAccount } = await getAccount();
-
+export async function update(APP_ID: bigint, testAccount: Account) {
   const factory = algorand.client.getTypedAppFactory(EquilibriumFactory, {
     defaultSender: testAccount.addr,
     defaultSigner: testAccount.signer,

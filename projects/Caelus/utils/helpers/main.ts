@@ -22,13 +22,12 @@ export async function init(account: Account, client: EquilibriumClient) {
     amount: (1).algos(),
   });
 
-  group.addTransaction(fundTxn).init({ args: [] });
-  await group.send({ populateAppCallResources: true });
+  group.addTransaction(fundTxn).init({ args: [fundTxn] });
+  await group.send({ populateAppCallResources: true, coverAppCallInnerTransactionFees: true });
 }
 
 export async function mint(amount: number, account: Account, client: EquilibriumClient) {
   const group = client.newGroup();
-
   const payTxn = await algorand.createTransaction.payment({
     sender: account.addr,
     receiver: client.appAddress,
@@ -36,7 +35,7 @@ export async function mint(amount: number, account: Account, client: Equilibrium
   });
 
   group.addTransaction(payTxn).mint({ args: [payTxn] });
-  await group.send({ populateAppCallResources: true });
+  await group.send({ populateAppCallResources: true, coverAppCallInnerTransactionFees: true });
 }
 
 export async function burn(amount: bigint, account: Account, client: EquilibriumClient) {
@@ -51,19 +50,23 @@ export async function burn(amount: bigint, account: Account, client: Equilibrium
 
   const group = client.newGroup();
   group.addTransaction(axferTxn).burn({ args: [axferTxn] });
-  await group.send({ populateAppCallResources: true });
+  await group.send({ populateAppCallResources: true, coverAppCallInnerTransactionFees: true });
 }
 
 export async function snitch(account: string, client: EquilibriumClient) {
-  await client.send.snitch({ args: [account], populateAppCallResources: true });
+  await client.send.snitch({ args: [account], populateAppCallResources: true, coverAppCallInnerTransactionFees: true });
 }
 
 export async function bid(account: string, client: EquilibriumClient) {
-  await client.send.bid({ args: [account], populateAppCallResources: true });
+  await client.send.bid({ args: [account], populateAppCallResources: true, coverAppCallInnerTransactionFees: true });
 }
 
 export async function delegate(amount: number, client: EquilibriumClient) {
-  await client.send.delegate({ args: [amount], populateAppCallResources: true });
+  await client.send.delegate({
+    args: [amount],
+    populateAppCallResources: true,
+    coverAppCallInnerTransactionFees: true,
+  });
 }
 
 export async function spawn(account: Account, client: EquilibriumClient) {
@@ -91,5 +94,5 @@ export async function commit(account: Account, client: EquilibriumClient, amount
   await group
     .addTransaction(commitTxn)
     .operatorCommit({ args: [commitTxn] })
-    .send({ populateAppCallResources: true });
+    .send({ populateAppCallResources: true, coverAppCallInnerTransactionFees: true });
 }

@@ -608,7 +608,7 @@
   {
     "teal": 119,
     "source": "contracts\\Equilibrium.algo.ts:79",
-    "errorMessage": "argument 0 (mbr) for init_ must be a pay transaction",
+    "errorMessage": "argument 0 (mbr) for init must be a pay transaction",
     "pc": [
       263
     ]

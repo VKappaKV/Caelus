@@ -104,8 +104,8 @@ updateApplication:
 	assert
 	retsub
 
-// init_(pay)void
-*abi_route_init_:
+// init(pay)void
+*abi_route_init:
 	// mbr: pay
 	txn GroupIndex
 	intc 1 // 1
@@ -115,16 +115,16 @@ updateApplication:
 	intc 1 //  pay
 	==
 
-	// argument 0 (mbr) for init_ must be a pay transaction
+	// argument 0 (mbr) for init must be a pay transaction
 	assert
 
-	// execute init_(pay)void
-	callsub init_
+	// execute init(pay)void
+	callsub init
 	intc 1 // 1
 	return
 
-// init_(mbr: PayTxn): void
-init_:
+// init(mbr: PayTxn): void
+init:
 	proto 1 0
 
 	// contracts\Equilibrium.algo.ts:80
@@ -3258,7 +3258,7 @@ tolerated_performance:
 	err
 
 *call_NoOp:
-	pushbytes 0xa659938f // method "init_(pay)void"
+	pushbytes 0xa1fb506b // method "init(pay)void"
 	pushbytes 0xb5678e7e // method "mint(pay)void"
 	pushbytes 0x53f4bd3b // method "burn(axfer)void"
 	pushbytes 0x13169ab2 // method "snitch(address)void"
@@ -3275,7 +3275,7 @@ tolerated_performance:
 	pushbytes 0x289976ad // method "solve_delinquency(uint64,address)void"
 	pushbytes 0x69edf66f // method "close_validator(address)void"
 	txna ApplicationArgs 0
-	match *abi_route_init_ *abi_route_mint *abi_route_burn *abi_route_snitch *abi_route_bid *abi_route_delegate *abi_route_spawn_validator *abi_route_operator_commit *abi_route_operator_unstake *abi_route_go_online *abi_route_go_offline *abi_route_report_block *abi_route_stake_dust *abi_route_check_delinquency *abi_route_solve_delinquency *abi_route_close_validator
+	match *abi_route_init *abi_route_mint *abi_route_burn *abi_route_snitch *abi_route_bid *abi_route_delegate *abi_route_spawn_validator *abi_route_operator_commit *abi_route_operator_unstake *abi_route_go_online *abi_route_go_offline *abi_route_report_block *abi_route_stake_dust *abi_route_check_delinquency *abi_route_solve_delinquency *abi_route_close_validator
 
 	// this contract does not implement the given ABI method for call NoOp
 	err

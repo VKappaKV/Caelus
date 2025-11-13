@@ -5,10 +5,10 @@ export type SnitchInfo = {
   recipient: AppID; // must be either this.app or a validator
 };
 
-export const ALGORAND_BASE_FEE = 1000;
+export const ALGORAND_BASE_FEE = globals.minTxnFee;
 
-export const MBR_OPT_IN = 100_000;
-export const ACCOUNT_MIN_BALANCE = 100_000;
+export const MBR_OPT_IN = globals.assetOptInMinBalance;
+export const ACCOUNT_MIN_BALANCE = globals.minBalance;
 
 export const VALIDATOR_POOL_MBR = 2_040_900;
 export const BURN_QUEUE_MBR = 134_500;
@@ -23,7 +23,7 @@ export const MAX_DELINQUENCY_TOLERATED = 10;
 export const BURN_COOLDOWN = 5;
 
 export const PERFORMANCE_STAKE_INCREASE = 10_000_000_000;
-export const MAX_STAKE_PER_ACCOUNT = 50_000_000_000_000;
+export const MAX_STAKE_PER_ACCOUNT = globals.payoutsMaxBalance;
 
 export const FLASH_LOAN_FEE = 10_000_000;
 
