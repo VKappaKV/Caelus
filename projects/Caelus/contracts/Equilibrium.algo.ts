@@ -527,7 +527,11 @@ export class Equilibrium extends Contract {
 
   private get_max(info: Validator): uint64 {
     const max = info.commit + PERFORMANCE_STAKE_INCREASE * (info.performance / PERFORMANCE_STEP);
-    return max / info.delinquency;
+    const penalty = info.delinquency * PERFORMANCE_STAKE_INCREASE;
+    if (max < penalty) {
+      return 0;
+    }
+    return max - penalty;
   }
 
   private re_buffer(validator: Address): uint64 {

@@ -36,8 +36,8 @@ export async function deploy(testAccount: Account): Promise<DeployResult> {
       approvalProgram: approvalProgram.compiledApproval?.compiledBase64ToBytes!,
       clearStateProgram: approvalProgram.compiledClear?.compiledBase64ToBytes!,
       schema: {
-        globalInts: 13,
-        globalByteSlices: 3,
+        globalInts: 7,
+        globalByteSlices: 2,
         localInts: 0,
         localByteSlices: 0,
       },
