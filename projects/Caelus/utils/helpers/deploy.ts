@@ -3,7 +3,7 @@ import { OnSchemaBreak, OnUpdate } from '@algorandfoundation/algokit-utils/types
 import algosdk, { Address } from 'algosdk';
 import { algorand } from '../network';
 import { EquilibriumClient, EquilibriumFactory } from '../../contracts/clients/EquilibriumClient';
-import { Account } from './main';
+import { Account } from '../types/account';
 
 Config.configure({
   debug: true,

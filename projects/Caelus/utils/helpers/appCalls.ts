@@ -1,17 +1,6 @@
-import { SigningAccount, TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account';
-import { Address } from 'algosdk';
 import { algorand } from '../network';
 import { EquilibriumClient } from '../../contracts/clients/EquilibriumClient';
-
-export type Account = Address & TransactionSignerAccount & { account: SigningAccount };
-
-export async function clientSetUp(appId: bigint, account: Account) {
-  return algorand.client.getTypedAppClientById(EquilibriumClient, {
-    appId,
-    defaultSender: account.addr,
-    defaultSigner: account.signer,
-  });
-}
+import { Account } from '../types/account';
 
 export async function init(account: Account, client: EquilibriumClient) {
   const group = client.newGroup();
@@ -95,4 +84,14 @@ export async function commit(account: Account, client: EquilibriumClient, amount
     .addTransaction(commitTxn)
     .operatorCommit({ args: [commitTxn] })
     .send({ populateAppCallResources: true, coverAppCallInnerTransactionFees: true });
+}
+
+export async function retract(account: Account, client: EquilibriumClient, amount: bigint) {
+  await client.send.operatorUnstake({
+    sender: account.addr,
+    signer: account.signer,
+    args: [amount],
+    populateAppCallResources: true,
+    coverAppCallInnerTransactionFees: true,
+  });
 }

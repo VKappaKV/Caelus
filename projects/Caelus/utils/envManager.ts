@@ -9,14 +9,11 @@ export const updateEnvVariable = (key: string, value: string) => {
     const regex = new RegExp(`^${key}=.*$`, 'm');
 
     if (envContent.match(regex)) {
-      // Replace existing key
       envContent = envContent.replace(regex, `${key}=${value}`);
     } else {
-      // Append new key
       envContent += `\n${key}=${value}`;
     }
   } else {
-    // Create a new .env file
     envContent = `${key}=${value}\n`;
   }
 

@@ -9,8 +9,10 @@ import chalk from 'chalk';
 import { deploy, update } from './helpers/deploy';
 import { runner } from './runner';
 import { ADMIN_APP_ID, getAccount, VALIDATOR_APP_ID } from './account';
-import { clientSetUp, mint, spawn, commit, snitch, burn } from './helpers/main';
+import { mint, spawn, burn, bid, commit, retract, delegate } from './helpers/appCalls';
 import { EquilibriumClient } from '../contracts/clients/EquilibriumClient';
+import { Account } from './types/account';
+import { algorand } from './network';
 
 Config.configure({
   debug: true,
@@ -20,12 +22,20 @@ Config.configure({
 const ADMIN = 'ADMIN';
 const VALIDATOR = 'VALIDATOR';
 
+export async function clientSetUp(appId: bigint, account: Account) {
+  return algorand.client.getTypedAppClientById(EquilibriumClient, {
+    appId,
+    defaultSender: account.addr,
+    defaultSigner: account.signer,
+  });
+}
+
 async function main() {
-  let admin: bigint = 0n;
-  let validator: bigint = 0n;
+  let validator: string = '';
   let action: string = '';
   let appId: bigint = 0n;
   const { testAccount } = await getAccount();
+  let client: EquilibriumClient | null = null;
 
   while (action !== 'exit') {
     const pick = await inquirer.prompt([
@@ -62,7 +72,7 @@ async function main() {
           console.log('Aborted!');
           break;
         }
-        appId = await deploy();
+        appId = (await deploy(testAccount)).id;
         client = await clientSetUp(appId, testAccount);
         break;
       }
@@ -70,6 +80,10 @@ async function main() {
         const { confirm } = await confirmation();
         if (!confirm) {
           console.log('Aborted!');
+          break;
+        }
+        if (!client) {
+          console.log('Client not set up. Please deploy first...Or check something else is wrong');
           break;
         }
         await spawn(testAccount, client);
@@ -81,50 +95,66 @@ async function main() {
           console.log('Aborted!');
           break;
         }
-        const app = await getAppID(ADMIN, admin, validator);
-        await update(BigInt(app));
-        break;
-      }
-      case 'mint': {
-        const amount = await getAmount();
-        const account = await getAccount();
         if (!client) {
           console.log('Client not set up. Please deploy first...Or check something else is wrong');
           break;
         }
-        await mint(amount, account.testAccount, client);
+        const app = client.appId;
+        await update(app, testAccount);
+        break;
+      }
+      case 'mint': {
+        const amount = await getAmount();
+        if (!client) {
+          console.log('Client not set up. Please deploy first...Or check something else is wrong');
+          break;
+        }
+        await mint(amount, testAccount, client);
         break;
       }
       case 'burn': {
-        const app = await getAppID(ADMIN, admin, validator);
         const amount = await getAmount();
-        await burn(BigInt(app), BigInt(amount));
+        if (!client) {
+          console.log('Client not set up. Please deploy first...Or check something else is wrong');
+          break;
+        }
+        await burn(BigInt(amount), testAccount, client);
         break;
       }
       case 'mintOperator': {
-        const adminAppId = await getAppID(ADMIN, admin, validator);
-        const validatorAppId = await getAppID(VALIDATOR, admin, validator);
         const amount = await getAmount();
-        await mintOperatorCommit(BigInt(adminAppId), BigInt(validatorAppId), amount);
+        if (!client) {
+          console.log('Client not set up. Please deploy first...Or check something else is wrong');
+          break;
+        }
+        await commit(testAccount, client, amount);
         break;
       }
       case 'burnOperator': {
-        const adminAppId = await getAppID(ADMIN, admin, validator);
-        const validatorAppId = await getAppID(VALIDATOR, admin, validator);
         const amount = await getAmount();
-        await removeOperatorCommit(BigInt(validatorAppId), BigInt(adminAppId), amount);
+        if (!client) {
+          console.log('Client not set up. Please deploy first...Or check something else is wrong');
+          break;
+        }
+        await retract(testAccount, client, BigInt(amount));
         break;
       }
       case 'bidValidator': {
-        const adminAppId = await getAppID(ADMIN, admin, validator);
-        const validatorAppId = await getAppID(VALIDATOR, admin, validator);
-        await bid(BigInt(adminAppId), BigInt(validatorAppId));
+        const validatorToBid = await getValidatorAddress(validator);
+        if (!client) {
+          console.log('Client not set up. Please deploy first...Or check something else is wrong');
+          break;
+        }
+        await bid(validatorToBid, client);
         break;
       }
       case 'delegate': {
-        const adminAppId = await getAppID(ADMIN, admin, validator);
         const amount = await getAmount();
-        await delegate(BigInt(adminAppId), amount);
+        if (!client) {
+          console.log('Client not set up. Please deploy first...Or check something else is wrong');
+          break;
+        }
+        await delegate(amount, client);
         break;
       }
       case 'goOnline': {
@@ -301,19 +331,21 @@ const confirmation = () => {
   ]);
 };
 
-async function getAppID(role: string, defaultAdmin: bigint, defaultValidator: bigint): Promise<bigint> {
-  let requestApp: bigint;
-  if (defaultAdmin !== 0n && role === ADMIN) {
+async function getValidatorAddress(defaultValidator: string): Promise<string> {}
+
+async function getAddress(role: string, defaultAdmin: Account, defaultValidator: Account): Promise<Account> {
+  let requestAddress: Account;
+  if (defaultAdmin.addr.toString() !== '' && role === ADMIN) {
     return defaultAdmin;
   }
-  if (defaultValidator !== 0n && role === VALIDATOR) {
+  if (defaultValidator.addr.toString() !== '' && role === VALIDATOR) {
     return defaultValidator;
   }
   const { choice } = await inquirer.prompt([
     {
       type: 'list',
       name: 'choice',
-      message: `Do you want to use the ${role} app ID from the config file or enter it manually? \t found: ${role === ADMIN ? ADMIN_APP_ID : VALIDATOR_APP_ID}`,
+      message: `Do you want to use the ${role} address from the config file or enter it manually? \t found: ${role === ADMIN ? ADMIN_APP_ID : VALIDATOR_APP_ID}`,
       choices: [
         { name: `Use ${role === ADMIN ? ADMIN_APP_ID : VALIDATOR_APP_ID}`, value: 'config' },
         { name: 'Enter manually', value: 'manual' },
@@ -322,23 +354,22 @@ async function getAppID(role: string, defaultAdmin: bigint, defaultValidator: bi
   ]);
   switch (choice) {
     case 'config': {
-      const appId = role === ADMIN ? ADMIN_APP_ID : VALIDATOR_APP_ID;
-      if (!appId) {
-        throw new Error(`No ${role} app ID found in config file`);
+      const address = role === ADMIN ? ADMIN_APP_ID : VALIDATOR_APP_ID;
+      if (!address) {
+        throw new Error(`No ${role} address found in config file`);
       }
-      requestApp = BigInt(appId);
+      requestAddress = address;
       break;
     }
     case 'manual': {
-      const { appId } = await inquirer.prompt([
+      const { address } = await inquirer.prompt([
         {
           type: 'input',
-          name: 'appId',
-          message: `Enter ${role} app ID`,
-          validate: (input) => !Number.isNaN(Number(input)) || 'Must be a valid number',
+          name: 'address',
+          message: `Enter ${role} address`,
         },
       ]);
-      requestApp = BigInt(appId);
+      requestApp = await getAccountByAddress(address);
       break;
     }
     default:

@@ -2,7 +2,7 @@ export type SnitchInfo = {
   performanceCheck: boolean;
   stakeAmountCheck: boolean;
   versionCheck: boolean;
-  recipient: AppID; // must be either this.app or a validator
+  recipient: AppID;
 };
 
 export const ALGORAND_BASE_FEE = globals.minTxnFee;
