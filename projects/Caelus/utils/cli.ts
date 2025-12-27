@@ -8,7 +8,7 @@ import { Config } from '@algorandfoundation/algokit-utils';
 import chalk from 'chalk';
 import { deploy, update } from './helpers/deploy';
 import { runner } from './runner';
-import { ADMIN_APP_ID, getAccount, VALIDATOR_APP_ID } from './account';
+import { getAccount, VALIDATOR_APP_ID } from './account';
 import { mint, spawn, burn, bid, commit, retract, delegate } from './helpers/appCalls';
 import { EquilibriumClient } from '../contracts/clients/EquilibriumClient';
 import { Account } from './types/account';
@@ -19,7 +19,6 @@ Config.configure({
   traceAll: true,
 });
 
-const ADMIN = 'ADMIN';
 const VALIDATOR = 'VALIDATOR';
 
 export async function clientSetUp(appId: bigint, account: Account) {
@@ -140,7 +139,7 @@ async function main() {
         break;
       }
       case 'bidValidator': {
-        const validatorToBid = await getValidatorAddress(validator);
+        const validatorToBid = await getAddress();
         if (!client) {
           console.log('Client not set up. Please deploy first...Or check something else is wrong');
           break;
@@ -331,51 +330,43 @@ const confirmation = () => {
   ]);
 };
 
-async function getValidatorAddress(defaultValidator: string): Promise<string> {}
+async function getAddress(): Promise<string> {
+  let requestAddress: string;
 
-async function getAddress(role: string, defaultAdmin: Account, defaultValidator: Account): Promise<Account> {
-  let requestAddress: Account;
-  if (defaultAdmin.addr.toString() !== '' && role === ADMIN) {
-    return defaultAdmin;
-  }
-  if (defaultValidator.addr.toString() !== '' && role === VALIDATOR) {
-    return defaultValidator;
-  }
   const { choice } = await inquirer.prompt([
     {
       type: 'list',
       name: 'choice',
-      message: `Do you want to use the ${role} address from the config file or enter it manually? \t found: ${role === ADMIN ? ADMIN_APP_ID : VALIDATOR_APP_ID}`,
+      message: `Do you want to use the validator address from the config file or enter it manually? \t found: ${VALIDATOR_APP_ID}`,
       choices: [
-        { name: `Use ${role === ADMIN ? ADMIN_APP_ID : VALIDATOR_APP_ID}`, value: 'config' },
+        { name: `Use ${VALIDATOR_APP_ID}`, value: 'config' },
         { name: 'Enter manually', value: 'manual' },
       ],
     },
   ]);
   switch (choice) {
     case 'config': {
-      const address = role === ADMIN ? ADMIN_APP_ID : VALIDATOR_APP_ID;
+      const address = VALIDATOR_APP_ID;
       if (!address) {
-        throw new Error(`No ${role} address found in config file`);
+        throw new Error(`No validator address found in config file`);
       }
       requestAddress = address;
       break;
     }
     case 'manual': {
-      const { address } = await inquirer.prompt([
+      requestAddress = await inquirer.prompt([
         {
           type: 'input',
           name: 'address',
-          message: `Enter ${role} address`,
+          message: `Enter address`,
         },
-      ]);
-      requestApp = await getAccountByAddress(address);
+      ]).ui.answers.address;
       break;
     }
     default:
       throw new Error('Invalid choice');
   }
-  return requestApp;
+  return requestAddress;
 }
 
 main();
