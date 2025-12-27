@@ -1,6 +1,7 @@
-import { algorand } from '../network';
+import { algorand } from './network';
 import { EquilibriumClient } from '../../contracts/clients/EquilibriumClient';
 import { Account } from '../types/account';
+import { PartKey } from '../types/partkey';
 
 export async function init(account: Account, client: EquilibriumClient) {
   const group = client.newGroup();
@@ -91,6 +92,38 @@ export async function retract(account: Account, client: EquilibriumClient, amoun
     sender: account.addr,
     signer: account.signer,
     args: [amount],
+    populateAppCallResources: true,
+    coverAppCallInnerTransactionFees: true,
+  });
+}
+
+export async function online(account: Account, client: EquilibriumClient, partKey: PartKey) {
+  const onlineFeePayTxn = await algorand.createTransaction.payment({
+    sender: account.addr,
+    receiver: client.appAddress,
+    amount: (2).algos(),
+  });
+
+  const group = client.newGroup();
+  group.addTransaction(onlineFeePayTxn).goOnline({
+    args: [
+      onlineFeePayTxn,
+      partKey.votingKey,
+      partKey.selectionKey,
+      partKey.stateProofKey,
+      partKey.firstRound,
+      partKey.lastRound,
+      partKey.keyDilution,
+    ],
+  });
+  await group.send({ populateAppCallResources: true, coverAppCallInnerTransactionFees: true });
+}
+
+export async function offline(account: Account, client: EquilibriumClient) {
+  await client.send.goOffline({
+    sender: account.addr,
+    signer: account.signer,
+    args: [],
     populateAppCallResources: true,
     coverAppCallInnerTransactionFees: true,
   });

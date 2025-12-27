@@ -1,5 +1,3 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable camelcase */
 import { Contract } from '@algorandfoundation/tealscript';
 import {
   ALGORAND_BASE_FEE,
@@ -113,7 +111,6 @@ export class Equilibrium extends Contract {
   }
 
   burn(burnTxn: AssetTransferTxn): void {
-    // TODO: RECHECK
     verifyAssetTransferTxn(burnTxn, {
       assetReceiver: this.app.address,
       xferAsset: this.token_id.value,

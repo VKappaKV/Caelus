@@ -1,18 +1,14 @@
-/* eslint-disable import/no-cycle */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-console */
 import inquirer from 'inquirer';
 import { Config } from '@algorandfoundation/algokit-utils';
 import chalk from 'chalk';
 import { deploy, update } from './helpers/deploy';
 import { runner } from './runner';
-import { getAccount, VALIDATOR_APP_ID } from './account';
-import { mint, spawn, burn, bid, commit, retract, delegate } from './helpers/appCalls';
+import { getAccount } from './helpers/account';
+import { mint, spawn, burn, bid, commit, retract, delegate, online, offline } from './helpers/appCalls';
 import { EquilibriumClient } from '../contracts/clients/EquilibriumClient';
 import { Account } from './types/account';
-import { algorand } from './network';
+import { algorand } from './helpers/network';
+import { confirmation, decodeBase64ToUint8Array, getAddress, getAmount } from './helpers/misc';
 
 Config.configure({
   debug: true,
@@ -157,8 +153,6 @@ async function main() {
         break;
       }
       case 'goOnline': {
-        const validatorAppId = await getAppID(VALIDATOR, admin, validator);
-
         const partKeyInputs = await inquirer.prompt([
           {
             type: 'input',
@@ -204,15 +198,12 @@ async function main() {
           stateProofKey: decodeBase64ToUint8Array(partKeyInputs.stateProofKey),
         };
 
-        await goOnline(
-          BigInt(validatorAppId),
-          partKey.votingKey,
-          partKey.selectionKey,
-          partKey.stateProofKey,
-          partKey.firstRound,
-          partKey.lastRound,
-          partKey.keyDilution
-        );
+        if (!client) {
+          console.log('Client not set up. Please deploy first...Or check something else is wrong');
+          break;
+        }
+
+        await online(testAccount, client, partKey);
         break;
       }
       case 'goOffline': {
@@ -221,8 +212,11 @@ async function main() {
           console.log('Aborted!');
           break;
         }
-        const app = await getAppID(VALIDATOR, admin, validator);
-        await goOffline(BigInt(app));
+        if (!client) {
+          console.log('Client not set up. Please deploy first...Or check something else is wrong');
+          break;
+        }
+        await offline(testAccount, client);
         break;
       }
       case 'claimDustAlgos': {
@@ -300,73 +294,6 @@ async function main() {
         break;
     }
   }
-}
-
-function decodeBase64ToUint8Array(base64: string): Uint8Array {
-  const binary = Buffer.from(base64, 'base64');
-  return new Uint8Array(binary);
-}
-
-async function getAmount(): Promise<number> {
-  const { amount } = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'amount',
-      message: 'Enter amount: ',
-      validate: (input) => !Number.isNaN(Number(input)) || 'Must be a valid number',
-    },
-  ]);
-  return Number(amount);
-}
-
-const confirmation = () => {
-  return inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'confirm',
-      message: 'Are you sure?',
-      default: false,
-    },
-  ]);
-};
-
-async function getAddress(): Promise<string> {
-  let requestAddress: string;
-
-  const { choice } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'choice',
-      message: `Do you want to use the validator address from the config file or enter it manually? \t found: ${VALIDATOR_APP_ID}`,
-      choices: [
-        { name: `Use ${VALIDATOR_APP_ID}`, value: 'config' },
-        { name: 'Enter manually', value: 'manual' },
-      ],
-    },
-  ]);
-  switch (choice) {
-    case 'config': {
-      const address = VALIDATOR_APP_ID;
-      if (!address) {
-        throw new Error(`No validator address found in config file`);
-      }
-      requestAddress = address;
-      break;
-    }
-    case 'manual': {
-      requestAddress = await inquirer.prompt([
-        {
-          type: 'input',
-          name: 'address',
-          message: `Enter address`,
-        },
-      ]).ui.answers.address;
-      break;
-    }
-    default:
-      throw new Error('Invalid choice');
-  }
-  return requestAddress;
 }
 
 main();

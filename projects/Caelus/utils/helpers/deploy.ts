@@ -1,7 +1,7 @@
 import { Config } from '@algorandfoundation/algokit-utils';
 import { OnSchemaBreak, OnUpdate } from '@algorandfoundation/algokit-utils/types/app';
 import algosdk, { Address } from 'algosdk';
-import { algorand } from '../network';
+import { algorand } from './network';
 import { EquilibriumClient, EquilibriumFactory } from '../../contracts/clients/EquilibriumClient';
 import { Account } from '../types/account';
 
