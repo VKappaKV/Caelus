@@ -17,6 +17,7 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   rules: {
+    'no-use-before-define': 'off',
     'no-await-in-loop': 'off',
     'no-console': 'off',
     camelcase: 'off',

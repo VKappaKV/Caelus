@@ -155,19 +155,19 @@ async function main() {
             type: 'input',
             name: 'firstRound',
             message: 'First round:',
-            validate: (input) => !Number.isNaN(Number(input)) || 'Must be a valid number',
+            validate: (input: string) => !Number.isNaN(Number(input)) || 'Must be a valid number',
           },
           {
             type: 'input',
             name: 'lastRound',
             message: 'Last round:',
-            validate: (input) => !Number.isNaN(Number(input)) || 'Must be a valid number',
+            validate: (input: string) => !Number.isNaN(Number(input)) || 'Must be a valid number',
           },
           {
             type: 'input',
             name: 'keyDilution',
             message: 'Key dilution:',
-            validate: (input) => !Number.isNaN(Number(input)) || 'Must be a valid number',
+            validate: (input: string) => !Number.isNaN(Number(input)) || 'Must be a valid number',
           },
           {
             type: 'input',
@@ -222,7 +222,7 @@ async function main() {
             type: 'input',
             name: 'block',
             message: 'Enter the block number to start the runner script from:',
-            validate: (input) => !Number.isNaN(Number(input)) || 'Must be a valid number',
+            validate: (input: string) => !Number.isNaN(Number(input)) || 'Must be a valid number',
           },
         ]);
         const blockNumber = BigInt(block.block);
@@ -249,7 +249,7 @@ async function main() {
                 type: 'input',
                 name: 'adminAppId',
                 message: 'Enter Admin App ID',
-                validate: (input) => !Number.isNaN(Number(input)) || 'Must be a valid number',
+                validate: (input: string) => !Number.isNaN(Number(input)) || 'Must be a valid number',
               },
             ]);
             appId = BigInt(app.adminAppId);
@@ -261,7 +261,6 @@ async function main() {
                 type: 'input',
                 name: 'validatorAppId',
                 message: `Enter Validator Address to add to the default list: \n ${validators.join(', ')}`,
-                validate: (input) => !Number.isNaN(Number(input)) || 'Must be a valid number',
               },
             ]);
             validators.push(app.validatorAppId);
