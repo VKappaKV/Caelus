@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "@algorandfoundation/algokit-subscriber": "^3.1.0",
-    "@algorandfoundation/algokit-utils": "^8.2.2",
+    "@algorandfoundation/algokit-subscriber": "^3.2.0",
+    "@algorandfoundation/algokit-utils": "^9.0.0",
     "algosdk": "^3.1.0"
   },
   "devDependencies": {

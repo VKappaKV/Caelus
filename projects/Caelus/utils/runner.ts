@@ -1,27 +1,22 @@
-/* eslint-disable import/no-cycle */
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-console */
-/* eslint-disable no-await-in-loop */
 import { AlgorandSubscriber } from '@algorandfoundation/algokit-subscriber';
 import { TransactionType } from 'algosdk';
 import { SubscribedTransaction } from '@algorandfoundation/algokit-subscriber/types/subscription';
-import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
-import { reportRewards } from './helpers/validator';
-import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
-import { getAccount } from './cli';
 import { algorand, FEE_SINK_ADDRESS } from './helpers/network';
-import { snitch } from './helpers/admin';
+import { snitch } from './helpers/appCalls';
+import { Account } from './types/account';
+import { EquilibriumClient } from '../contracts/clients/EquilibriumClient';
+import { getAddress } from './helpers/misc';
 
-export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: bigint) => {
-  let currentWatermark = watermark;
+export const runner = async (adminAppId: bigint, watermark: bigint, testAccount: Account) => {
+  let currentWatermark = watermark; // check in bootstrap.ts change this to your account, mnemonics are expected to be in ../env.ts
 
-  const { testAccount } = await getAccount(); // check in bootstrap.ts change this to your account, mnemonics are expected to be in ../env.ts
-
-  const admin = algorand.client.getTypedAppClientById(CaelusAdminClient, {
+  const admin = algorand.client.getTypedAppClientById(EquilibriumClient, {
     appId: adminAppId,
     defaultSender: testAccount,
     defaultSigner: testAccount.signer,
   });
+
+  const myValidator = await getAddress();
 
   const subscriber = new AlgorandSubscriber(
     {
@@ -93,59 +88,50 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
     algorand.client.algod,
     algorand.client.indexer
   );
-  subscriber.on('payouts', async (tx) => onPayouts(tx, myAppId));
-  subscriber.on('bid', async (tx) => onBidTracking(tx, admin, myAppId));
-  subscriber.on('mint', async (tx) => onMintTracking(tx, admin, myAppId));
-  subscriber.on('declared_reward', async (tx) => onMintTracking(tx, admin, myAppId));
-  subscriber.on('stake_delegation', async (tx) => onBidTracking(tx, admin, myAppId));
-  subscriber.on('burn', async (tx) => onBurn(tx, admin, myAppId));
+  subscriber.on('payouts', async (tx) => onPayouts(tx, admin));
+  subscriber.on('bid', async (tx) => onBidTracking(tx, admin, myValidator));
+  subscriber.on('mint', async (tx) => onMintTracking(tx, admin, myValidator));
+  subscriber.on('declared_reward', async (tx) => onMintTracking(tx, admin, myValidator));
+  subscriber.on('stake_delegation', async (tx) => onBidTracking(tx, admin, myValidator));
+  subscriber.on('burn', async (tx) => onBurn(tx, admin, myValidator));
   subscriber.onError((error) => {
     console.error('Error in subscriber', error);
   });
   subscriber.start();
 };
 
-const onPayouts = async (tx: SubscribedTransaction, myAppId: bigint) => {
+const onPayouts = async (tx: SubscribedTransaction, client: EquilibriumClient) => {
   if (!tx) {
     console.log('No transaction found');
     return;
   }
   console.log('Payout detected', tx);
-  const client = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
-    appId: myAppId,
-  });
   const appAddress = client.appAddress.toString();
   if (tx.paymentTransaction?.receiver === appAddress) {
     await new Promise((f) => {
       setTimeout(f, 10000);
     });
-    await reportRewards(myAppId, tx.confirmedRound!);
+    await reportRewards(client.appId, tx.confirmedRound!);
   }
 };
 
-const onBidTracking = async (tx: SubscribedTransaction, adminClient: CaelusAdminClient, myAppId: bigint) => {
+const onBidTracking = async (tx: SubscribedTransaction, adminClient: EquilibriumClient, myValidator: string) => {
   console.log('Bid tracking detected', tx);
   if (!tx) {
     console.log('No transaction found');
     return;
   }
-  const myValidator = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
-    appId: myAppId,
-  });
   await outBid(adminClient, myValidator);
 };
 
-const onMintTracking = async (tx: SubscribedTransaction, adminClient: CaelusAdminClient, myAppId: bigint) => {
+const onMintTracking = async (tx: SubscribedTransaction, adminClient: EquilibriumClient, myValidator: string) => {
   console.log('Mint tracking detected', tx);
   if (!tx) {
     console.log('No transaction found');
     return;
   }
-  const myValidator = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
-    appId: myAppId,
-  });
 
-  await outBid(adminClient, myValidator); // check if I need to outbid
+  await outBid(adminClient, myValidator);
 
   const currentTopBidder = await adminClient.state.global.highestBidder();
   console.log('Current top bidder', currentTopBidder);
@@ -167,9 +153,9 @@ const onMintTracking = async (tx: SubscribedTransaction, adminClient: CaelusAdmi
   }
 };
 
-async function outBid(admin: CaelusAdminClient, myValidator: CaelusValidatorPoolClient) {
+async function outBid(admin: EquilibriumClient, myValidator: string) {
   const currentTopBidder = await admin.state.global.highestBidder();
-  const topBidderClient = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
+  const topBidderClient = algorand.client.getTypedAppClientById(EquilibriumClient, {
     appId: currentTopBidder!,
   });
   const bufferOfTopBidder = await topBidderClient.state.global.saturationBuffer();
@@ -205,13 +191,10 @@ function uint8ArrayToBigIntArray(bytes: Uint8Array): bigint[] {
   return result;
 }
 
-const onBurn = async (tx: SubscribedTransaction, adminClient: CaelusAdminClient, myAppId: bigint) => {
+const onBurn = async (tx: SubscribedTransaction, adminClient: EquilibriumClient, myAppId: string) => {
   console.log('Burn detected', tx);
 
-  const client = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
-    appId: myAppId,
-  });
-  const currentQueue = (await adminClient.state.global.burnQueue()).asByteArray();
+  const currentQueue = await adminClient.state;
   if (currentQueue === undefined) {
     console.log('Burn queue is undefined');
     return;

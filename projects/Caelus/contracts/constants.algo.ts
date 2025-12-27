@@ -2,12 +2,16 @@ export type SnitchInfo = {
   performanceCheck: boolean;
   stakeAmountCheck: boolean;
   versionCheck: boolean;
-  recipient: AppID; // must be either this.app or a validator
+  recipient: AppID;
 };
 
-export const ALGORAND_BASE_FEE = 1000;
+export const ALGORAND_BASE_FEE = globals.minTxnFee;
 
-export const VALIDATOR_POOL_CONTRACT_MBR = 1_120_500;
+export const MBR_OPT_IN = globals.assetOptInMinBalance;
+export const ACCOUNT_MIN_BALANCE = globals.minBalance;
+
+export const VALIDATOR_POOL_MBR = 2_040_900;
+export const BURN_QUEUE_MBR = 134_500;
 
 export const PROTOCOL_COMMISSION = 4;
 export const VALIDATOR_COMMISSION = 6;
@@ -19,10 +23,7 @@ export const MAX_DELINQUENCY_TOLERATED = 10;
 export const BURN_COOLDOWN = 5;
 
 export const PERFORMANCE_STAKE_INCREASE = 10_000_000_000;
-export const MAX_STAKE_PER_ACCOUNT = 50_000_000_000_000;
-
-export const VEST_TIER_4 = 100_000_000_000;
-export const VEST_TIER_5 = 150_000_000_000;
+export const MAX_STAKE_PER_ACCOUNT = globals.payoutsMaxBalance;
 
 export const FLASH_LOAN_FEE = 10_000_000;
 
