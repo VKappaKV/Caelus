@@ -29,6 +29,30 @@ export const confirmation = () => {
   ]);
 };
 
+export const defaultOrInput = async (defaultValue: string[]): Promise<boolean> => {
+  const { input } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'input',
+      message: `do you want to use default or new address?: \n Defaults: ${defaultValue.join(', ')}`,
+      choice: ['default', 'new'],
+    },
+  ]);
+  return input === 'default';
+};
+
+export const pickFromList = async (message: string, choices: string[]) => {
+  const { selection } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'selection',
+      message,
+      choices,
+    },
+  ]);
+  return selection;
+};
+
 export async function getAddress(): Promise<string> {
   let requestAddress: string;
 

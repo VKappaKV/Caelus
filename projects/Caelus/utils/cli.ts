@@ -15,8 +15,6 @@ Config.configure({
   traceAll: true,
 });
 
-const VALIDATOR = 'VALIDATOR';
-
 export async function clientSetUp(appId: bigint, account: Account) {
   return algorand.client.getTypedAppClientById(EquilibriumClient, {
     appId,
@@ -26,7 +24,7 @@ export async function clientSetUp(appId: bigint, account: Account) {
 }
 
 async function main() {
-  let validator: string = '';
+  const validators: string[] = [];
   let action: string = '';
   let appId: bigint = 0n;
   const { testAccount } = await getAccount();
@@ -49,7 +47,6 @@ async function main() {
           { name: 'Bid Validator', value: 'bidValidator' },
           { name: 'Delegate stake to validator', value: 'delegate' },
           { name: 'Delete Operator', value: 'deleteOperator' },
-          { name: 'Claim Leftover Algos into the Validator', value: 'claimDustAlgos' },
           { name: 'Go Online', value: 'goOnline' },
           { name: 'Go Offline', value: 'goOffline' },
           { name: 'Init Runner Script', value: 'initRunner' },
@@ -219,19 +216,7 @@ async function main() {
         await offline(testAccount, client);
         break;
       }
-      case 'claimDustAlgos': {
-        const { confirm } = await confirmation();
-        if (!confirm) {
-          console.log('Aborted!');
-          break;
-        }
-        const app = await getAppID(VALIDATOR, admin, validator);
-        await claimDust(BigInt(app));
-        break;
-      }
       case 'initRunner': {
-        const app = await getAppID(ADMIN, admin, validator);
-        const validatorAppId = await getAppID(VALIDATOR, admin, validator);
         const block = await inquirer.prompt([
           {
             type: 'input',
@@ -241,7 +226,7 @@ async function main() {
           },
         ]);
         const blockNumber = BigInt(block.block);
-        await runner(BigInt(app), BigInt(validatorAppId), blockNumber);
+        await runner(appId, blockNumber, testAccount);
         break;
       }
       case 'settings': {
@@ -251,7 +236,7 @@ async function main() {
             name: 'choice',
             message: 'What do you want to do?',
             choices: [
-              { name: 'Set Default Main', value: 'setMain' },
+              { name: 'Set Default App', value: 'setMain' },
               { name: 'Set Default Validator', value: 'setValidator' },
               { name: 'Exit', value: 'exit' },
             ],
@@ -267,7 +252,7 @@ async function main() {
                 validate: (input) => !Number.isNaN(Number(input)) || 'Must be a valid number',
               },
             ]);
-            admin = BigInt(app.adminAppId);
+            appId = BigInt(app.adminAppId);
             break;
           }
           case 'setValidator': {
@@ -275,11 +260,11 @@ async function main() {
               {
                 type: 'input',
                 name: 'validatorAppId',
-                message: 'Enter Validator App ID',
+                message: `Enter Validator Address to add to the default list: \n ${validators.join(', ')}`,
                 validate: (input) => !Number.isNaN(Number(input)) || 'Must be a valid number',
               },
             ]);
-            validator = BigInt(app.validatorAppId);
+            validators.push(app.validatorAppId);
             break;
           }
           default:

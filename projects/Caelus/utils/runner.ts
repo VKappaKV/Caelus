@@ -1,23 +1,18 @@
-/* eslint-disable import/no-cycle */
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-console */
-/* eslint-disable no-await-in-loop */
 import { AlgorandSubscriber } from '@algorandfoundation/algokit-subscriber';
 import { TransactionType } from 'algosdk';
 import { SubscribedTransaction } from '@algorandfoundation/algokit-subscriber/types/subscription';
 import { CaelusValidatorPoolClient } from '../contracts/clients/CaelusValidatorPoolClient';
 import { reportRewards } from './helpers/validator';
 import { CaelusAdminClient } from '../contracts/clients/CaelusAdminClient';
-import { getAccount } from './helpers/account';
 import { algorand, FEE_SINK_ADDRESS } from './helpers/network';
 import { snitch } from './helpers/appCalls';
+import { Account } from './types/account';
+import { EquilibriumClient } from '../contracts/clients/EquilibriumClient';
 
-export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: bigint) => {
-  let currentWatermark = watermark;
+export const runner = async (adminAppId: bigint, watermark: bigint, testAccount: Account) => {
+  let currentWatermark = watermark; // check in bootstrap.ts change this to your account, mnemonics are expected to be in ../env.ts
 
-  const { testAccount } = await getAccount(); // check in bootstrap.ts change this to your account, mnemonics are expected to be in ../env.ts
-
-  const admin = algorand.client.getTypedAppClientById(CaelusAdminClient, {
+  const admin = algorand.client.getTypedAppClientById(EquilibriumClient, {
     appId: adminAppId,
     defaultSender: testAccount,
     defaultSigner: testAccount.signer,
@@ -105,21 +100,18 @@ export const runner = async (adminAppId: bigint, myAppId: bigint, watermark: big
   subscriber.start();
 };
 
-const onPayouts = async (tx: SubscribedTransaction, myAppId: bigint) => {
+const onPayouts = async (tx: SubscribedTransaction, client: EquilibriumClient) => {
   if (!tx) {
     console.log('No transaction found');
     return;
   }
   console.log('Payout detected', tx);
-  const client = algorand.client.getTypedAppClientById(CaelusValidatorPoolClient, {
-    appId: myAppId,
-  });
   const appAddress = client.appAddress.toString();
   if (tx.paymentTransaction?.receiver === appAddress) {
     await new Promise((f) => {
       setTimeout(f, 10000);
     });
-    await reportRewards(myAppId, tx.confirmedRound!);
+    await reportRewards(client.appId, tx.confirmedRound!);
   }
 };
 
