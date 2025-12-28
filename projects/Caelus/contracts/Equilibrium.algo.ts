@@ -113,52 +113,55 @@ export class Equilibrium extends Contract {
 
   burn(burnTxn: AssetTransferTxn): void {
     verifyAssetTransferTxn(burnTxn, {
+      assetSender: this.txn.sender,
       assetReceiver: this.app.address,
       xferAsset: this.token_id.value,
       assetAmount: { greaterThanEqualTo: ALGORAND_BASE_FEE },
     });
-    assert(this.txn.sender === burnTxn.sender, 'Burn transaction sender mismatch');
-    const burn_amount = this.get_burn_amount(burnTxn.assetAmount);
+    let burn_amount = this.get_burn_amount(burnTxn.assetAmount); // Algo amount to burn from LST amount
     let burned = 0; // Algo amount burn counter
+    let from_idle = 0;
+    let from_delegation = 0;
 
     // check if there are Algo in idle balance to use
     if (this.idle_stake.value > 0) {
-      let amount_from_idle = 0;
       if (this.idle_stake.value >= burn_amount) {
         this.idle_stake.value -= burn_amount;
         burned = burn_amount;
-        amount_from_idle = burn_amount;
       } else {
         burned = this.idle_stake.value;
         this.idle_stake.value = 0;
-        amount_from_idle = burned;
       }
       sendPayment({
         receiver: this.txn.sender,
-        amount: amount_from_idle,
+        amount: burned,
       });
-      const from_idle = this.get_burn_amount(amount_from_idle);
-      this.down_counters(amount_from_idle, from_idle);
+      from_idle = this.get_mint_amount(burned); // LST amount equivalent to burned Algo from idle
+      this.down_counters(burned, from_idle);
     }
+
+    burn_amount -= burned; // remaining amount to burn
+    burned = 0; // reset burned counter for delegation burning
 
     if (this.exhausted.value === globals.round && !this.queue_is_full()) {
       return;
     }
 
-    if (burned !== burn_amount) {
+    if (burned < burn_amount) {
       const queue = clone(this.burn_queue.value);
       for (let i = 0; i < queue.length; i += 1) {
-        if (queue[i] !== Address.zeroAddress && burned !== burn_amount) {
+        const validator_i = clone(this.validator(queue[i]).value);
+        if (queue[i] !== Address.zeroAddress && burned < burn_amount) {
           const delegated = this.validator(queue[i]).value.delegated;
           const to_burn = burn_amount - burned;
           let burning_from_i = 0;
           if (delegated >= to_burn) {
-            this.validator(queue[i]).value.delegated -= to_burn;
+            validator_i.delegated -= to_burn;
             burned += to_burn;
             burning_from_i = to_burn;
           } else {
             burning_from_i = delegated;
-            this.validator(queue[i]).value.delegated = 0;
+            validator_i.delegated = 0;
             queue[i] = Address.zeroAddress;
             burned += delegated;
           }
@@ -169,19 +172,22 @@ export class Equilibrium extends Contract {
               amount: burning_from_i,
             });
           }
+          this.validator(queue[i]).value = validator_i;
         }
       }
-      const amount_in_lst = this.get_burn_amount(burned);
-      this.down_counters(burned, amount_in_lst);
+      from_delegation = this.get_mint_amount(burned); // LST amount equivalent to burned Algo from delegation
+      if (burned === burn_amount) {
+        assert(from_idle + from_delegation === burnTxn.assetAmount, 'Burn amounts do not match, calculation error'); // SANITY CHECK
+      }
+      this.down_counters(burned, from_delegation);
       this.burn_queue.value = queue;
-      if (amount_in_lst > 0) {
+      if (from_delegation + from_idle < burnTxn.assetAmount) {
         sendAssetTransfer({
-          sender: this.txn.sender,
-          assetReceiver: this.app.address,
+          assetReceiver: this.txn.sender,
           xferAsset: this.token_id.value,
-          assetAmount: burnTxn.assetAmount - amount_in_lst,
+          assetAmount: burnTxn.assetAmount - from_delegation - from_idle,
         });
-        this.exhausted.value = globals.round;
+        this.exhausted.value = globals.round; // if we couldn't burn the full amount, set exhausted to current round, the burn queue needs to be populated again
       }
     }
   }
