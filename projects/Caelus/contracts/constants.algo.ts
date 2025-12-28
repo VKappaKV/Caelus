@@ -18,7 +18,7 @@ export const VALIDATOR_COMMISSION = 6;
 
 export const OPERATOR_REPORT_MAX_TIME = 700;
 export const PERFORMANCE_STEP = 5;
-
+export const BURN_QUEUE_LENGTH = 10;
 export const MAX_DELINQUENCY_TOLERATED = 10;
 export const BURN_COOLDOWN = 5;
 

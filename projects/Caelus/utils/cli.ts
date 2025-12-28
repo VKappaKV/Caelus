@@ -2,7 +2,6 @@ import inquirer from 'inquirer';
 import { Config } from '@algorandfoundation/algokit-utils';
 import chalk from 'chalk';
 import { deploy, update } from './helpers/deploy';
-import { runner } from './runner';
 import { getAccount } from './helpers/account';
 import { mint, spawn, burn, bid, commit, retract, delegate, online, offline } from './helpers/appCalls';
 import { EquilibriumClient } from '../contracts/clients/EquilibriumClient';
@@ -226,7 +225,8 @@ async function main() {
           },
         ]);
         const blockNumber = BigInt(block.block);
-        await runner(appId, blockNumber, testAccount);
+        console.log(`Runner script initialized from block number: ${blockNumber}`);
+        // await runner(appId, blockNumber, testAccount);
         break;
       }
       case 'settings': {

@@ -12,7 +12,7 @@ export async function getAmount(): Promise<number> {
       type: 'input',
       name: 'amount',
       message: 'Enter amount: ',
-      validate: (input) => !Number.isNaN(Number(input)) || 'Must be a valid number',
+      validate: (input: string) => !Number.isNaN(Number(input)) || 'Must be a valid number',
     },
   ]);
   return Number(amount);

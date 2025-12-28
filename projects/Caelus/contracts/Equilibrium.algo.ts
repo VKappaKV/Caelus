@@ -16,6 +16,7 @@ import {
   DELINQUENCY_STATUS,
   ACCOUNT_MIN_BALANCE,
   BURN_QUEUE_MBR,
+  BURN_QUEUE_LENGTH,
 } from './constants.algo';
 import { Puppet } from './Puppet.algo';
 
@@ -51,7 +52,7 @@ export class Equilibrium extends Contract {
 
   highest_bidder = GlobalStateKey<Address>({ key: 'highest_bidder' });
 
-  burn_queue = BoxKey<StaticArray<Address, 10>>({ key: 'burn_queue' });
+  burn_queue = BoxKey<StaticArray<Address, typeof BURN_QUEUE_LENGTH>>({ key: 'burn_queue' });
 
   exhausted = GlobalStateKey<uint64>({ key: 'exhausted' });
 
@@ -413,7 +414,8 @@ export class Equilibrium extends Contract {
     }
   }
 
-  check_delinquency(): void {
+  check_delinquency(validator: Address): void {
+    assert(this.validator(validator).exists, 'Validator does not exist');
     // check delinquency values: stake amount, last block etc.
     // set status to DELINQUENT || increment delinquency counter
     // save report block in last report
