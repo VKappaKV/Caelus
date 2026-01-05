@@ -14,7 +14,7 @@ Config.configure({
   traceAll: true,
 });
 
-export async function clientSetUp(appId: bigint, account: Account) {
+function clientSetUp(appId: bigint, account: Account) {
   return algorand.client.getTypedAppClientById(EquilibriumClient, {
     appId,
     defaultSender: account.addr,
