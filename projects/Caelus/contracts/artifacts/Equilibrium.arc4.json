@@ -230,6 +230,30 @@
       "returns": {
         "type": "void"
       }
+    },
+    {
+      "name": "get_validator",
+      "args": [
+        {
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "address"
+      }
+    },
+    {
+      "name": "get_validator_info",
+      "args": [
+        {
+          "name": "validator",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "(address,uint64,uint64,uint64,uint64,uint64,uint64,uint64,uint64,uint64)"
+      }
     }
   ]
 }
