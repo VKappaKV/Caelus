@@ -140,55 +140,61 @@ export class Equilibrium extends Contract {
       this.down_counters(burned, from_idle);
     }
 
-    burn_amount -= burned; // remaining amount to burn
-    burned = 0; // reset burned counter for delegation burning
-
-    if (this.exhausted.value === globals.round && !this.queue_is_full()) {
+    if (burned === burn_amount) {
       return;
     }
 
-    if (burned < burn_amount) {
-      const queue = clone(this.burn_queue.value);
-      for (let i = 0; i < queue.length; i += 1) {
-        const validator_i = clone(this.validator(queue[i]).value);
-        if (queue[i] !== Address.zeroAddress && burned < burn_amount) {
-          const delegated = this.validator(queue[i]).value.delegated;
-          const to_burn = burn_amount - burned;
-          let burning_from_i = 0;
-          if (delegated >= to_burn) {
-            validator_i.delegated -= to_burn;
-            burned += to_burn;
-            burning_from_i = to_burn;
-          } else {
-            burning_from_i = delegated;
-            validator_i.delegated = 0;
-            queue[i] = Address.zeroAddress;
-            burned += delegated;
-          }
-          if (burning_from_i > 0) {
-            sendPayment({
-              sender: queue[i],
-              receiver: this.txn.sender,
-              amount: burning_from_i,
-            });
-          }
+    burn_amount -= burned; // remaining amount to burn
+    burned = 0; // reset burned counter for delegation burning
+
+    if (this.exhausted.value === globals.round && this.queue_is_full()) {
+      return;
+    }
+
+    const queue = clone(this.burn_queue.value);
+    for (let i = 0; i < queue.length; i += 1) {
+      if (burned >= burn_amount) {
+        break;
+      }
+      const validator_i = clone(this.validator(queue[i]).value);
+      const validator_address = queue[i];
+      if (queue[i] !== Address.zeroAddress && burned < burn_amount) {
+        const delegated = validator_i.delegated;
+        const to_burn = burn_amount - burned;
+        let burning_from_i = 0;
+        if (delegated >= to_burn) {
+          validator_i.delegated -= to_burn;
+          burned += to_burn;
+          burning_from_i = to_burn;
+        } else {
+          burning_from_i = delegated;
+          validator_i.delegated = 0;
+          queue[i] = Address.zeroAddress;
+          burned += delegated;
+        }
+        if (burning_from_i > 0) {
+          sendPayment({
+            sender: validator_address,
+            receiver: this.txn.sender,
+            amount: burning_from_i,
+          });
           this.validator(queue[i]).value = validator_i;
         }
       }
-      from_delegation = this.get_mint_amount(burned); // LST amount equivalent to burned Algo from delegation
-      if (burned === burn_amount) {
-        assert(from_idle + from_delegation === burnTxn.assetAmount, 'Burn amounts do not match, calculation error'); // SANITY CHECK
-      }
-      this.down_counters(burned, from_delegation);
-      this.burn_queue.value = queue;
-      if (from_delegation + from_idle < burnTxn.assetAmount) {
-        sendAssetTransfer({
-          assetReceiver: this.txn.sender,
-          xferAsset: this.token_id.value,
-          assetAmount: burnTxn.assetAmount - from_delegation - from_idle,
-        });
-        this.exhausted.value = globals.round; // if we couldn't burn the full amount, set exhausted to current round, the burn queue needs to be populated again
-      }
+    }
+    from_delegation = this.get_mint_amount(burned); // LST amount equivalent to burned Algo from delegation
+    if (burned === burn_amount) {
+      assert(from_idle + from_delegation === burnTxn.assetAmount, 'Burn amounts do not match, calculation error'); // SANITY CHECK
+    }
+    this.down_counters(burned, from_delegation);
+    this.burn_queue.value = queue;
+    if (from_delegation + from_idle < burnTxn.assetAmount) {
+      sendAssetTransfer({
+        assetReceiver: this.txn.sender,
+        xferAsset: this.token_id.value,
+        assetAmount: burnTxn.assetAmount - from_delegation - from_idle,
+      });
+      this.exhausted.value = globals.round; // if we couldn't burn the full amount, set exhausted to current round, the burn queue needs to be populated again
     }
   }
 
@@ -234,6 +240,7 @@ export class Equilibrium extends Contract {
       receiver: this.highest_bidder.value,
       amount: amount,
     });
+    this.validator(this.highest_bidder.value).value.delegated += amount;
     this.idle_stake.value -= amount;
   }
 
@@ -564,5 +571,13 @@ export class Equilibrium extends Contract {
 
   private tolerated_performance(expected: uint64): uint64 {
     return expected * 2;
+  }
+
+  get_validator(operator: Address): Address {
+    return this.operator_to_validator_map(operator).value;
+  }
+
+  get_validator_info(validator: Address): Validator {
+    return this.validator(validator).value;
   }
 }

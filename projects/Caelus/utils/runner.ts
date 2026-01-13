@@ -2,7 +2,7 @@ import { AlgorandSubscriber } from '@algorandfoundation/algokit-subscriber';
 import { TransactionType } from 'algosdk';
 import { SubscribedTransaction } from '@algorandfoundation/algokit-subscriber/types/subscription';
 import { algorand, FEE_SINK_ADDRESS } from './helpers/network';
-import { snitch } from './helpers/appCalls';
+import { report, snitch } from './helpers/appCalls';
 import { Account } from './types/account';
 import { EquilibriumClient } from '../contracts/clients/EquilibriumClient';
 import { getAddress } from './helpers/misc';
@@ -88,7 +88,7 @@ export const runner = async (adminAppId: bigint, watermark: bigint, testAccount:
     algorand.client.algod,
     algorand.client.indexer
   );
-  subscriber.on('payouts', async (tx) => onPayouts(tx, admin));
+  subscriber.on('payouts', async (tx) => onPayouts(tx, admin, testAccount));
   subscriber.on('bid', async (tx) => onBidTracking(tx, admin, myValidator));
   subscriber.on('mint', async (tx) => onMintTracking(tx, admin, myValidator));
   subscriber.on('declared_reward', async (tx) => onMintTracking(tx, admin, myValidator));
@@ -100,7 +100,7 @@ export const runner = async (adminAppId: bigint, watermark: bigint, testAccount:
   subscriber.start();
 };
 
-const onPayouts = async (tx: SubscribedTransaction, client: EquilibriumClient) => {
+const onPayouts = async (tx: SubscribedTransaction, client: EquilibriumClient, account: Account) => {
   if (!tx) {
     console.log('No transaction found');
     return;
@@ -111,42 +111,42 @@ const onPayouts = async (tx: SubscribedTransaction, client: EquilibriumClient) =
     await new Promise((f) => {
       setTimeout(f, 10000);
     });
-    await reportRewards(client.appId, tx.confirmedRound!);
+    await report(account, client, tx.confirmedRound!);
   }
 };
 
-const onBidTracking = async (tx: SubscribedTransaction, adminClient: EquilibriumClient, myValidator: string) => {
+const onBidTracking = async (tx: SubscribedTransaction, client: EquilibriumClient, myValidator: string) => {
   console.log('Bid tracking detected', tx);
   if (!tx) {
     console.log('No transaction found');
     return;
   }
-  await outBid(adminClient, myValidator);
+  await outBid(client, myValidator);
 };
 
-const onMintTracking = async (tx: SubscribedTransaction, adminClient: EquilibriumClient, myValidator: string) => {
+const onMintTracking = async (tx: SubscribedTransaction, client: EquilibriumClient, myValidator: string) => {
   console.log('Mint tracking detected', tx);
   if (!tx) {
     console.log('No transaction found');
     return;
   }
 
-  await outBid(adminClient, myValidator);
+  await outBid(client, myValidator);
 
-  const currentTopBidder = await adminClient.state.global.highestBidder();
+  const currentTopBidder = await client.state.global.highestBidder();
   console.log('Current top bidder', currentTopBidder);
-  if (currentTopBidder === myAppId) {
+  if (currentTopBidder === myValidator) {
     console.log('I am the top bidder, taking more stake');
-    const adminInfo = await algorand.account.getInformation(adminClient.appAddress);
+    const adminInfo = await algorand.account.getInformation(client.appAddress);
     const availableAdminBalance =
       adminInfo.balance.microAlgos > adminInfo.minBalance.microAlgos
         ? adminInfo.balance.microAlgos - adminInfo.minBalance.microAlgos
         : 0n;
 
-    const delegateTxn = await adminClient.send.delegateStake({
+    const delegateTxn = await client.send.delegate({
       args: [availableAdminBalance],
       populateAppCallResources: true,
-      extraFee: (2000).microAlgos(),
+      coverAppCallInnerTransactionFees: true,
     });
 
     console.log('Taking more stake to my validator', delegateTxn.confirmation);

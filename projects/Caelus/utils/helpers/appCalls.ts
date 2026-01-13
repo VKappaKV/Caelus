@@ -128,3 +128,13 @@ export async function offline(account: Account, client: EquilibriumClient) {
     coverAppCallInnerTransactionFees: true,
   });
 }
+
+export async function report(account: Account, client: EquilibriumClient, blockHash: bigint) {
+  await client.send.reportBlock({
+    args: [blockHash],
+    sender: account.addr,
+    signer: account.signer,
+    populateAppCallResources: true,
+    coverAppCallInnerTransactionFees: true,
+  });
+}
