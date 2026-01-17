@@ -223,7 +223,7 @@
       "name": "close_validator",
       "args": [
         {
-          "name": "val",
+          "name": "validator",
           "type": "address"
         }
       ],

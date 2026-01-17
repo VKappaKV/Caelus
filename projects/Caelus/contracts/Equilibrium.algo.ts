@@ -81,7 +81,8 @@ export class Equilibrium extends Contract {
       amount: { greaterThanEqualTo: MBR_OPT_IN + ACCOUNT_MIN_BALANCE + BURN_QUEUE_MBR },
     });
     assert(this.token_id.value === AssetID.zeroIndex, 'Token already initialized');
-    this.burn_queue.value = [];
+    assert(this.burn_queue.exists === false, 'Burn queue already initialized');
+    this.burn_queue.create();
     this.token_id.value = sendAssetCreation({
       configAssetTotal: 10 ** 16,
       configAssetDecimals: 6,
@@ -102,12 +103,15 @@ export class Equilibrium extends Contract {
       receiver: this.app.address,
       amount: { greaterThanEqualTo: ALGORAND_BASE_FEE },
     });
+
+    const lst_amount = this.get_mint_amount(mintTxn.amount);
+
     sendAssetTransfer({
       assetReceiver: this.txn.sender,
       xferAsset: this.token_id.value,
-      assetAmount: this.get_mint_amount(mintTxn.amount),
+      assetAmount: lst_amount,
     });
-    this.up_counters(mintTxn.amount, this.get_mint_amount(mintTxn.amount));
+    this.up_counters(mintTxn.amount, lst_amount);
     this.idle_stake.value += mintTxn.amount;
   }
 
@@ -147,7 +151,8 @@ export class Equilibrium extends Contract {
     burn_amount -= burned; // remaining amount to burn
     burned = 0; // reset burned counter for delegation burning
 
-    if (this.exhausted.value === globals.round && this.queue_is_full()) {
+    // if we have already exhausted by burn from delegation in this round, and the burn queue is not full, skip burning from delegation
+    if (this.exhausted.value === globals.round && !this.queue_is_full()) {
       return;
     }
 
@@ -156,8 +161,9 @@ export class Equilibrium extends Contract {
       if (burned >= burn_amount) {
         break;
       }
-      const validator_i = clone(this.validator(queue[i]).value);
       const validator_address = queue[i];
+      if (validator_address === Address.zeroAddress) continue;
+      const validator_i = clone(this.validator(queue[i]).value);
       if (queue[i] !== Address.zeroAddress && burned < burn_amount) {
         const delegated = validator_i.delegated;
         const to_burn = burn_amount - burned;
@@ -178,13 +184,13 @@ export class Equilibrium extends Contract {
             receiver: this.txn.sender,
             amount: burning_from_i,
           });
-          this.validator(queue[i]).value = validator_i;
+          this.validator(validator_address).value = validator_i;
         }
       }
     }
     from_delegation = this.get_mint_amount(burned); // LST amount equivalent to burned Algo from delegation
     if (burned === burn_amount) {
-      assert(from_idle + from_delegation === burnTxn.assetAmount, 'Burn amounts do not match, calculation error'); // SANITY CHECK
+      assert(from_idle + from_delegation <= burnTxn.assetAmount, 'Burn amounts do not match, calculation error'); // SANITY CHECK
     }
     this.down_counters(burned, from_delegation);
     this.burn_queue.value = queue;
@@ -236,6 +242,8 @@ export class Equilibrium extends Contract {
   }
 
   delegate(amount: uint64): void {
+    assert(this.highest_bidder.value !== Address.zeroAddress, 'No highest bidder to delegate to');
+    assert(this.idle_stake.value >= amount, 'Not enough idle stake to delegate');
     sendPayment({
       receiver: this.highest_bidder.value,
       amount: amount,
@@ -289,26 +297,27 @@ export class Equilibrium extends Contract {
   }
 
   operator_commit(commitTxn: PayTxn): void {
-    const validator_address = this.operator_to_validator_map(this.txn.sender).value;
+    assert(this.operator_to_validator_map(this.txn.sender).exists);
+    const validator = this.operator_to_validator_map(this.txn.sender).value;
     verifyPayTxn(commitTxn, {
       receiver: this.app.address,
       amount: { greaterThanEqualTo: ALGORAND_BASE_FEE },
     });
     const lst_amount = this.get_mint_amount(commitTxn.amount);
     sendPayment({
-      receiver: validator_address,
+      receiver: validator,
       amount: commitTxn.amount,
     });
     sendAssetTransfer({
       assetAmount: lst_amount,
-      assetReceiver: this.operator_to_validator_map(this.txn.sender).value,
+      assetReceiver: validator,
       xferAsset: this.token_id.value,
     });
     this.up_counters(commitTxn.amount, lst_amount);
-    const validator = this.operator_to_validator_map(this.txn.sender).value;
-    const validator_info = this.validator(validator).value;
+    const validator_info = clone(this.validator(validator).value);
     validator_info.commit += commitTxn.amount;
     validator_info.buffer = this.re_buffer(validator);
+    this.validator(validator).value = validator_info;
   }
 
   operator_unstake(amount: uint64): void {
@@ -333,7 +342,8 @@ export class Equilibrium extends Contract {
       assetAmount: amount,
       xferAsset: this.token_id.value,
     });
-    this.re_buffer(val);
+    val_info.buffer = this.re_buffer(val);
+    this.validator(val).value = val_info;
     this.down_counters(algo_amount, amount);
   }
 
@@ -416,8 +426,9 @@ export class Equilibrium extends Contract {
     if (account === this.app.address) {
       dust = this.app.address.balance - this.idle_stake.value - this.app.address.minBalance;
       this.up_counters(dust, 0);
+      this.idle_stake.value += dust;
     } else if (this.validator(account).exists) {
-      const val_info = this.validator(account).value;
+      const val_info = clone(this.validator(account).value);
       dust = account.balance - val_info.commit - val_info.delegated - account.minBalance;
       if (dust > 0) {
         this.up_counters(dust, 0);
@@ -458,32 +469,33 @@ export class Equilibrium extends Contract {
     // if score is 0, set status to NEUTRAL_STATUS
   }
 
-  close_validator(val: Address): void {
+  close_validator(validator: Address): void {
     // check sender is the operator of the validator
     // check that the validator is not delinquent
     // send all Algo to idle stake
     // send all LST to operator
     // delete validator from map & closeout account
 
-    assert(this.txn.sender === this.validator(val).value.operator, 'Only operator can close the validator');
-    assert(this.validator(val).value.status !== DELINQUENCY_STATUS, 'Cannot close a delinquent validator');
-    const lst_balance = val.assetBalance(this.token_id.value);
+    assert(this.txn.sender === this.validator(validator).value.operator, 'Only operator can close the validator');
+    assert(this.validator(validator).value.status !== DELINQUENCY_STATUS, 'Cannot close a delinquent validator');
+    const lst_balance = validator.assetBalance(this.token_id.value);
+    const sweep = validator.balance - validator.minBalance;
     sendAssetTransfer({
-      sender: val,
+      sender: validator,
       assetReceiver: this.txn.sender,
       xferAsset: this.token_id.value,
       assetAmount: lst_balance,
     });
     sendPayment({
-      sender: val,
+      sender: validator,
       receiver: this.app.address,
-      amount: val.balance - val.minBalance,
+      amount: sweep,
       closeRemainderTo: this.app.address,
     });
-    this.idle_stake.value += val.balance - val.minBalance;
-    this.cleanup_on_delete(val);
+    this.idle_stake.value += sweep;
+    this.cleanup_on_delete(validator);
     this.operator_to_validator_map(this.txn.sender).delete();
-    this.validator(val).delete();
+    this.validator(validator).delete();
   }
 
   private get_online_fee(): uint64 {
@@ -556,7 +568,7 @@ export class Equilibrium extends Contract {
   }
 
   private queue_is_full(): boolean {
-    const queue = clone(this.burn_queue.value);
+    const queue = this.burn_queue.value;
     for (let i = 0; i < queue.length; i += 1) {
       if (queue[i] === Address.zeroAddress) {
         return false;
@@ -566,6 +578,9 @@ export class Equilibrium extends Contract {
   }
 
   private expected_performance(stake: uint64): uint64 {
+    if (stake === 0) {
+      return 0;
+    }
     return onlineStake() / stake;
   }
 

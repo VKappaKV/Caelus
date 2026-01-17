@@ -21,6 +21,7 @@ module.exports = {
     'no-await-in-loop': 'off',
     'no-console': 'off',
     camelcase: 'off',
+    'no-continue': 'off',
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/ban-ts-comment': 'warn',
     'import/prefer-default-export': 'off',
