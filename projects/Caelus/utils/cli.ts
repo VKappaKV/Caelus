@@ -64,7 +64,7 @@ async function main() {
           break;
         }
         appId = (await deploy(testAccount)).id;
-        client = await clientSetUp(appId, testAccount);
+        client = clientSetUp(appId, testAccount);
         break;
       }
       case 'spawn': {
